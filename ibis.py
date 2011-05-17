@@ -439,7 +439,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 				raise Exception('Unknown submodel mode: {}'.format(mode))
 
 			print '.lib {} {}'.format(outfile, key)
-			print 'x_{} pad vcc vee vdd vss {} spec={{spec}}'.format(key, en)
+			print 'x_{} pad vcc vee vdd vss {} {} spec={{spec}}'.format(key, en, key)
 
 	for lib in libs:
 		print '.lib ibis.lib {}'.format(lib)
