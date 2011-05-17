@@ -1,0 +1,61 @@
+v 20110115 2
+C 44400 44700 1 90 0 capacitor-1.sym
+{
+T 43700 44900 5 10 0 0 90 0 1
+device=CAPACITOR
+T 44300 45300 5 10 1 1 0 0 1
+refdes=Cac
+T 43500 44900 5 10 0 0 90 0 1
+symversion=0.1
+T 44300 44900 5 10 1 1 0 0 1
+value={Cac}
+}
+C 44300 45600 1 90 0 resistor-1.sym
+{
+T 43900 45900 5 10 0 0 90 0 1
+device=RESISTOR
+T 44300 46200 5 10 1 1 0 0 1
+refdes=Rac
+T 44300 46000 5 10 1 1 0 0 1
+value={Rac}
+}
+C 42700 45600 1 90 0 resistor-1.sym
+{
+T 42300 45900 5 10 0 0 90 0 1
+device=RESISTOR
+T 42700 46200 5 10 1 1 0 0 1
+refdes=Rgnd
+T 42700 45800 5 10 1 1 0 0 1
+value={Rgnd}
+}
+C 42700 46700 1 90 0 resistor-1.sym
+{
+T 42300 47000 5 10 0 0 90 0 1
+device=RESISTOR
+T 42700 47300 5 10 1 1 0 0 1
+refdes=Rpower
+T 42700 46800 5 10 1 1 0 0 1
+value={Rpower}
+}
+C 42800 45100 1 180 0 vee-1.sym
+C 42400 48000 1 0 0 vcc-1.sym
+N 44200 46600 44200 46500 4
+N 42600 46500 42600 46700 4
+N 42600 45100 42600 45600 4
+N 42600 47600 42600 48000 4
+N 42600 46600 45400 46600 4
+{
+T 45300 46700 5 10 1 1 0 0 1
+netname=pad
+}
+T 42500 48700 8 10 1 0 0 0 1
+dist-license=GPLv3
+T 42506 48900 8 10 1 0 0 0 1
+author=Russ Dill <Russ.Dill@asu.edu>
+C 44100 44400 1 0 0 gnd-1.sym
+C 43600 44400 1 0 0 gnd-1.sym
+N 43500 44700 43700 44700 4
+{
+T 43500 44700 5 10 1 1 0 0 1
+netname=0
+}
