@@ -1,4 +1,4 @@
-all: ibis.lib m62b_bd.lib
+all: ibis.lib m62b_bd.lib u69a.lib
 
 %.net: %.sch
 	gnetlist -g spice-sdb -o $@ $<
