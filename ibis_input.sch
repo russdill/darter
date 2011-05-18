@@ -8,12 +8,12 @@ device=vexp
 T 45050 45800 5 10 0 0 90 2 1
 footprint=none
 T 47700 45750 5 10 1 1 0 6 1
-value=V=V(out) > 0 ? (V(pad) < {Vinl} ? 0 : 1) : (V(pad) > {Vinh} ? 1 : 0)
+value=V=V(in) > 0 ? (V(pad) < {Vinl} ? 0 : 1) : (V(pad) > {Vinh} ? 1 : 0)
 }
 N 45500 45400 45200 45400 4
 {
 T 45200 45400 5 10 1 1 0 0 1
-netname=out
+netname=in
 }
 C 43900 45100 1 0 0 gnd-1.sym
 C 48700 45000 1 0 0 gnd-1.sym

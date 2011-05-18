@@ -190,8 +190,8 @@ def tbl_subcircuits(n, sections):
 			print 'b0 np nn V=pwl(V(ncp, ncn)'
 			for line, row in enumerate(tbl.data):
 				print '+,{},{{pwl{}}}'.format(row[0], line)
-				if row[0] > maxval:
-					maxval = row[0]
+				if parse_num(row[0]) > maxval:
+					maxval = parse_num(row[0])
 
 			print '+)'
 			print '.ends {}{}'.format(n, i)
@@ -295,20 +295,20 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 
 	libs = [ 'ibis_buffer' ]
 	if type == 'Input': # 4
-		print '.subckt {} pad vcc vee out spec=0'.format(model.header)
+		print '.subckt {} pad vcc vee in spec=0'.format(model.header)
 		print 'V_en en 0 DC 0'
 		libs.append('ibis_input')
 	elif type == 'I/O': # 8
-		print '.subckt {} pad vcc vee vdd vss en in out spec=0'.format(model.header)
+		print '.subckt {} pad vcc vee vdd vss en out in spec=0'.format(model.header)
 		libs.append('ibis_input')
 		libs.append('ibis_output')
 		Vinl, Vinh = 0.8, 2.0
 #	elif type == 'I/O_open_drain' or type == 'I/O_open_sink': # 7
-#		print '.subckt {} pad vcc vee vdd vss en out spec=0'.format(model.header)
+#		print '.subckt {} pad vcc vee vdd vss en in spec=0'.format(model.header)
 #		libs.append('ibis_input')
 #		libs.append('ibis_open_sink')
 #	elif type == 'I/O_open_source': # 7
-#		print '.subckt {} pad vcc vee vdd vss en out spec=0'.format(model.header)
+#		print '.subckt {} pad vcc vee vdd vss en in spec=0'.format(model.header)
 #		libs.append('ibis_input')
 #		libs.append('ibis_open_source')
 #	elif type == 'Input_ECL':
@@ -318,11 +318,11 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		print 'V_en en 0 DC 0'
 		libs.append('ibis_terminator')
 	elif type == 'Output': # 6
-		print '.subckt {} pad vcc vee vdd vss in spec=0'.format(model.header)
+		print '.subckt {} pad vcc vee vdd vss out spec=0'.format(model.header)
 		print 'V_en en 0 DC 1'
 		libs.append('ibis_output')
 	elif type == '3-state': # 7
-		print '.subckt {} pad vcc vee vdd vss en in spec=0'.format(model.header)
+		print '.subckt {} pad vcc vee vdd vss en out spec=0'.format(model.header)
 		libs.append('ibis_output')
 #	elif type == 'Open_sink' or type == 'Open_drain': # 6
 #		print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
