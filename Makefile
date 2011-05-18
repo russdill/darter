@@ -1,5 +1,7 @@
 all: ibis.lib m62b_bd.lib u69a.lib
 
+test.net: pi.net
+
 %.net: %.sch
 	gnetlist -g spice-sdb -o $@ $<
 
