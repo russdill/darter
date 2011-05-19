@@ -17,9 +17,8 @@
 import sys
 
 # table of sections
-sections = set([
+supported_sections = set([
 	'.ibis_ver',
-	'.comment_char',
 	'.file_name',
 	'.file_rev',
 	'.date',
@@ -27,6 +26,35 @@ sections = set([
 	'.notes',
 	'.disclaimer',
 	'.copyright',
+	'.model_selector',
+	'.model',
+	'.model.add_submodel',
+	'.model.voltage_range',
+	'.model.pullup_reference',
+	'.model.pulldown_reference',
+	'.model.power_clamp_reference',
+	'.model.gnd_clamp_reference',
+	'.model.pulldown',
+	'.model.pullup',
+	'.model.gnd_clamp',
+	'.model.power_clamp',
+	'.model.rgnd',
+	'.model.rpower',
+	'.model.rac',
+	'.model.cac',
+	'.model.rising_waveform',
+	'.model.falling_waveform',
+	'.submodel',
+	'.submodel.submodel_spec',
+	'.submodel.power_pulse_table',
+	'.submodel.gnd_pulse_table',
+	'.submodel.gnd_clamp',
+	'.submodel.power_clamp',
+	'.end'
+])
+
+ignored_sections = set([
+	'.comment_char',
 	'.component',
 	'.component.manufacturer',
 	'.component.package',
@@ -42,50 +70,13 @@ sections = set([
 	'.component.node_declarations.end_node_declarations',
 	'.component.circuit_call',
 	'.component.circuit_call.end_circuit_call',
-	'.model_selector',
-	'.model',
-	'.model.model_spec',
-	'.model.receiver_thresholds',
-	'.model.add_submodel',
-#	'.model.driver_schedule',
-	'.model.temperature_range',
-	'.model.voltage_range',
-	'.model.pullup_reference',
-	'.model.pulldown_reference',
-	'.model.power_clamp_reference',
-	'.model.gnd_clamp_reference',
-	'.model.external_reference',
 	'.model.ttgnd',
 	'.model.ttpower',
-	'.model.pulldown',
-	'.model.pullup',
-	'.model.gnd_clamp',
-	'.model.power_clamp',
-	'.model.rgnd',
-	'.model.rpower',
-	'.model.rac',
-	'.model.cac',
-#	'.model.on',
-#	'.model.on.r_series',
-#	'.model.on.l_series',
-#	'.model.on.rl_series',
-#	'.model.on.c_series',
-#	'.model.on.lc_series',
-#	'.model.on.rc_series',
-#	'.model.on.series_current',
-#	'.model.on.series_mosfet',
-#	'.model.off',
-#	'.model.off.r_series',
-#	'.model.off.l_series',
-#	'.model.off.rl_series',
-#	'.model.off.c_series',
-#	'.model.off.lc_series',
-#	'.model.off.rc_series',
-#	'.model.off.series_current',
-#	'.model.off.series_mosfet',
+	'.model.model_spec',
+	'.model.receiver_thresholds',
+	'.model.temperature_range',
+	'.model.external_reference',
 	'.model.ramp',
-	'.model.rising_waveform',
-	'.model.falling_waveform',
 	'.model.test_data',
 	'.model.test_data.rising_waveform_near',
 	'.model.test_data.falling_waveform_near',
@@ -96,21 +87,6 @@ sections = set([
 	'.model.test_data.diff_rising_waveform_far',
 	'.model.test_data.diff_falling_waveform_far',
 	'.model.test_data.test_load',
-#	'.model.external_model',
-#	'.model.external_model.end_external_model',
-	'.submodel',
-	'.submodel.submodel_spec',
-	'.submodel.power_pulse_table',
-	'.submodel.gnd_pulse_table',
-#	'.submodel.pulldown',
-#	'.submodel.pullup',
-	'.submodel.gnd_clamp',
-	'.submodel.power_clamp',
-#	'.submodel.ramp',
-#	'.submodel.rising_waveform',
-#	'.submodel.falling_waveform',
-#	'.external_circuit',
-#	'.external_circuit.end_external_circuit',
 	'.define_package_model',
 	'.define_package_model.manufacturer',
 	'.define_package_model.oem',
@@ -130,9 +106,40 @@ sections = set([
 	'.define_package_model.model_data.capacitance_matrix.row',
 	'.define_package_model.model_data.end_model_data',
 	'.define_package_model.end_package_model',
-	'.end'
 ])
 
+unsupported_sections = set([
+	'.model.driver_schedule',
+	'.model.on',
+	'.model.on.r_series',
+	'.model.on.l_series',
+	'.model.on.rl_series',
+	'.model.on.c_series',
+	'.model.on.lc_series',
+	'.model.on.rc_series',
+	'.model.on.series_current',
+	'.model.on.series_mosfet',
+	'.model.off',
+	'.model.off.r_series',
+	'.model.off.l_series',
+	'.model.off.rl_series',
+	'.model.off.c_series',
+	'.model.off.lc_series',
+	'.model.off.rc_series',
+	'.model.off.series_current',
+	'.model.off.series_mosfet',
+	'.model.external_model',
+	'.model.external_model.end_external_model',
+	'.submodel.pulldown',
+	'.submodel.pullup',
+	'.submodel.ramp',
+	'.submodel.rising_waveform',
+	'.submodel.falling_waveform',
+	'.external_circuit',
+	'.external_circuit.end_external_circuit',
+])
+
+sections = frozenset(supported_sections | unsupported_sections | ignored_sections)
 
 def parse_num(val):
 	ext = val.lstrip('+-0123456789.eE')
@@ -213,6 +220,7 @@ class section:
 		self.columns = list()
 		# self.param_vert = dict()
 		self.parent = None
+		self.unsupported = False
 		
 modv_func = '.func modv(typ, minv, maxv) {ternary_fcn(spec > 0, maxv, ternary_fcn(spec < 0, minv, typ))} '
 
@@ -225,6 +233,8 @@ infile = sys.argv[1]
 outfile = sys.argv[2]
 
 sys.stdout = open(outfile, 'wb')
+
+already_ignored = set()
 
 file = open(infile, 'rb')
 for line in file:
@@ -254,6 +264,18 @@ for line in file:
 			curr_sect.sections[key] = list()
 		curr_sect.sections[key].append(new_section)
 		curr_sect = new_section
+
+		if curr_key in ignored_sections and not curr_key in already_ignored:
+			print >> sys.stderr, 'Warning: {} is ignored'.format(curr_key)
+			already_ignored.add(curr_key)
+		elif curr_key in unsupported_sections:
+			iter = curr_sect
+			while iter != None:
+				if not iter.unsupported and iter.parent != None:
+					print >> sys.stderr, 'Error: Unsupported section {} in {}'.format(name, curr_key)
+				iter.unsupported = True
+				iter = iter.parent
+
 	else:
 		line = line.strip()
 		if '=' in line:
@@ -289,6 +311,9 @@ for n in [ 'ibis_ver', 'file_name', 'file_rev', 'date',
 for model in main.sections['model'] if 'model' in main.sections else list():
 	Vinl, Vinh = None, None
 
+	if model.unsupported:
+		continue
+
 	print '.lib {}'.format(model.header)
 	type = model.param['Model_type']
 	print '* type - {}'.format(type)
@@ -303,14 +328,14 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		libs.append('ibis_input')
 		libs.append('ibis_output')
 		Vinl, Vinh = 0.8, 2.0
-#	elif type == 'I/O_open_drain' or type == 'I/O_open_sink': # 7
-#		print '.subckt {} pad vcc vee vdd vss en in spec=0'.format(model.header)
-#		libs.append('ibis_input')
-#		libs.append('ibis_open_sink')
-#	elif type == 'I/O_open_source': # 7
-#		print '.subckt {} pad vcc vee vdd vss en in spec=0'.format(model.header)
-#		libs.append('ibis_input')
-#		libs.append('ibis_open_source')
+	elif type == 'I/O_open_drain' or type == 'I/O_open_sink': # 7
+		print '.subckt {} pad vcc vee vdd vss en in spec=0'.format(model.header)
+		libs.append('ibis_input')
+		libs.append('ibis_open_sink')
+	elif type == 'I/O_open_source': # 7
+		print '.subckt {} pad vcc vee vdd vss en in spec=0'.format(model.header)
+		libs.append('ibis_input')
+		libs.append('ibis_open_source')
 #	elif type == 'Input_ECL':
 #	elif type == 'I/O_ECL':
 	elif type == 'Terminator': # 3
@@ -324,12 +349,12 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	elif type == '3-state': # 7
 		print '.subckt {} pad vcc vee vdd vss en out spec=0'.format(model.header)
 		libs.append('ibis_output')
-#	elif type == 'Open_sink' or type == 'Open_drain': # 6
-#		print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
-#		libs.append('ibis_open_sink')
-#	elif type == 'Open_source': # 6
-#		print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
-#		libs.append('ibis_open_source')
+	elif type == 'Open_sink' or type == 'Open_drain': # 6
+		print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
+		libs.append('ibis_open_sink')
+	elif type == 'Open_source': # 6
+		print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
+		libs.append('ibis_open_source')
 #	elif type == 'Input_ECL':
 #	elif type == 'Output_ECL':
 #	elif type == 'I/O_ECL':
@@ -448,6 +473,9 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	print '.endl'
 
 for model in main.sections['submodel'] if 'submodel' in main.sections else list():
+
+	if model.unsupported:
+		continue
 
 	print '.lib {}'.format(model.header)
 	type = model.param['Submodel_type']

@@ -2,7 +2,7 @@ v 20110115 2
 C 40000 40000 1 90 0 vexp-1.sym
 {
 T 39700 40550 5 10 1 1 0 0 1
-refdes=A20
+refdes=A_ru_time
 T 39150 40700 5 10 0 0 90 0 1
 device=vexp
 T 38950 40700 5 10 0 0 90 0 1
@@ -27,8 +27,8 @@ value=.MODEL time slew(rise_slope=1 fall_slope=10)
 C 37900 38800 1 0 0 gnd-1.sym
 C 37700 36300 1 0 0 vdc-1.sym
 {
-T 37700 37250 5 10 1 1 0 0 1
-refdes=B1
+T 37200 37250 5 10 1 1 0 0 1
+refdes=B_fu_on
 T 38400 37150 5 10 0 0 0 0 1
 device=VOLTAGE_SOURCE
 T 38400 37350 5 10 0 0 0 0 1
@@ -41,7 +41,7 @@ value=V=V(en) > 0 ?
 C 40100 37200 1 90 0 vexp-1.sym
 {
 T 39800 37750 5 10 1 1 0 0 1
-refdes=A21
+refdes=A_fu_time
 T 39250 37900 5 10 0 0 90 0 1
 device=vexp
 T 39050 37900 5 10 0 0 90 0 1
@@ -62,8 +62,8 @@ netname=pullup_fixture0
 C 37900 36000 1 0 0 gnd-1.sym
 C 37700 39100 1 0 0 vdc-1.sym
 {
-T 37500 39950 5 10 1 1 0 0 1
-refdes=B0
+T 37200 40050 5 10 1 1 0 0 1
+refdes=B_ru_on
 T 38400 39950 5 10 0 0 0 0 1
 device=VOLTAGE_SOURCE
 T 38400 40150 5 10 0 0 0 0 1
@@ -339,7 +339,7 @@ B 36800 28000 27700 6100 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
 C 40000 33100 1 90 0 vexp-1.sym
 {
 T 39700 33650 5 10 1 1 0 0 1
-refdes=A22
+refdes=A_rd_time
 T 39150 33800 5 10 0 0 90 0 1
 device=vexp
 T 38950 33800 5 10 0 0 90 0 1
@@ -355,8 +355,8 @@ netname=rd_time
 C 37900 31900 1 0 0 gnd-1.sym
 C 37800 29400 1 0 0 vdc-1.sym
 {
-T 37800 30350 5 10 1 1 0 0 1
-refdes=B3
+T 37300 30350 5 10 1 1 0 0 1
+refdes=B_fd_on
 T 38500 30250 5 10 0 0 0 0 1
 device=VOLTAGE_SOURCE
 T 38500 30450 5 10 0 0 0 0 1
@@ -368,7 +368,7 @@ value=V=V(en) > 0 ?
 C 40100 30300 1 90 0 vexp-1.sym
 {
 T 39800 30850 5 10 1 1 0 0 1
-refdes=A23
+refdes=A_fd_time
 T 39250 31000 5 10 0 0 90 0 1
 device=vexp
 T 39050 31000 5 10 0 0 90 0 1
@@ -384,8 +384,8 @@ netname=fd_time
 C 38000 29100 1 0 0 gnd-1.sym
 C 37700 32200 1 0 0 vdc-1.sym
 {
-T 37500 33050 5 10 1 1 0 0 1
-refdes=B2
+T 37200 33150 5 10 1 1 0 0 1
+refdes=B_rd_on
 T 38400 33050 5 10 0 0 0 0 1
 device=VOLTAGE_SOURCE
 T 38400 33250 5 10 0 0 0 0 1
