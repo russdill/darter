@@ -1,13 +1,4 @@
 v 20110115 2
-C 36800 43200 1 0 0 spice-directive-1.sym
-{
-T 36900 43500 5 10 0 1 0 0 1
-device=directive
-T 36900 43600 5 10 1 1 0 0 1
-refdes=A1
-T 36800 43300 5 10 1 1 0 0 1
-value=.MODEL time slew(rise_slope=1 fall_slope=10)
-}
 N 39600 31300 41500 31300 4
 {
 T 41100 31400 5 10 1 1 0 0 1
@@ -75,7 +66,7 @@ T 37500 30700 5 10 1 1 0 0 1
 netname=Ipd
 }
 B 36800 29300 5500 4000 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
-B 36800 33800 18000 6200 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
+B 36800 33800 22900 6200 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
 C 40000 38600 1 90 0 vexp-1.sym
 {
 T 39700 39150 5 10 1 1 0 0 1
@@ -180,159 +171,8 @@ N 38100 36100 38900 36100 4
 T 38100 36100 5 10 1 1 0 0 1
 netname=f_on
 }
-N 49100 36600 50900 36600 4
-{
-T 48900 36700 5 10 1 1 0 0 1
-netname=fixture0
-}
-C 51900 34900 1 0 1 gnd-1.sym
-C 50300 35100 1 0 0 vcvs-1.sym
-{
-T 50500 36150 5 10 0 0 0 0 1
-device=SPICE-vcvs
-T 50300 35950 5 10 1 1 0 0 1
-refdes=X_pulldown0
-T 50500 36350 5 10 0 0 0 0 1
-symversion=0.1
-T 51500 34850 5 10 1 1 0 5 1
-value=pulldown0 spec={spec}
-}
-N 52900 36600 53100 36600 4
-N 53100 36600 53100 36400 4
-C 53000 35200 1 0 0 gnd-1.sym
-N 50200 35800 50200 36600 4
-N 50300 35800 50200 35800 4
-C 49400 35200 1 0 0 gnd-1.sym
-C 51800 36800 1 180 0 current-1.sym
-{
-T 51200 35800 5 10 0 0 180 0 1
-device=CURRENT_SOURCE
-T 50700 36800 5 10 1 1 0 0 1
-refdes=Vfx0
-T 50700 36400 5 10 1 1 0 0 1
-value=DC 0
-}
-N 52000 35800 51800 35800 4
-{
-T 51800 35800 5 10 1 1 0 0 1
-netname=I2
-}
-C 49100 36400 1 0 1 current-1.sym
-{
-T 48500 37400 5 10 0 0 0 6 1
-device=CURRENT_SOURCE
-T 48100 37000 5 10 1 1 0 0 1
-refdes=V_comp0
-T 48100 36800 5 10 1 1 0 0 1
-value=DC 0
-}
-C 47700 35200 1 90 0 capacitor-1.sym
-{
-T 47000 35400 5 10 0 0 90 0 1
-device=CAPACITOR
-T 47600 35800 5 10 1 1 0 0 1
-refdes=C_comp_gc0
-T 46800 35400 5 10 0 0 90 0 1
-symversion=0.1
-T 47600 35400 5 10 1 1 0 0 1
-value={C_comp_gnd_clamp}
-}
-C 47700 37200 1 90 0 capacitor-1.sym
-{
-T 47000 37400 5 10 0 0 90 0 1
-device=CAPACITOR
-T 47600 37800 5 10 1 1 0 0 1
-refdes=C_comp_pc0
-T 46800 37400 5 10 0 0 90 0 1
-symversion=0.1
-T 47600 37400 5 10 1 1 0 0 1
-value={C_comp_power_clamp}
-}
-C 45900 37200 1 90 0 capacitor-1.sym
-{
-T 45200 37400 5 10 0 0 90 0 1
-device=CAPACITOR
-T 45800 37800 5 10 1 1 0 0 1
-refdes=C_comp_pu0
-T 45000 37400 5 10 0 0 90 0 1
-symversion=0.1
-T 45800 37400 5 10 1 1 0 0 1
-value={C_comp_pullup}
-}
-C 45900 35200 1 90 0 capacitor-1.sym
-{
-T 45200 35400 5 10 0 0 90 0 1
-device=CAPACITOR
-T 45800 35800 5 10 1 1 0 0 1
-refdes=C_comp_pd0
-T 45000 35400 5 10 0 0 90 0 1
-symversion=0.1
-T 45800 35400 5 10 1 1 0 0 1
-value={C_comp_pulldown}
-}
-C 45500 38100 1 0 0 generic-power.sym
-{
-T 45700 38350 5 10 1 1 0 3 1
-net=Vpu:1
-}
-C 47700 35200 1 180 0 generic-power.sym
-{
-T 47500 34950 5 10 1 1 180 3 1
-net=Vgc:1
-}
-C 47300 38100 1 0 0 generic-power.sym
-{
-T 47500 38350 5 10 1 1 0 3 1
-net=Vpc:1
-}
-C 45900 35200 1 180 0 generic-power.sym
-{
-T 45700 34950 5 10 1 1 180 3 1
-net=Vpd:1
-}
-N 47500 37200 47500 36100 4
-N 45700 37200 45700 36100 4
-N 48200 36600 47500 36600 4
-N 47500 36600 45700 36600 4
-C 50500 35200 1 180 0 generic-power.sym
-{
-T 50300 34950 5 10 1 1 180 3 1
-net=Vpd:1
-}
-N 52000 36600 51800 36600 4
 T 44900 40100 9 10 1 0 0 0 1
 Fixture 0
-C 52000 36500 1 0 0 resistor-1.sym
-{
-T 52300 36900 5 10 0 0 0 0 1
-device=RESISTOR
-T 52000 36800 5 10 1 1 0 0 1
-refdes=R_fixture0
-T 51900 36300 5 10 1 1 0 0 1
-value={R_fixture0}
-}
-C 52900 36400 1 270 0 voltage-3.sym
-{
-T 53600 36200 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 53200 36200 5 10 1 1 0 0 1
-refdes=V_fixture0
-T 53200 35600 5 10 1 1 0 0 1
-value=DC {V_fixture0}
-}
-C 46800 34300 1 90 0 capacitor-1.sym
-{
-T 46100 34500 5 10 0 0 90 0 1
-device=CAPACITOR
-T 45500 34500 5 10 1 1 0 0 1
-refdes=C_comp_pd0
-T 45900 34500 5 10 0 0 90 0 1
-symversion=0.1
-T 46700 34500 5 10 1 1 0 0 1
-value={C_comp}
-}
-C 46500 34000 1 0 0 gnd-1.sym
-N 46600 35200 46600 36600 4
 C 42900 40500 1 0 0 gnd-1.sym
 N 42800 40800 43000 40800 4
 {
@@ -346,7 +186,7 @@ device=VOLTAGE_SOURCE
 T 37900 32300 5 10 1 1 0 0 1
 refdes=B_Kpd
 T 37200 32800 5 10 1 1 0 0 1
-value=V=(I(Vfx0) - I(V_comp0))/V(I2)
+value=V=(I(Vfx0) - V(Icomp0))/V(I2)
 }
 C 38400 31300 1 0 0 gnd-1.sym
 N 38500 32500 38900 32500 4
@@ -354,19 +194,19 @@ N 38500 32500 38900 32500 4
 T 38500 32500 5 10 1 1 0 0 1
 netname=Kpd
 }
-C 39200 41100 1 90 0 resistor-1.sym
+C 42700 41800 1 90 0 resistor-1.sym
 {
-T 38800 41400 5 10 0 0 90 0 1
+T 42300 42100 5 10 0 0 90 0 1
 device=RESISTOR
-T 39200 41700 5 10 1 1 0 0 1
+T 42700 42400 5 10 1 1 0 0 1
 refdes=R_en_gnd_ref
-T 39200 41300 5 10 1 1 0 0 1
+T 42700 42000 5 10 1 1 0 0 1
 value=1e18
 }
-C 39000 40800 1 0 0 gnd-1.sym
-N 39100 42000 39400 42000 4
+C 42500 41500 1 0 0 gnd-1.sym
+N 42600 42700 42900 42700 4
 {
-T 39100 42000 5 10 1 1 0 0 1
+T 42600 42700 5 10 1 1 0 0 1
 netname=en
 }
 C 37800 29800 1 0 0 gnd-1.sym
@@ -405,13 +245,200 @@ C 44100 41700 1 0 0 generic-power.sym
 T 44300 41950 5 10 1 1 0 3 1
 net=Vpd:1
 }
-C 49300 36400 1 270 0 voltage-3.sym
+N 48100 37100 54600 37100 4
 {
-T 50000 36200 5 8 0 0 270 0 1
+T 49000 37200 5 10 1 1 0 0 1
+netname=fixture0
+}
+C 50500 35400 1 0 1 gnd-1.sym
+C 48900 35600 1 0 0 vcvs-1.sym
+{
+T 49100 36650 5 10 0 0 0 0 1
+device=SPICE-vcvs
+T 48900 36450 5 10 1 1 0 0 1
+refdes=X_pulldown0
+T 49100 36850 5 10 0 0 0 0 1
+symversion=0.1
+T 49900 35050 5 10 1 1 180 5 1
+value=pulldown0 spec={spec}
+}
+C 55700 37000 1 0 0 resistor-1.sym
+{
+T 56000 37400 5 10 0 0 0 0 1
+device=RESISTOR
+T 55700 37300 5 10 1 1 0 0 1
+refdes=R_fixture0
+T 55600 36800 5 10 1 1 0 0 1
+value={R_fixture0}
+}
+C 56600 36900 1 270 0 voltage-3.sym
+{
+T 57300 36700 5 8 0 0 270 0 1
 device=VOLTAGE_SOURCE
-T 48600 36200 5 10 1 1 0 0 1
-refdes=B_fixture0
-T 47700 34600 5 10 1 1 0 0 1
+T 56900 36700 5 10 1 1 0 0 1
+refdes=V_fixture0
+T 56900 36100 5 10 1 1 0 0 1
+value=DC {V_fixture0}
+}
+N 56600 37100 56800 37100 4
+N 56800 37100 56800 36900 4
+C 56700 35700 1 0 0 gnd-1.sym
+N 48800 36300 48800 37100 4
+N 48400 37900 48800 37900 4
+N 48900 36300 48800 36300 4
+C 48000 35700 1 0 0 gnd-1.sym
+N 50600 36300 50400 36300 4
+{
+T 50400 36300 5 10 1 1 0 0 1
+netname=I2
+}
+N 48800 37100 48800 37900 4
+C 49100 35700 1 180 0 generic-power.sym
+{
+T 48900 35450 5 10 1 1 180 3 1
+net=Vpd:1
+}
+N 51000 36300 51000 37100 4
+C 52600 35400 1 0 1 gnd-1.sym
+C 51000 37800 1 0 0 vcvs-1.sym
+{
+T 51200 38850 5 10 0 0 0 0 1
+device=SPICE-vcvs
+T 51600 38650 5 10 1 1 0 0 1
+refdes=X_pc0
+T 51200 39050 5 10 0 0 0 0 1
+symversion=0.1
+T 52200 37450 5 10 1 1 180 5 1
+value=power_clamp0 spec={spec}
+}
+C 51000 35600 1 0 0 vcvs-1.sym
+{
+T 51200 36650 5 10 0 0 0 0 1
+device=SPICE-vcvs
+T 51600 36450 5 10 1 1 0 0 1
+refdes=X_gc0
+T 51200 36850 5 10 0 0 0 0 1
+symversion=0.1
+T 51900 35050 5 10 1 1 180 5 1
+value=gnd_clamp0 spec={spec}
+}
+C 52600 37600 1 0 1 gnd-1.sym
+N 53100 38500 52500 38500 4
+{
+T 52500 38500 5 10 1 1 0 0 1
+netname=Ipc0
+}
+N 53100 36300 52500 36300 4
+{
+T 52500 36300 5 10 1 1 0 0 1
+netname=Igc0
+}
+C 50800 38500 1 0 0 generic-power.sym
+{
+T 51000 38750 5 10 1 1 0 3 1
+net=Vpc:1
+}
+C 51200 35700 1 180 0 generic-power.sym
+{
+T 51000 35450 5 10 1 1 180 3 1
+net=Vgc:1
+}
+N 51000 37100 51000 37900 4
+C 47900 36900 1 270 0 voltage-3.sym
+{
+T 48600 36700 5 8 0 0 270 0 1
+device=VOLTAGE_SOURCE
+T 47800 36700 5 10 1 1 0 0 1
+refdes=B0
+T 45900 37200 5 10 1 1 0 0 1
 value=V=V(r_on) > 0  ? V(vr0) : V(vf0)
 }
-N 49500 36400 49500 36600 4
+C 55500 37300 1 180 0 current-1.sym
+{
+T 54900 36300 5 10 0 0 180 0 1
+device=CURRENT_SOURCE
+T 54500 37300 5 10 1 1 0 0 1
+refdes=Vfx0
+T 54500 36800 5 10 1 1 0 0 1
+value=DC 0
+}
+N 48100 36900 48100 37100 4
+C 54200 37300 1 90 0 current-1.sym
+{
+T 53200 37900 5 10 0 0 90 0 1
+device=CURRENT_SOURCE
+T 53400 37200 5 10 1 1 0 0 1
+refdes=B_pc0
+T 53200 38000 5 10 1 1 0 0 1
+value=I=V(Ipc0)
+}
+C 53800 36900 1 270 0 current-1.sym
+{
+T 54800 36300 5 10 0 0 270 0 1
+device=CURRENT_SOURCE
+T 53400 36700 5 10 1 1 0 0 1
+refdes=B_gc0
+T 53200 36000 5 10 1 1 0 0 1
+value=I=V(Igc0)
+}
+N 54000 37100 54000 37300 4
+N 54000 37100 54000 36900 4
+N 54000 38200 54000 38300 4
+N 54000 36000 54000 35900 4
+C 53800 38300 1 0 0 generic-power.sym
+{
+T 54000 38550 5 10 1 1 0 3 1
+net=Vpc:1
+}
+C 54200 35900 1 180 0 generic-power.sym
+{
+T 54000 35650 5 10 1 1 180 3 1
+net=Vgc:1
+}
+C 47200 37600 1 270 1 vexp-1.sym
+{
+T 47200 38250 5 10 1 1 0 0 1
+refdes=A_comp0
+T 48050 38300 5 10 0 0 90 2 1
+device=vexp
+T 48250 38300 5 10 0 0 90 2 1
+footprint=none
+T 46900 37650 5 10 1 1 0 0 1
+value=comp0
+}
+N 47200 37900 46500 37900 4
+{
+T 46300 38000 5 10 1 1 0 0 1
+netname=Icomp0
+}
+N 55500 37100 55700 37100 4
+C 36800 42900 1 0 0 spice-directive-1.sym
+{
+T 36900 43200 5 10 0 1 0 0 1
+device=directive
+T 36900 43300 5 10 1 1 0 0 1
+refdes=Atime
+T 36800 43000 5 10 1 1 0 0 1
+value=.MODEL time slew(rise_slope=1 fall_slope=10)
+}
+C 36800 42200 1 0 0 spice-directive-1.sym
+{
+T 36900 42500 5 10 0 1 0 0 1
+device=directive
+T 36900 42600 5 10 1 1 0 0 1
+refdes=Apc
+T 36800 41900 5 10 1 1 0 0 3
+value=.PARAM c_comp_tot={C_comp +
++     C_comp_pullup + C_comp_pulldown +
++     C_comp_power_clamp + C_comp_gnd_clamp}
+}
+C 36800 41100 1 0 0 spice-directive-1.sym
+{
+T 36900 41400 5 10 0 1 0 0 1
+device=directive
+T 36900 41500 5 10 1 1 0 0 1
+refdes=Amc0
+T 36800 40900 5 10 1 1 0 0 2
+value=.MODEL comp0 d_dt(gain={C_comp_tot+C_fixture0}
++    out_lower_limit=-1e12 out_upper_limit=1e12)
+}

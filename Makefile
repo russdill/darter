@@ -8,7 +8,17 @@ test.net: pi.net
 %.lib: %.ibs ibis.py
 	./ibis.py $< $@
 
-ibis.lib: ibis_input.sch ibis_output.sch ibis_buffer.sch ibis_terminator.sch ibis_dynamic_clamp.sch
+IBIS_COMPONENTS=\
+	ibis_input.sch \
+	ibis_output.sch \
+	ibis_tristate.sch \
+	ibis_open_source.sch \
+	ibis_open_sink.sch \
+	ibis_buffer.sch \
+	ibis_terminator.sch \
+	ibis_dynamic_clamp.sch
+
+ibis.lib: $(IBIS_COMPONENTS)
 	@-rm -f $@
 	@echo Generating $@...
 	@set -e; for n in $^; do \

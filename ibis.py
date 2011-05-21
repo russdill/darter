@@ -70,13 +70,21 @@ ignored_sections = set([
 	'.component.node_declarations.end_node_declarations',
 	'.component.circuit_call',
 	'.component.circuit_call.end_circuit_call',
+	'.component.begin_emi_component',
+	'.component.begin_emi_component.pin_emi',
+	'.component.begin_emi_component.pin_domain_emi',
+	'.component.begin_emi_component.end_emi_component',
 	'.model.ttgnd',
 	'.model.ttpower',
 	'.model.model_spec',
 	'.model.receiver_thresholds',
 	'.model.temperature_range',
 	'.model.external_reference',
+	'.model.isso_pu',
+	'.model.isso_pd',
 	'.model.ramp',
+	'.model.rising_waveform.composite_current',
+	'.model.falling_waveform.composite_current',
 	'.model.test_data',
 	'.model.test_data.rising_waveform_near',
 	'.model.test_data.falling_waveform_near',
@@ -130,6 +138,9 @@ unsupported_sections = set([
 	'.model.off.series_mosfet',
 	'.model.external_model',
 	'.model.external_model.end_external_model',
+	'.model.algorithmic_model'
+	'.model.algorithmic_model.end_algorithmic_model'
+	'.model.begin_emi_model.end_emi_model'
 	'.submodel.pulldown',
 	'.submodel.pullup',
 	'.submodel.ramp',
@@ -326,7 +337,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	elif type == 'I/O': # 8
 		print '.subckt {} pad vcc vee vdd vss en out in spec=0'.format(model.header)
 		libs.append('ibis_input')
-		libs.append('ibis_output')
+		libs.append('ibis_tristate')
 		Vinl, Vinh = 0.8, 2.0
 	elif type == 'I/O_open_drain' or type == 'I/O_open_sink': # 7
 		print '.subckt {} pad vcc vee vdd vss en in spec=0'.format(model.header)
@@ -348,7 +359,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		libs.append('ibis_output')
 	elif type == '3-state': # 7
 		print '.subckt {} pad vcc vee vdd vss en out spec=0'.format(model.header)
-		libs.append('ibis_output')
+		libs.append('ibis_tristate')
 	elif type == 'Open_sink' or type == 'Open_drain': # 6
 		print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
 		libs.append('ibis_open_sink')
@@ -439,15 +450,22 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	for n in [ 'rising_waveform', 'falling_waveform' ]:
 		if n in model.sections:
 			for i, tbl in enumerate(model.sections[n]):
-				for f in [ 'V_fixture', 'R_fixture' ]:
+				for f in [ 'R_fixture', 'C_fixture' ]:
 					if f in tbl.param:
-						typ = tbl.param[f]
-						min, max = 'NA', 'NA'
-						if '{}_min'.format(f) in tbl.param:
-							min = tbl.param['{}_min'.format(f)]
-						if '{}_max'.format(f) in tbl.param:
-							max = tbl.param['{}_max'.format(f)]
-						range_param('{}{}'.format(f, i), [ typ, min, max], False)
+						param('{}{}'.format(f, i), tbl.param[f])
+					else:
+						param('{}{}'.format(f, i), 0)
+				if 'V_fixture' in tbl.param:
+					typ = tbl.param['V_fixture']
+					min, max = 'NA', 'NA'
+					if 'V_fixture_min' in tbl.param:
+						min = tbl.param['V_fixture_min']
+					if 'V_fixture_max' in tbl.param:
+						max = tbl.param['V_fixture_max']
+					range_param('V_fixture{}'.format(i), [ typ, min, max ], False)
+				for f in [ 'L_fixture', 'R_dut', 'L_dut', 'C_dut' ]:
+					if f in tbl.param:
+						print >> sys.stderr, 'Error: {} not supported in {}'.format(f, model.name)
 			# FIXME: We silently ignore non-matching fixtures
 			break
 			
