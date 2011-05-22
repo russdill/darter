@@ -14,6 +14,8 @@
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 
+# FIXME: M in IBIS is 1000, but in SPICE we need Meg
+
 import sys
 
 # table of sections
@@ -315,8 +317,6 @@ for n in [ 'ibis_ver', 'file_name', 'file_rev', 'date',
 		else:
 			print '* {}: {}'.format(main.sections[n][0].name, main.sections[n][0].header)
 
-#for comp in main.sections['component'] if 'component' in main.sections else list():
-
 #for model in main.sections['model_selector'] if 'model_selector' in main.sections else list():
 
 for model in main.sections['model'] if 'model' in main.sections else list():
@@ -325,46 +325,45 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	if model.unsupported:
 		continue
 
-	print '.lib {}'.format(model.header)
 	type = model.param['Model_type']
-	print '* type - {}'.format(type)
 
 	libs = [ 'ibis_buffer' ]
+	pins = ''
+	en = None
 	if type == 'Input': # 4
-		print '.subckt {} pad vcc vee in spec=0'.format(model.header)
-		print 'V_en en 0 DC 0'
+		pins = 'in'
+		en = '0'
 		libs.append('ibis_input')
 	elif type == 'I/O': # 8
-		print '.subckt {} pad vcc vee vdd vss en out in spec=0'.format(model.header)
+		pins = 'vdd vss en out in'
 		libs.append('ibis_input')
 		libs.append('ibis_tristate')
 		Vinl, Vinh = 0.8, 2.0
 	elif type == 'I/O_open_drain' or type == 'I/O_open_sink': # 7
-		print '.subckt {} pad vcc vee vdd vss en in spec=0'.format(model.header)
+		pins = 'vdd vss en in'
 		libs.append('ibis_input')
 		libs.append('ibis_open_sink')
 	elif type == 'I/O_open_source': # 7
-		print '.subckt {} pad vcc vee vdd vss en in spec=0'.format(model.header)
+		pins = 'vdd vss en in'
 		libs.append('ibis_input')
 		libs.append('ibis_open_source')
 #	elif type == 'Input_ECL':
 #	elif type == 'I/O_ECL':
 	elif type == 'Terminator': # 3
-		print '.subckt {} pad vcc vee spec=0'.format(model.header)
-		print 'V_en en 0 DC 0'
 		libs.append('ibis_terminator')
+		en = '0'
 	elif type == 'Output': # 6
-		print '.subckt {} pad vcc vee vdd vss out spec=0'.format(model.header)
-		print 'V_en en 0 DC 1'
+		pins = 'vdd vss out'
+		en = '1'
 		libs.append('ibis_output')
 	elif type == '3-state': # 7
-		print '.subckt {} pad vcc vee vdd vss en out spec=0'.format(model.header)
+		pins = 'vdd vss en out'
 		libs.append('ibis_tristate')
 	elif type == 'Open_sink' or type == 'Open_drain': # 6
-		print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
+		pins = 'vdd vss en'
 		libs.append('ibis_open_sink')
 	elif type == 'Open_source': # 6
-		print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
+		pins = 'vdd vss en'
 		libs.append('ibis_open_source')
 #	elif type == 'Input_ECL':
 #	elif type == 'Output_ECL':
@@ -378,9 +377,13 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 #	elif type == '3-state_diff':
 	else:
 		print '* Unhandled model type: {}'.format(type)
-		print '.endl'
 		continue
 
+	print '.lib {}'.format(model.header)
+	print '* type - {}'.format(type)
+	print '.subckt {} pad vcc vee {} spec=0'.format(model.header, pins)
+	if en != None:
+		print 'V_en en 0 DC {}'.format(en)
 	print 'V_always_hi always_hi 0 DC 1'
 	print 'B_not_en not_en 0 V=V(en) > 0 ? 0 : 1'
 
@@ -488,6 +491,19 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		print '.lib ibis.lib {}'.format(lib)
 
 	print '.ends {}'.format(model.header)
+
+	for comp in main.sections['component'] if 'component' in main.sections else list():
+		name = comp.header.replace(' ', '_')
+		print '.subckt {}_{} pad vcc vee {} spec=0'.format(name, model.header, pins)
+		for n, inv in [ [ 'R_pkg', False ], [ 'C_pkg', True ], [ 'L_pkg', True ] ]:
+			if 'package' in comp.sections and n in comp.sections['package'][0].param_row:
+				range_param(n, comp.sections['package'][0].param_row[n], inv)
+			else:
+				param(n, '0')
+		print '.lib ibis.lib ibis_pkg'
+		print 'x0 {} die vcc vee {} spec={{spec}}'.format(model.header, pins)
+		print '.ends {}_{}'.format(name, model.header)
+
 	print '.endl'
 
 for model in main.sections['submodel'] if 'submodel' in main.sections else list():

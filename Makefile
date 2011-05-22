@@ -9,6 +9,7 @@ test.net: pi.net
 	./ibis.py $< $@
 
 IBIS_COMPONENTS=\
+	ibis_pkg.sch \
 	ibis_input.sch \
 	ibis_output.sch \
 	ibis_tristate.sch \
