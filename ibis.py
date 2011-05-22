@@ -328,7 +328,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	type = model.param['Model_type']
 
 	libs = [ 'ibis_buffer' ]
-	pins = ''
+	pins = None
 	en = None
 	if type == 'Input': # 4
 		pins = 'in'
@@ -381,7 +381,11 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 
 	print '.lib {}'.format(model.header)
 	print '* type - {}'.format(type)
-	print '.subckt {} pad vcc vee {} spec=0'.format(model.header, pins)
+	if pins == None:
+		pins=''
+	else:
+		pins += ' '
+	print '.subckt {} pad vcc vee {}spec=0'.format(model.header, pins)
 	if en != None:
 		print 'V_en en 0 DC {}'.format(en)
 	print 'V_always_hi always_hi 0 DC 1'
@@ -494,14 +498,14 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 
 	for comp in main.sections['component'] if 'component' in main.sections else list():
 		name = comp.header.replace(' ', '_')
-		print '.subckt {}_{} pad vcc vee {} spec=0'.format(name, model.header, pins)
+		print '.subckt {}_{} pad vcc vee {}spec=0'.format(name, model.header, pins)
 		for n, inv in [ [ 'R_pkg', False ], [ 'C_pkg', True ], [ 'L_pkg', True ] ]:
 			if 'package' in comp.sections and n in comp.sections['package'][0].param_row:
 				range_param(n, comp.sections['package'][0].param_row[n], inv)
 			else:
 				param(n, '0')
 		print '.lib ibis.lib ibis_pkg'
-		print 'x0 {} die vcc vee {} spec={{spec}}'.format(model.header, pins)
+		print 'x0 {} die vcc vee {}spec={{spec}}'.format(model.header, pins)
 		print '.ends {}_{}'.format(name, model.header)
 
 	print '.endl'
