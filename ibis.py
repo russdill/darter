@@ -28,6 +28,8 @@ supported_sections = set([
 	'.notes',
 	'.disclaimer',
 	'.copyright',
+	'.component',
+	'.component.package',
 	'.model_selector',
 	'.model',
 	'.model.add_submodel',
@@ -57,9 +59,7 @@ supported_sections = set([
 
 ignored_sections = set([
 	'.comment_char',
-	'.component',
 	'.component.manufacturer',
-	'.component.package',
 	'.component.pin',
 	'.component.package_model',
 	'.component.package_model.alternate_package_models',
@@ -178,12 +178,10 @@ def range_param(n, row, invert):
 		min, max = max, min
 	print '.param {}={{modv({}, {}, {})}}'.format(n, typ, min, max)
 
-def tbl_subcircuits(n, sections):
+def tbl_models(n, sections):
 	maxval = 0
 	if n in sections:
 		for i, tbl in enumerate(sections[n]):
-			print '.subckt {}{} np nn ncp ncn spec=0'.format(n, i)
-			print modv_func
 
 			for idx, row in enumerate(tbl.data):
 				if row[2] == 'NA':
@@ -204,21 +202,22 @@ def tbl_subcircuits(n, sections):
 						lv = nv
 						li = ni
 
-			for line, row in enumerate(tbl.data):
-				print '.param pwl{}={{modv({}, {}, {})}}'.format(line, row[1], row[2], row[3])
+			print '.model {}{} pwl(input_domain=0.1 fraction=TRUE'.format(n, i)
 
-			print 'b0 np nn V=pwl(V(ncp, ncn)'
-			for line, row in enumerate(tbl.data):
-				print '+,{},{{pwl{}}}'.format(row[0], line)
+			print '+  x_array=['
+			for row in tbl.data:
+				print '+    {}'.format(row[0])
 				if parse_num(row[0]) > maxval:
 					maxval = parse_num(row[0])
+			print '+  ]'
 
+			print '+  y_array=['
+			for row in tbl.data:
+				print '+    {{modv({}, {}, {})}}'.format(row[1], row[2], row[3])
+			print '+  ]'
 			print '+)'
-			print '.ends {}{}'.format(n, i)
 	else:
-		print '.subckt {}0 np nn ncp ncn spec=0'.format(n)
-		print 'b0 np nn V=0'
-		print '.ends {}0'.format(n)
+		print '.model {}0 pwl(x_array=[0] y_array=[0])'
 	param('{}_max'.format(n), maxval)
 
 class section:
@@ -452,7 +451,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 
 	for n in [ 'pulldown', 'pullup', 'gnd_clamp', 'power_clamp',
 		   'rising_waveform', 'falling_waveform' ]:
-		tbl_subcircuits(n, model.sections)
+		tbl_models(n, model.sections)
 
 	for n in [ 'rising_waveform', 'falling_waveform' ]:
 		if n in model.sections:
@@ -492,7 +491,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 			print 'x_{} pad vcc vee vdd vss {} {} spec={{spec}}'.format(key, en, key)
 
 	for lib in libs:
-		print '.lib ibis.lib {}'.format(lib)
+		print '.include {}.inc'.format(lib)
 
 	print '.ends {}'.format(model.header)
 
@@ -504,8 +503,8 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 				range_param(n, comp.sections['package'][0].param_row[n], inv)
 			else:
 				param(n, '0')
-		print '.lib ibis.lib ibis_pkg'
-		print 'x0 {} die vcc vee {}spec={{spec}}'.format(model.header, pins)
+		print '.include ibis_pkg.inc'
+		print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, model.header)
 		print '.ends {}_{}'.format(name, model.header)
 
 	print '.endl'
@@ -541,7 +540,7 @@ for model in main.sections['submodel'] if 'submodel' in main.sections else list(
 	for n in [ 'pulldown', 'pullup', 'gnd_clamp', 'power_clamp',
 		   'rising_waveform', 'falling_waveform',
 		   'gnd_pulse_table', 'power_pulse_table' ]:
-		tbl_subcircuits(n, model.sections)
+		tbl_models(n, model.sections)
 
 	print '.lib ibis.lib {}'.format(lib)
 
