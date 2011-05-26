@@ -30,7 +30,6 @@ supported_sections = set([
 	'.copyright',
 	'.component',
 	'.component.package',
-	'.model_selector',
 	'.model',
 	'.model.add_submodel',
 	'.model.voltage_range',
@@ -76,6 +75,7 @@ ignored_sections = set([
 	'.component.begin_emi_component.pin_emi',
 	'.component.begin_emi_component.pin_domain_emi',
 	'.component.begin_emi_component.end_emi_component',
+	'.model_selector',
 	'.model.ttgnd',
 	'.model.ttpower',
 	'.model.model_spec',
@@ -390,9 +390,9 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	print 'V_always_hi always_hi 0 DC 1'
 	print 'B_not_en not_en 0 V=V(en) > 0 ? 0 : 1'
 
-	print '.subckt dummy d'
-	print '.ends dummy'
-	print 'x_dummy 0 dummy'
+#	print '.subckt dummy d'
+#	print '.ends dummy'
+#	print 'x_dummy 0 dummy'
 
 	print modv_func
 
@@ -518,12 +518,23 @@ for model in main.sections['submodel'] if 'submodel' in main.sections else list(
 	type = model.param['Submodel_type']
 	print '* type - {}'.format(type)
 
+	tables = [ 'gnd_clamp', 'power_clamp' ]
 	if type == 'Dynamic_clamp':
 		lib = 'ibis_dynamic_clamp'
+		tables.append('gnd_pulse_table')
+		tables.append('power_pulse_table')
 #	elif type == 'Bus_hold':
 #		lib = 'ibis_bus_hold'
+#		tables.append('pulldown')
+#		tables.append('pullup')
+#		tables.append('falling_waveform')
+#		tables.append('rising_waveform')
 #	elif type == 'Fall_back':
 #		lib = 'ibis_fall_back'
+#		tables.append('pulldown')
+#		tables.append('pullup')
+#		tables.append('falling_waveform')
+#		tables.append('rising_waveform')
 	else:
 		print '* Unhandled submodel type: {}'.format(type)
 		print '.endl'
@@ -531,18 +542,20 @@ for model in main.sections['submodel'] if 'submodel' in main.sections else list(
 
 	print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
 
+#	print '.subckt dummy d'
+#	print '.ends dummy'
+#	print 'x_dummy 0 dummy'
+
 	for n in [ 'V_trigger_r', 'V_trigger_f', 'Off_delay' ]:
 		if n in model.param_row:
 			range_param(n, model.param_row[n], False)
 		else:
 			param(n, '0')
 
-	for n in [ 'pulldown', 'pullup', 'gnd_clamp', 'power_clamp',
-		   'rising_waveform', 'falling_waveform',
-		   'gnd_pulse_table', 'power_pulse_table' ]:
+	for n in tables:
 		tbl_models(n, model.sections)
 
-	print '.lib ibis.lib {}'.format(lib)
+	print '.include {}.inc'.format(lib)
 
 	print '.ends {}'.format(model.header)
 	print '.endl'

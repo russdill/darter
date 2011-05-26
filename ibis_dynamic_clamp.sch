@@ -16,7 +16,7 @@ C 44200 40900 1 0 0 spice-directive-1.sym
 T 44300 41200 5 10 0 1 0 0 1
 device=directive
 T 44300 41300 5 10 1 1 0 0 1
-refdes=A1
+refdes=Atime
 T 44200 41000 5 10 1 1 0 0 1
 value=.MODEL time slew(rise_slope=1 fall_slope=10)
 }
