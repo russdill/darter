@@ -65,8 +65,8 @@ T 48400 46700 5 10 0 0 90 0 1
 device=CURRENT_SOURCE
 T 48700 46200 5 10 1 1 0 0 1
 refdes=B_pc
-T 48500 46800 5 10 1 1 0 0 1
-value=I=V(Ipc)
+T 48300 47700 5 10 1 1 0 0 1
+value=I=pwl(V(Vcc,pad) $power_clamp0)
 }
 C 49000 45700 1 270 0 current-1.sym
 {
@@ -74,8 +74,8 @@ T 50000 45100 5 10 0 0 270 0 1
 device=CURRENT_SOURCE
 T 48700 45500 5 10 1 1 0 0 1
 refdes=B_gc
-T 48500 44900 5 10 1 1 0 0 1
-value=I=V(Igc)
+T 48200 44100 5 10 1 1 0 0 1
+value=I=pwl(V(pad, Vee) $gnd_clamp0)
 }
 N 49200 45900 49200 45700 4
 N 49200 47000 49200 47200 4
@@ -117,74 +117,3 @@ value=1e18
 }
 N 53300 45700 53300 45900 4
 C 53200 44500 1 0 0 gnd-1.sym
-N 45700 45300 45100 45300 4
-{
-T 45100 45300 5 10 1 1 0 0 1
-netname=Igc
-}
-C 43100 46700 1 270 0 voltage-3.sym
-{
-T 43800 46500 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 43600 46200 5 10 1 1 0 0 1
-refdes=B_vpc
-T 43600 46000 5 10 1 1 0 0 1
-value=V=V(Vcc) - V(pad)
-}
-C 43200 45500 1 0 0 gnd-1.sym
-N 43300 46700 43900 46700 4
-{
-T 43300 46700 5 10 1 1 0 0 1
-netname=vpc
-}
-C 45100 46400 1 90 0 vexp-1.sym
-{
-T 44800 46950 5 10 1 1 0 0 1
-refdes=A_power_clamp
-T 44250 47100 5 10 0 0 90 0 1
-device=vexp
-T 44050 47100 5 10 0 0 90 0 1
-footprint=none
-T 44800 46450 5 10 1 1 0 0 1
-value=power_clamp0
-}
-N 45700 46700 45100 46700 4
-{
-T 45100 46700 5 10 1 1 0 0 1
-netname=Ipc
-}
-C 43100 45300 1 270 0 voltage-3.sym
-{
-T 43800 45100 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 43600 44800 5 10 1 1 0 0 1
-refdes=B_vgc
-T 43600 44600 5 10 1 1 0 0 1
-value=V=V(Vee) - V(pad)
-}
-C 43200 44100 1 0 0 gnd-1.sym
-N 43300 45300 43900 45300 4
-{
-T 43300 45300 5 10 1 1 0 0 1
-netname=vgc
-}
-C 45100 45000 1 90 0 vexp-1.sym
-{
-T 44800 45550 5 10 1 1 0 0 1
-refdes=A_gnd_clamp
-T 44250 45700 5 10 0 0 90 0 1
-device=vexp
-T 44050 45700 5 10 0 0 90 0 1
-footprint=none
-T 44800 45050 5 10 1 1 0 0 1
-value=gnd_clamp0
-}
-C 43200 47700 1 0 0 spice-directive-1.sym
-{
-T 43300 48000 5 10 0 1 0 0 1
-device=directive
-T 43300 48100 5 10 1 1 0 0 1
-refdes=Atime
-T 43200 47800 5 10 1 1 0 0 1
-value=.option rshunt=1e18
-}

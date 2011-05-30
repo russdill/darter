@@ -67,60 +67,36 @@ T 37200 38450 5 10 1 1 0 0 2
 value=V=V(en) > 0 ?
 +  (V(out) > 0 ? {rising_waveform_max} : 0) : 0
 }
-N 53700 43200 54900 43200 4
+N 53600 43600 54800 43600 4
 {
-T 54500 43300 5 10 1 1 0 0 1
+T 54400 43700 5 10 1 1 0 0 1
 netname=pad
 }
-C 53900 43400 1 90 0 current-1.sym
+C 53800 43800 1 90 0 current-1.sym
 {
-T 52900 44000 5 10 0 0 90 0 1
+T 52800 44400 5 10 0 0 90 0 1
 device=CURRENT_SOURCE
-T 53800 44100 5 10 1 1 0 0 1
+T 53700 44500 5 10 1 1 0 0 1
 refdes=B_pu
-T 53800 43500 5 10 1 1 0 0 1
+T 53700 43900 5 10 1 1 0 0 1
 value=I=V(Ipu)*V(Kpu)
 }
-C 53500 43000 1 270 0 current-1.sym
+C 53400 43400 1 270 0 current-1.sym
 {
-T 54500 42400 5 10 0 0 270 0 1
+T 54400 42800 5 10 0 0 270 0 1
 device=CURRENT_SOURCE
-T 53800 42800 5 10 1 1 0 0 1
+T 53700 43200 5 10 1 1 0 0 1
 refdes=B_pd
-T 53800 42200 5 10 1 1 0 0 1
+T 53700 42600 5 10 1 1 0 0 1
 value=I=V(Ipd)*V(Kpd)
 }
-C 53900 41900 1 180 0 vss-1.sym
-C 53500 44500 1 0 0 vdd-1.sym
-N 53700 43400 53700 43000 4
-N 53700 44300 53700 44500 4
-N 53700 41900 53700 42100 4
-N 41700 39000 41300 39000 4
-N 41300 39000 41300 40300 4
-N 41700 36200 41300 36200 4
-N 41300 36200 41300 37500 4
-N 42900 40300 43500 40300 4
-{
-T 43100 40300 5 10 1 1 0 0 1
-netname=vru0
-}
-N 42900 37500 43500 37500 4
-{
-T 43100 37500 5 10 1 1 0 0 1
-netname=vfu0
-}
-N 42900 36200 43500 36200 4
-{
-T 43100 36200 5 10 1 1 0 0 1
-netname=vfu1
-}
-N 42900 39000 43500 39000 4
-{
-T 43100 39000 5 10 1 1 0 0 1
-netname=vru1
-}
+C 53800 42300 1 180 0 vss-1.sym
+C 53400 44900 1 0 0 vdd-1.sym
+N 53600 43800 53600 43400 4
+N 53600 44700 53600 44900 4
+N 53600 42300 53600 42500 4
 B 36800 34700 36000 6200 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
-B 50200 41200 5500 4000 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
+B 43600 41400 12000 4200 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
 B 36800 28000 36000 6100 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
 C 40000 33100 1 90 0 vexp-1.sym
 {
@@ -181,30 +157,6 @@ value=V=V(en) > 0 ?
 +  (V(out) > 0 ? {rising_waveform_max} : 0) :
 +  {rising_waveform_max}
 }
-N 41700 32100 41300 32100 4
-N 41300 32100 41300 33400 4
-N 41700 29300 41300 29300 4
-N 41300 29300 41300 30600 4
-N 42900 33400 43500 33400 4
-{
-T 43100 33400 5 10 1 1 0 0 1
-netname=vrd0
-}
-N 42900 30600 43500 30600 4
-{
-T 43100 30600 5 10 1 1 0 0 1
-netname=vfd0
-}
-N 42900 29300 43500 29300 4
-{
-T 43100 29300 5 10 1 1 0 0 1
-netname=vfd1
-}
-N 42900 32100 43500 32100 4
-{
-T 43100 32100 5 10 1 1 0 0 1
-netname=vrd1
-}
 T 36800 41000 9 10 1 0 0 0 1
 Models for pull-up multiplier
 T 36800 34200 9 10 1 0 0 0 1
@@ -217,7 +169,7 @@ T 45000 40600 9 10 1 0 0 0 1
 Fixture 0
 T 59000 40600 9 10 1 0 0 0 1
 Fixture 1
-T 50200 45300 9 10 1 0 0 0 1
+T 43600 45700 9 10 1 0 0 0 1
 IBIS Gate Model
 T 36800 45400 8 10 1 0 0 0 1
 dist-license=GPLv3
@@ -253,38 +205,38 @@ N 42100 42100 42300 42100 4
 T 42100 42100 5 10 1 1 0 0 1
 netname=0
 }
-C 46800 42300 1 270 0 voltage-3.sym
+C 46700 42700 1 270 0 voltage-3.sym
 {
-T 47500 42100 5 8 0 0 270 0 1
+T 47400 42500 5 8 0 0 270 0 1
 device=VOLTAGE_SOURCE
-T 46400 42100 5 10 1 1 0 0 1
+T 46300 42500 5 10 1 1 0 0 1
 refdes=B_Kpd
-T 44100 42600 5 10 1 1 0 0 3
-value=V=((I(Vfx_pd0) - V(Icomp_pd0) + V(Ipc_pd0) + V(Igc_pd0)) * V(I4_pd) +
+T 44000 42900 5 10 1 1 0 0 3
+value=V=((I(Vfx_pd0) - V(Icomp_pd0) + V(Ipc_pd0) + V(Igc_pd0)) * -V(I4_pd) +
 +      (I(Vfx_pd1) - V(Icomp_pd1) + V(Ipc_pd1) + V(Igc_pd1)) * V(I3_pd)) /
-+   (V(I2_pd) * V(I4_pd) - V(I1_pd) * V(I3_pd))
++   (V(I1_pd) * V(I3_pd) - V(I2_pd) * V(I4_pd))
 }
-C 46800 44400 1 270 0 voltage-3.sym
+C 46700 44800 1 270 0 voltage-3.sym
 {
-T 47500 44200 5 8 0 0 270 0 1
+T 47400 44600 5 8 0 0 270 0 1
 device=VOLTAGE_SOURCE
-T 46400 44200 5 10 1 1 0 0 1
+T 46300 44600 5 10 1 1 0 0 1
 refdes=B_Kpu
-T 44100 44700 5 10 1 1 0 0 3
+T 44000 45000 5 10 1 1 0 0 3
 value=V=((I(Vfx_pu0) - V(Icomp_pu0) + V(Ipc_pu0) + V(Igc_pu0)) * V(I1_pu) +
-+    (I(Vfx_pu1) - V(Icomp_pu1) + V(Ipc_pu1) + V(Igc_pu1)) * V(I2_pu)) /
-+    (V(I2_pu) * V(I4_pu) - V(I1_pu) * V(I3_pu))
++    (I(Vfx_pu1) - V(Icomp_pu1) + V(Ipc_pu1) + V(Igc_pu1)) * -V(I2_pu)) /
++    (V(I1_pu) * V(I3_pu) - V(I2_pu) * V(I4_pu))
 }
-C 46900 43200 1 0 0 gnd-1.sym
-C 46900 41100 1 0 0 gnd-1.sym
-N 47000 42300 47400 42300 4
+C 46800 43600 1 0 0 gnd-1.sym
+C 46800 41500 1 0 0 gnd-1.sym
+N 46900 42700 47300 42700 4
 {
-T 47000 42300 5 10 1 1 0 0 1
+T 46900 42700 5 10 1 1 0 0 1
 netname=Kpd
 }
-N 47000 44400 47400 44400 4
+N 46900 44800 47300 44800 4
 {
-T 47000 44400 5 10 1 1 0 0 1
+T 46900 44800 5 10 1 1 0 0 1
 netname=Kpu
 }
 C 36800 43900 1 0 0 spice-directive-1.sym
@@ -318,155 +270,35 @@ T 36800 41700 5 10 1 1 0 0 2
 value=.MODEL comp1 d_dt(gain={C_comp_tot+C_fixture1}
 +    out_lower_limit=-1e12 out_upper_limit=1e12)
 }
-C 50600 44500 1 270 0 voltage-3.sym
+C 50200 44800 1 270 0 voltage-3.sym
 {
-T 51300 44300 5 8 0 0 270 0 1
+T 50900 44600 5 8 0 0 270 0 1
 device=VOLTAGE_SOURCE
-T 51100 44000 5 10 1 1 0 0 1
-refdes=B_vpu
-T 51100 43800 5 10 1 1 0 0 1
-value=V=V(Vdd) - V(pad)
+T 50700 44300 5 10 1 1 0 0 1
+refdes=B_pullup
+T 50700 44100 5 10 1 1 0 0 1
+value=V=pwl(V(Vdd, pad) $pullup0)
 }
-C 50700 43300 1 0 0 gnd-1.sym
-N 50800 44500 51400 44500 4
+C 50300 43600 1 0 0 gnd-1.sym
+N 50400 44800 51000 44800 4
 {
-T 50800 44500 5 10 1 1 0 0 1
-netname=vpu
-}
-C 52600 44200 1 90 0 vexp-1.sym
-{
-T 52300 44750 5 10 1 1 0 0 1
-refdes=A_pullup
-T 51750 44900 5 10 0 0 90 0 1
-device=vexp
-T 51550 44900 5 10 0 0 90 0 1
-footprint=none
-T 52300 44250 5 10 1 1 0 0 1
-value=pullup0
-}
-N 52600 44500 53200 44500 4
-{
-T 52800 44500 5 10 1 1 0 0 1
+T 50600 44800 5 10 1 1 0 0 1
 netname=Ipu
 }
-C 50600 42700 1 270 0 voltage-3.sym
+C 50200 42700 1 270 0 voltage-3.sym
 {
-T 51300 42500 5 8 0 0 270 0 1
+T 50900 42500 5 8 0 0 270 0 1
 device=VOLTAGE_SOURCE
-T 51100 42200 5 10 1 1 0 0 1
-refdes=B_vpd
-T 51100 42000 5 10 1 1 0 0 1
-value=V=V(pad) - V(Vss)
+T 50700 42200 5 10 1 1 0 0 1
+refdes=B_pulldown
+T 50700 42000 5 10 1 1 0 0 1
+value=V=pwl(V(pad, Vss) $pulldown0)
 }
-C 50700 41500 1 0 0 gnd-1.sym
-N 50800 42700 51400 42700 4
+C 50300 41500 1 0 0 gnd-1.sym
+N 50400 42700 51000 42700 4
 {
-T 50800 42700 5 10 1 1 0 0 1
-netname=vpd
-}
-C 52600 42400 1 90 0 vexp-1.sym
-{
-T 52300 42950 5 10 1 1 0 0 1
-refdes=A_pulldown
-T 51750 43100 5 10 0 0 90 0 1
-device=vexp
-T 51550 43100 5 10 0 0 90 0 1
-footprint=none
-T 52300 42450 5 10 1 1 0 0 1
-value=pulldown0
-}
-N 52600 42700 53200 42700 4
-{
-T 52800 42700 5 10 1 1 0 0 1
+T 50600 42700 5 10 1 1 0 0 1
 netname=Ipd
-}
-C 42900 40000 1 90 0 vexp-1.sym
-{
-T 42600 40550 5 10 1 1 0 0 1
-refdes=A_ru0
-T 42050 40700 5 10 0 0 90 0 1
-device=vexp
-T 41850 40700 5 10 0 0 90 0 1
-footprint=none
-T 41700 39850 5 10 1 1 0 0 1
-value=rising_waveform0
-}
-C 42900 38700 1 90 0 vexp-1.sym
-{
-T 42600 39250 5 10 1 1 0 0 1
-refdes=A_ru1
-T 42050 39400 5 10 0 0 90 0 1
-device=vexp
-T 41850 39400 5 10 0 0 90 0 1
-footprint=none
-T 41700 38550 5 10 1 1 0 0 1
-value=rising_waveform1
-}
-C 42900 37200 1 90 0 vexp-1.sym
-{
-T 42600 37750 5 10 1 1 0 0 1
-refdes=A_fu0
-T 42050 37900 5 10 0 0 90 0 1
-device=vexp
-T 41850 37900 5 10 0 0 90 0 1
-footprint=none
-T 41700 37050 5 10 1 1 0 0 1
-value=falling_waveform0
-}
-C 42900 35900 1 90 0 vexp-1.sym
-{
-T 42600 36450 5 10 1 1 0 0 1
-refdes=A_fu1
-T 42050 36600 5 10 0 0 90 0 1
-device=vexp
-T 41850 36600 5 10 0 0 90 0 1
-footprint=none
-T 41700 35750 5 10 1 1 0 0 1
-value=falling_waveform1
-}
-C 42900 33100 1 90 0 vexp-1.sym
-{
-T 42600 33650 5 10 1 1 0 0 1
-refdes=A_rd0
-T 42050 33800 5 10 0 0 90 0 1
-device=vexp
-T 41850 33800 5 10 0 0 90 0 1
-footprint=none
-T 41700 32950 5 10 1 1 0 0 1
-value=rising_waveform0
-}
-C 42900 31800 1 90 0 vexp-1.sym
-{
-T 42600 32350 5 10 1 1 0 0 1
-refdes=A_rd1
-T 42050 32500 5 10 0 0 90 0 1
-device=vexp
-T 41850 32500 5 10 0 0 90 0 1
-footprint=none
-T 41700 31650 5 10 1 1 0 0 1
-value=rising_waveform1
-}
-C 42900 30300 1 90 0 vexp-1.sym
-{
-T 42600 30850 5 10 1 1 0 0 1
-refdes=A_fd0
-T 42050 31000 5 10 0 0 90 0 1
-device=vexp
-T 41850 31000 5 10 0 0 90 0 1
-footprint=none
-T 41700 30150 5 10 1 1 0 0 1
-value=falling_waveform0
-}
-C 42900 29000 1 90 0 vexp-1.sym
-{
-T 42600 29550 5 10 1 1 0 0 1
-refdes=A_fd1
-T 42050 29700 5 10 0 0 90 0 1
-device=vexp
-T 41850 29700 5 10 0 0 90 0 1
-footprint=none
-T 41700 28850 5 10 1 1 0 0 1
-value=falling_waveform1
 }
 N 45900 38700 46600 38700 4
 {
@@ -499,14 +331,14 @@ netname=fu0b
 N 48800 38700 48800 38500 4
 C 48700 37300 1 0 0 gnd-1.sym
 C 45800 37300 1 0 0 gnd-1.sym
-N 53000 36600 52800 36600 4
+N 52600 37700 52000 37700 4
 {
-T 52800 36600 5 10 1 1 0 0 1
+T 52000 37700 5 10 1 1 0 0 1
 netname=I2_pu
 }
-N 56800 36600 56200 36600 4
+N 52600 36900 52000 36900 4
 {
-T 56200 36600 5 10 1 1 0 0 1
+T 52000 36900 5 10 1 1 0 0 1
 netname=Igc_pu0
 }
 C 45700 38500 1 270 0 voltage-3.sym
@@ -515,8 +347,10 @@ T 46400 38300 5 8 0 0 270 0 1
 device=VOLTAGE_SOURCE
 T 46000 38300 5 10 1 1 0 0 1
 refdes=B_pu0
-T 46100 37700 5 10 1 1 0 0 1
-value=V=V(ru_on) > 0  ? V(vru0) : V(vfu0)
+T 45600 36700 5 10 1 1 0 0 3
+value=V=V(ru_on) > 0 ? 
++    pwl(V(ru_time) $rising_waveform0) :
++    pwl(V(fu_time) $falling_waveform0)
 }
 C 47500 38900 1 180 0 current-1.sym
 {
@@ -528,20 +362,20 @@ T 46500 38400 5 10 1 1 0 0 1
 value=DC 0
 }
 N 45900 38500 45900 38700 4
-C 48100 35700 1 90 0 vexp-1.sym
+C 53000 35600 1 90 0 vexp-1.sym
 {
-T 47700 36350 5 10 1 1 0 0 1
+T 51200 36250 5 10 1 1 0 0 1
 refdes=A_comp_pu0
-T 47250 36400 5 10 0 0 90 0 1
+T 52150 36300 5 10 0 0 90 0 1
 device=vexp
-T 47050 36400 5 10 0 0 90 0 1
+T 51950 36300 5 10 0 0 90 0 1
 footprint=none
-T 47800 35750 5 10 1 1 0 0 1
+T 52800 36250 5 10 1 1 0 0 1
 value=comp0
 }
-N 48100 36000 48800 36000 4
+N 53000 35900 53700 35900 4
 {
-T 48100 36000 5 10 1 1 0 0 1
+T 53000 35900 5 10 1 1 0 0 1
 netname=Icomp_pu0
 }
 N 47500 38700 47700 38700 4
@@ -549,123 +383,59 @@ N 47500 38700 47700 38700 4
 T 47500 38700 5 10 1 1 0 0 1
 netname=fu0a
 }
-C 50800 39500 1 270 0 voltage-3.sym
+C 52000 39100 1 0 1 voltage-3.sym
 {
-T 51500 39300 5 8 0 0 270 0 1
+T 51800 39800 5 8 0 0 0 6 1
 device=VOLTAGE_SOURCE
-T 51300 39000 5 10 1 1 0 0 1
-refdes=B_vpu_pu0
-T 51300 38800 5 10 1 1 0 0 1
-value=V={pullup_reference} - V(fixture_pu0)
+T 51000 39600 5 10 1 1 0 0 1
+refdes=B_pullup_pu0
+T 52800 39600 5 10 1 1 0 0 1
+value=V=pwl({pullup_reference} - V(fixture_pu0) $pullup0)
 }
-C 50900 38300 1 0 0 gnd-1.sym
-N 51000 39500 51600 39500 4
+C 51000 39000 1 0 0 gnd-1.sym
+N 52000 39300 52600 39300 4
 {
-T 51000 39500 5 10 1 1 0 0 1
-netname=vpu_pu0
-}
-C 52800 39200 1 90 0 vexp-1.sym
-{
-T 52500 39750 5 10 1 1 0 0 1
-refdes=A_pullup_pu0
-T 51950 39900 5 10 0 0 90 0 1
-device=vexp
-T 51750 39900 5 10 0 0 90 0 1
-footprint=none
-T 52500 39250 5 10 1 1 0 0 1
-value=pullup0
-}
-N 52800 39500 53000 39500 4
-{
-T 52800 39500 5 10 1 1 0 0 1
+T 52000 39300 5 10 1 1 0 0 1
 netname=I3_pu
 }
-C 54200 39500 1 270 0 voltage-3.sym
+C 52000 38300 1 0 1 voltage-3.sym
 {
-T 54900 39300 5 8 0 0 270 0 1
+T 51800 39000 5 8 0 0 0 6 1
 device=VOLTAGE_SOURCE
-T 54700 39000 5 10 1 1 0 0 1
-refdes=B_vpc_pu0
-T 54700 38800 5 10 1 1 0 0 1
-value=V={power_clamp_reference} - V(fixture_pu0)
+T 51000 38800 5 10 1 1 0 0 1
+refdes=B_power_clamp_pu0
+T 52800 38800 5 10 1 1 0 0 1
+value=V=pwl({power_clamp_reference} - V(fixture_pu0) $power_clamp0)
 }
-C 54300 38300 1 0 0 gnd-1.sym
-N 54400 39500 55000 39500 4
+C 51000 38200 1 0 0 gnd-1.sym
+N 52600 38500 52000 38500 4
 {
-T 54400 39500 5 10 1 1 0 0 1
-netname=vpc_pu0
-}
-C 56200 39200 1 90 0 vexp-1.sym
-{
-T 55900 39750 5 10 1 1 0 0 1
-refdes=A_power_clamp_pu0
-T 55350 39900 5 10 0 0 90 0 1
-device=vexp
-T 55150 39900 5 10 0 0 90 0 1
-footprint=none
-T 55900 39250 5 10 1 1 0 0 1
-value=power_clamp0
-}
-N 56800 39500 56200 39500 4
-{
-T 56200 39500 5 10 1 1 0 0 1
+T 52000 38500 5 10 1 1 0 0 1
 netname=Ipc_pu0
 }
-C 50800 36600 1 270 0 voltage-3.sym
+C 52000 37500 1 0 1 voltage-3.sym
 {
-T 51500 36400 5 8 0 0 270 0 1
+T 51800 38200 5 8 0 0 0 6 1
 device=VOLTAGE_SOURCE
-T 51300 36100 5 10 1 1 0 0 1
-refdes=B_vpd_pu0
-T 51300 35900 5 10 1 1 0 0 1
-value=V=V(fixture_pu0) - {pulldown_reference}
+T 51000 38000 5 10 1 1 0 0 1
+refdes=B_pulldown_pu0
+T 52800 38000 5 10 1 1 0 0 1
+value=V=pwl(V(fixture_pu0) - {pulldown_reference} $pulldown0)
 }
-C 50900 35400 1 0 0 gnd-1.sym
-N 51000 36600 51600 36600 4
+C 51000 37400 1 0 0 gnd-1.sym
+C 52000 37100 1 180 0 voltage-3.sym
 {
-T 51000 36600 5 10 1 1 0 0 1
-netname=vpd_pu0
-}
-C 52800 36300 1 90 0 vexp-1.sym
-{
-T 52500 36850 5 10 1 1 0 0 1
-refdes=A_pulldown_pu0
-T 51950 37000 5 10 0 0 90 0 1
-device=vexp
-T 51750 37000 5 10 0 0 90 0 1
-footprint=none
-T 52500 36350 5 10 1 1 0 0 1
-value=pulldown0
-}
-C 54200 36600 1 270 0 voltage-3.sym
-{
-T 54900 36400 5 8 0 0 270 0 1
+T 51800 36400 5 8 0 0 180 0 1
 device=VOLTAGE_SOURCE
-T 54700 36100 5 10 1 1 0 0 1
-refdes=B_vgc_pu0
-T 54700 35900 5 10 1 1 0 0 1
-value=V=V(fixture_pu0) - {gnd_clamp_reference}
+T 51000 37200 5 10 1 1 0 0 1
+refdes=B_gnd_clamp_pu0
+T 52800 37200 5 10 1 1 0 0 1
+value=V=pwl(V(fixture_pu0) - {gnd_clamp_reference} $gnd_clamp0)
 }
-C 54300 35400 1 0 0 gnd-1.sym
-N 54400 36600 55000 36600 4
+C 51000 36600 1 0 0 gnd-1.sym
+N 51100 35900 51800 35900 4
 {
-T 54400 36600 5 10 1 1 0 0 1
-netname=vgc_pu0
-}
-C 56200 36300 1 90 0 vexp-1.sym
-{
-T 55900 36850 5 10 1 1 0 0 1
-refdes=A_gnd_clamp_pu0
-T 55350 37000 5 10 0 0 90 0 1
-device=vexp
-T 55150 37000 5 10 0 0 90 0 1
-footprint=none
-T 55900 36350 5 10 1 1 0 0 1
-value=gnd_clamp0
-}
-N 46200 36000 46900 36000 4
-{
-T 46200 36000 5 10 1 1 0 0 1
+T 50900 35900 5 10 1 1 0 0 1
 netname=fixture_pu0
 }
 N 59900 38700 60600 38700 4
@@ -698,26 +468,6 @@ netname=fu1b
 }
 N 62800 38700 62800 38500 4
 C 62700 37300 1 0 0 gnd-1.sym
-C 59800 37300 1 0 0 gnd-1.sym
-N 67000 36600 66800 36600 4
-{
-T 66800 36600 5 10 1 1 0 0 1
-netname=I1_pu
-}
-N 70800 36600 70200 36600 4
-{
-T 70200 36600 5 10 1 1 0 0 1
-netname=Igc_pu1
-}
-C 59700 38500 1 270 0 voltage-3.sym
-{
-T 60400 38300 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 60000 38300 5 10 1 1 0 0 1
-refdes=B_pu1
-T 60100 37700 5 10 1 1 0 0 1
-value=V=V(ru_on) > 0  ? V(vru1) : V(vfu1)
-}
 C 61500 38900 1 180 0 current-1.sym
 {
 T 60900 37900 5 10 0 0 180 0 1
@@ -727,146 +477,10 @@ refdes=Vfx_pu1
 T 60500 38400 5 10 1 1 0 0 1
 value=DC 0
 }
-N 59900 38500 59900 38700 4
-C 62100 35700 1 90 0 vexp-1.sym
-{
-T 61700 36350 5 10 1 1 0 0 1
-refdes=A_comp_pu1
-T 61250 36400 5 10 0 0 90 0 1
-device=vexp
-T 61050 36400 5 10 0 0 90 0 1
-footprint=none
-T 61800 35750 5 10 1 1 0 0 1
-value=comp1
-}
-N 62100 36000 62800 36000 4
-{
-T 62100 36000 5 10 1 1 0 0 1
-netname=Icomp_pu1
-}
 N 61500 38700 61700 38700 4
 {
 T 61500 38700 5 10 1 1 0 0 1
 netname=fu1a
-}
-C 64800 39500 1 270 0 voltage-3.sym
-{
-T 65500 39300 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 65300 39000 5 10 1 1 0 0 1
-refdes=B_vpu_pu1
-T 65300 38800 5 10 1 1 0 0 1
-value=V={pullup_reference} - V(fixture_pu1)
-}
-C 64900 38300 1 0 0 gnd-1.sym
-N 65000 39500 65600 39500 4
-{
-T 65000 39500 5 10 1 1 0 0 1
-netname=vpu_pu1
-}
-C 66800 39200 1 90 0 vexp-1.sym
-{
-T 66500 39750 5 10 1 1 0 0 1
-refdes=A_pullup_pu1
-T 65950 39900 5 10 0 0 90 0 1
-device=vexp
-T 65750 39900 5 10 0 0 90 0 1
-footprint=none
-T 66500 39250 5 10 1 1 0 0 1
-value=pullup0
-}
-N 66800 39500 67000 39500 4
-{
-T 66800 39500 5 10 1 1 0 0 1
-netname=I4_pu
-}
-C 68200 39500 1 270 0 voltage-3.sym
-{
-T 68900 39300 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 68700 39000 5 10 1 1 0 0 1
-refdes=B_vpc_pu1
-T 68700 38800 5 10 1 1 0 0 1
-value=V={power_clamp_reference} - V(fixture_pu1)
-}
-C 68300 38300 1 0 0 gnd-1.sym
-N 68400 39500 69000 39500 4
-{
-T 68400 39500 5 10 1 1 0 0 1
-netname=vpc_pu1
-}
-C 70200 39200 1 90 0 vexp-1.sym
-{
-T 69900 39750 5 10 1 1 0 0 1
-refdes=A_power_clamp_pu1
-T 69350 39900 5 10 0 0 90 0 1
-device=vexp
-T 69150 39900 5 10 0 0 90 0 1
-footprint=none
-T 69900 39250 5 10 1 1 0 0 1
-value=power_clamp0
-}
-N 70800 39500 70200 39500 4
-{
-T 70200 39500 5 10 1 1 0 0 1
-netname=Ipc_pu1
-}
-C 64800 36600 1 270 0 voltage-3.sym
-{
-T 65500 36400 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 65300 36100 5 10 1 1 0 0 1
-refdes=B_vpd_pu1
-T 65300 35900 5 10 1 1 0 0 1
-value=V=V(fixture_pu1) - {pulldown_reference}
-}
-C 64900 35400 1 0 0 gnd-1.sym
-N 65000 36600 65600 36600 4
-{
-T 65000 36600 5 10 1 1 0 0 1
-netname=vpd_pu1
-}
-C 66800 36300 1 90 0 vexp-1.sym
-{
-T 66500 36850 5 10 1 1 0 0 1
-refdes=A_pulldown_pu1
-T 65950 37000 5 10 0 0 90 0 1
-device=vexp
-T 65750 37000 5 10 0 0 90 0 1
-footprint=none
-T 66500 36350 5 10 1 1 0 0 1
-value=pulldown0
-}
-C 68200 36600 1 270 0 voltage-3.sym
-{
-T 68900 36400 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 68700 36100 5 10 1 1 0 0 1
-refdes=B_vgc_pu1
-T 68700 35900 5 10 1 1 0 0 1
-value=V=V(fixture_pu1) - {gnd_clamp_reference}
-}
-C 68300 35400 1 0 0 gnd-1.sym
-N 68400 36600 69000 36600 4
-{
-T 68400 36600 5 10 1 1 0 0 1
-netname=vgc_pu1
-}
-C 70200 36300 1 90 0 vexp-1.sym
-{
-T 69900 36850 5 10 1 1 0 0 1
-refdes=A_gnd_clamp_pu1
-T 69350 37000 5 10 0 0 90 0 1
-device=vexp
-T 69150 37000 5 10 0 0 90 0 1
-footprint=none
-T 69900 36350 5 10 1 1 0 0 1
-value=gnd_clamp0
-}
-N 60200 36000 60900 36000 4
-{
-T 60200 36000 5 10 1 1 0 0 1
-netname=fixture_pu1
 }
 N 45900 32000 46600 32000 4
 {
@@ -899,24 +513,16 @@ netname=fd0b
 N 48800 32000 48800 31800 4
 C 48700 30600 1 0 0 gnd-1.sym
 C 45800 30600 1 0 0 gnd-1.sym
-N 53000 29900 52800 29900 4
-{
-T 52800 29900 5 10 1 1 0 0 1
-netname=I2_pd
-}
-N 56800 29900 56200 29900 4
-{
-T 56200 29900 5 10 1 1 0 0 1
-netname=Igc_pd0
-}
 C 45700 31800 1 270 0 voltage-3.sym
 {
 T 46400 31600 5 8 0 0 270 0 1
 device=VOLTAGE_SOURCE
 T 46000 31600 5 10 1 1 0 0 1
 refdes=B_pd0
-T 46100 31000 5 10 1 1 0 0 1
-value=V=V(rd_on) > 0  ? V(vrd0) : V(vfd0)
+T 45700 30000 5 10 1 1 0 0 3
+value=V=V(rd_on) > 0 ? 
++    pwl(V(rd_time) $rising_waveform0) :
++    pwl(V(fd_time) $falling_waveform0)
 }
 C 47500 32200 1 180 0 current-1.sym
 {
@@ -928,145 +534,10 @@ T 46500 31700 5 10 1 1 0 0 1
 value=DC 0
 }
 N 45900 31800 45900 32000 4
-C 48100 29000 1 90 0 vexp-1.sym
-{
-T 47700 29650 5 10 1 1 0 0 1
-refdes=A_comp_pd0
-T 47250 29700 5 10 0 0 90 0 1
-device=vexp
-T 47050 29700 5 10 0 0 90 0 1
-footprint=none
-T 47800 29050 5 10 1 1 0 0 1
-value=comp0
-}
-N 48100 29300 48800 29300 4
-{
-T 48100 29300 5 10 1 1 0 0 1
-netname=Icomp_pd0
-}
 N 47500 32000 47700 32000 4
 {
 T 47500 32000 5 10 1 1 0 0 1
 netname=fd0a
-}
-C 50800 32800 1 270 0 voltage-3.sym
-{
-T 51500 32600 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 51300 32300 5 10 1 1 0 0 1
-refdes=B_vpu_pd0
-T 51300 32100 5 10 1 1 0 0 1
-value=V={pullup_reference} - V(fixture_pd0)
-}
-C 50900 31600 1 0 0 gnd-1.sym
-N 51000 32800 51600 32800 4
-{
-T 51000 32800 5 10 1 1 0 0 1
-netname=vpu_pd0
-}
-C 52800 32500 1 90 0 vexp-1.sym
-{
-T 52500 33050 5 10 1 1 0 0 1
-refdes=A_pullup_pd0
-T 51950 33200 5 10 0 0 90 0 1
-device=vexp
-T 51750 33200 5 10 0 0 90 0 1
-footprint=none
-T 52500 32550 5 10 1 1 0 0 1
-value=pullup0
-}
-N 52800 32800 53000 32800 4
-{
-T 52800 32800 5 10 1 1 0 0 1
-netname=I3_pd
-}
-C 54200 32800 1 270 0 voltage-3.sym
-{
-T 54900 32600 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 54700 32300 5 10 1 1 0 0 1
-refdes=B_vpc_pd0
-T 54700 32100 5 10 1 1 0 0 1
-value=V={power_clamp_reference} - V(fixture_pd0)
-}
-C 54300 31600 1 0 0 gnd-1.sym
-N 54400 32800 55000 32800 4
-{
-T 54400 32800 5 10 1 1 0 0 1
-netname=vpc_pd0
-}
-C 56200 32500 1 90 0 vexp-1.sym
-{
-T 55900 33050 5 10 1 1 0 0 1
-refdes=A_power_clamp_pd0
-T 55350 33200 5 10 0 0 90 0 1
-device=vexp
-T 55150 33200 5 10 0 0 90 0 1
-footprint=none
-T 55900 32550 5 10 1 1 0 0 1
-value=power_clamp0
-}
-N 56800 32800 56200 32800 4
-{
-T 56200 32800 5 10 1 1 0 0 1
-netname=Ipc_pd0
-}
-C 50800 29900 1 270 0 voltage-3.sym
-{
-T 51500 29700 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 51300 29400 5 10 1 1 0 0 1
-refdes=B_vpd_pd0
-T 51300 29200 5 10 1 1 0 0 1
-value=V=V(fixture_pd0) - {pulldown_reference}
-}
-C 50900 28700 1 0 0 gnd-1.sym
-N 51000 29900 51600 29900 4
-{
-T 51000 29900 5 10 1 1 0 0 1
-netname=vpd_pd0
-}
-C 52800 29600 1 90 0 vexp-1.sym
-{
-T 52500 30150 5 10 1 1 0 0 1
-refdes=A_pulldown_pd0
-T 51950 30300 5 10 0 0 90 0 1
-device=vexp
-T 51750 30300 5 10 0 0 90 0 1
-footprint=none
-T 52500 29650 5 10 1 1 0 0 1
-value=pulldown0
-}
-C 54200 29900 1 270 0 voltage-3.sym
-{
-T 54900 29700 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 54700 29400 5 10 1 1 0 0 1
-refdes=B_vgc_pd0
-T 54700 29200 5 10 1 1 0 0 1
-value=V=V(fixture_pd0) - {gnd_clamp_reference}
-}
-C 54300 28700 1 0 0 gnd-1.sym
-N 54400 29900 55000 29900 4
-{
-T 54400 29900 5 10 1 1 0 0 1
-netname=vgc_pd0
-}
-C 56200 29600 1 90 0 vexp-1.sym
-{
-T 55900 30150 5 10 1 1 0 0 1
-refdes=A_gnd_clamp_pd0
-T 55350 30300 5 10 0 0 90 0 1
-device=vexp
-T 55150 30300 5 10 0 0 90 0 1
-footprint=none
-T 55900 29650 5 10 1 1 0 0 1
-value=gnd_clamp0
-}
-N 46200 29300 46900 29300 4
-{
-T 46200 29300 5 10 1 1 0 0 1
-netname=fixture_pd0
 }
 N 59900 32000 60600 32000 4
 {
@@ -1098,26 +569,6 @@ netname=fd1b
 }
 N 62800 32000 62800 31800 4
 C 62700 30600 1 0 0 gnd-1.sym
-C 59800 30600 1 0 0 gnd-1.sym
-N 67000 29900 66800 29900 4
-{
-T 66800 29900 5 10 1 1 0 0 1
-netname=I1_pd
-}
-N 70800 29900 70200 29900 4
-{
-T 70200 29900 5 10 1 1 0 0 1
-netname=Igc_pd1
-}
-C 59700 31800 1 270 0 voltage-3.sym
-{
-T 60400 31600 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 60000 31600 5 10 1 1 0 0 1
-refdes=B_pd1
-T 60100 31000 5 10 1 1 0 0 1
-value=V=V(rd_on) > 0  ? V(vrd1) : V(vfd1)
-}
 C 61500 32200 1 180 0 current-1.sym
 {
 T 60900 31200 5 10 0 0 180 0 1
@@ -1127,144 +578,277 @@ refdes=Vfx_pd1
 T 60500 31700 5 10 1 1 0 0 1
 value=DC 0
 }
-N 59900 31800 59900 32000 4
-C 62100 29000 1 90 0 vexp-1.sym
-{
-T 61700 29650 5 10 1 1 0 0 1
-refdes=A_comp_pd1
-T 61250 29700 5 10 0 0 90 0 1
-device=vexp
-T 61050 29700 5 10 0 0 90 0 1
-footprint=none
-T 61800 29050 5 10 1 1 0 0 1
-value=comp1
-}
-N 62100 29300 62800 29300 4
-{
-T 62100 29300 5 10 1 1 0 0 1
-netname=Icomp_pd1
-}
 N 61500 32000 61700 32000 4
 {
 T 61500 32000 5 10 1 1 0 0 1
 netname=fd1a
 }
-C 64800 32800 1 270 0 voltage-3.sym
+N 52600 31000 52000 31000 4
 {
-T 65500 32600 5 8 0 0 270 0 1
-device=VOLTAGE_SOURCE
-T 65300 32300 5 10 1 1 0 0 1
-refdes=B_vpu_pd1
-T 65300 32100 5 10 1 1 0 0 1
-value=V={pullup_reference} - V(fixture_pd1)
+T 52000 31000 5 10 1 1 0 0 1
+netname=I2_pd
 }
-C 64900 31600 1 0 0 gnd-1.sym
-N 65000 32800 65600 32800 4
+N 52600 30200 52000 30200 4
 {
-T 65000 32800 5 10 1 1 0 0 1
-netname=vpu_pd1
+T 52000 30200 5 10 1 1 0 0 1
+netname=Igc_pd0
 }
-C 66800 32500 1 90 0 vexp-1.sym
+C 53000 28900 1 90 0 vexp-1.sym
 {
-T 66500 33050 5 10 1 1 0 0 1
-refdes=A_pullup_pd1
-T 65950 33200 5 10 0 0 90 0 1
+T 51200 29550 5 10 1 1 0 0 1
+refdes=A_comp_pd0
+T 52150 29600 5 10 0 0 90 0 1
 device=vexp
-T 65750 33200 5 10 0 0 90 0 1
+T 51950 29600 5 10 0 0 90 0 1
 footprint=none
-T 66500 32550 5 10 1 1 0 0 1
-value=pullup0
+T 52800 29550 5 10 1 1 0 0 1
+value=comp0
 }
-N 66800 32800 67000 32800 4
+N 53000 29200 53700 29200 4
 {
-T 66800 32800 5 10 1 1 0 0 1
+T 53000 29200 5 10 1 1 0 0 1
+netname=Icomp_pd0
+}
+C 52000 32400 1 0 1 voltage-3.sym
+{
+T 51800 33100 5 8 0 0 0 6 1
+device=VOLTAGE_SOURCE
+T 51000 32900 5 10 1 1 0 0 1
+refdes=B_pullup_pd0
+T 52800 32900 5 10 1 1 0 0 1
+value=V=pwl({pullup_reference} - V(fixture_pd0) $pullup0)
+}
+C 51000 32300 1 0 0 gnd-1.sym
+N 52000 32600 52600 32600 4
+{
+T 52000 32600 5 10 1 1 0 0 1
+netname=I3_pd
+}
+C 52000 31600 1 0 1 voltage-3.sym
+{
+T 51800 32300 5 8 0 0 0 6 1
+device=VOLTAGE_SOURCE
+T 51000 32100 5 10 1 1 0 0 1
+refdes=B_power_clamp_pd0
+T 52800 32100 5 10 1 1 0 0 1
+value=V=pwl({power_clamp_reference} - V(fixture_pd0) $power_clamp0)
+}
+C 51000 31500 1 0 0 gnd-1.sym
+N 52600 31800 52000 31800 4
+{
+T 52000 31800 5 10 1 1 0 0 1
+netname=Ipc_pd0
+}
+C 52000 30800 1 0 1 voltage-3.sym
+{
+T 51800 31500 5 8 0 0 0 6 1
+device=VOLTAGE_SOURCE
+T 51000 31300 5 10 1 1 0 0 1
+refdes=B_pulldown_pd0
+T 52800 31300 5 10 1 1 0 0 1
+value=V=pwl(V(fixture_pd0) - {pulldown_reference} $pulldown0)
+}
+C 51000 30700 1 0 0 gnd-1.sym
+C 52000 30400 1 180 0 voltage-3.sym
+{
+T 51800 29700 5 8 0 0 180 0 1
+device=VOLTAGE_SOURCE
+T 51000 30500 5 10 1 1 0 0 1
+refdes=B_gnd_clamp_pd0
+T 52800 30500 5 10 1 1 0 0 1
+value=V=pwl(V(fixture_pd0) - {gnd_clamp_reference} $gnd_clamp0)
+}
+C 51000 29900 1 0 0 gnd-1.sym
+N 51100 29200 51800 29200 4
+{
+T 50900 29200 5 10 1 1 0 0 1
+netname=fixture_pd0
+}
+C 59800 37300 1 0 0 gnd-1.sym
+N 66600 37700 66000 37700 4
+{
+T 66000 37700 5 10 1 1 0 0 1
+netname=I1_pu
+}
+N 66600 36900 66000 36900 4
+{
+T 66000 36900 5 10 1 1 0 0 1
+netname=Igc_pu1
+}
+C 59700 38500 1 270 0 voltage-3.sym
+{
+T 60400 38300 5 8 0 0 270 0 1
+device=VOLTAGE_SOURCE
+T 60000 38300 5 10 1 1 0 0 1
+refdes=B_pu1
+T 59600 36700 5 10 1 1 0 0 3
+value=V=V(ru_on) > 0 ? 
++    pwl(V(ru_time) $rising_waveform1) :
++    pwl(V(fu_time) $falling_waveform1)
+}
+N 59900 38500 59900 38700 4
+C 67000 35600 1 90 0 vexp-1.sym
+{
+T 65200 36250 5 10 1 1 0 0 1
+refdes=A_comp_pu1
+T 66150 36300 5 10 0 0 90 0 1
+device=vexp
+T 65950 36300 5 10 0 0 90 0 1
+footprint=none
+T 66800 36250 5 10 1 1 0 0 1
+value=comp1
+}
+N 67000 35900 67700 35900 4
+{
+T 67000 35900 5 10 1 1 0 0 1
+netname=Icomp_pu1
+}
+C 66000 39100 1 0 1 voltage-3.sym
+{
+T 65800 39800 5 8 0 0 0 6 1
+device=VOLTAGE_SOURCE
+T 65000 39600 5 10 1 1 0 0 1
+refdes=B_pullup_pu1
+T 66800 39600 5 10 1 1 0 0 1
+value=V=pwl({pullup_reference} - V(fixture_pu1) $pullup0)
+}
+C 65000 39000 1 0 0 gnd-1.sym
+N 66000 39300 66600 39300 4
+{
+T 66000 39300 5 10 1 1 0 0 1
+netname=I4_pu
+}
+C 66000 38300 1 0 1 voltage-3.sym
+{
+T 65800 39000 5 8 0 0 0 6 1
+device=VOLTAGE_SOURCE
+T 65000 38800 5 10 1 1 0 0 1
+refdes=B_power_clamp_pu1
+T 66800 38800 5 10 1 1 0 0 1
+value=V=pwl({power_clamp_reference} - V(fixture_pu1) $power_clamp0)
+}
+C 65000 38200 1 0 0 gnd-1.sym
+N 66600 38500 66000 38500 4
+{
+T 66000 38500 5 10 1 1 0 0 1
+netname=Ipc_pu1
+}
+C 66000 37500 1 0 1 voltage-3.sym
+{
+T 65800 38200 5 8 0 0 0 6 1
+device=VOLTAGE_SOURCE
+T 65000 38000 5 10 1 1 0 0 1
+refdes=B_pulldown_pu1
+T 66800 38000 5 10 1 1 0 0 1
+value=V=pwl(V(fixture_pu1) - {pulldown_reference} $pulldown0)
+}
+C 65000 37400 1 0 0 gnd-1.sym
+C 66000 37100 1 180 0 voltage-3.sym
+{
+T 65800 36400 5 8 0 0 180 0 1
+device=VOLTAGE_SOURCE
+T 65000 37200 5 10 1 1 0 0 1
+refdes=B_gnd_clamp_pu1
+T 66800 37200 5 10 1 1 0 0 1
+value=V=pwl(V(fixture_pu1) - {gnd_clamp_reference} $gnd_clamp0)
+}
+C 65000 36600 1 0 0 gnd-1.sym
+N 65100 35900 65800 35900 4
+{
+T 64900 35900 5 10 1 1 0 0 1
+netname=fixture_pu1
+}
+C 59800 30600 1 0 0 gnd-1.sym
+C 59700 31800 1 270 0 voltage-3.sym
+{
+T 60400 31600 5 8 0 0 270 0 1
+device=VOLTAGE_SOURCE
+T 60000 31600 5 10 1 1 0 0 1
+refdes=B_pd1
+T 59700 30000 5 10 1 1 0 0 3
+value=V=V(rd_on) > 0 ? 
++    pwl(V(rd_time) $rising_waveform1) :
++    pwl(V(fd_time) $falling_waveform1)
+}
+N 59900 31800 59900 32000 4
+N 66600 31000 66000 31000 4
+{
+T 66000 31000 5 10 1 1 0 0 1
+netname=I1_pd
+}
+N 66600 30200 66000 30200 4
+{
+T 66000 30200 5 10 1 1 0 0 1
+netname=Igc_pd1
+}
+C 67000 28900 1 90 0 vexp-1.sym
+{
+T 65200 29550 5 10 1 1 0 0 1
+refdes=A_comp_pd1
+T 66150 29600 5 10 0 0 90 0 1
+device=vexp
+T 65950 29600 5 10 0 0 90 0 1
+footprint=none
+T 66800 29550 5 10 1 1 0 0 1
+value=comp1
+}
+N 67000 29200 67700 29200 4
+{
+T 67000 29200 5 10 1 1 0 0 1
+netname=Icomp_pd1
+}
+C 66000 32400 1 0 1 voltage-3.sym
+{
+T 65800 33100 5 8 0 0 0 6 1
+device=VOLTAGE_SOURCE
+T 65000 32900 5 10 1 1 0 0 1
+refdes=B_pullup_pd1
+T 66800 32900 5 10 1 1 0 0 1
+value=V=pwl({pullup_reference} - V(fixture_pd1) $pullup0)
+}
+C 65000 32300 1 0 0 gnd-1.sym
+N 66000 32600 66600 32600 4
+{
+T 66000 32600 5 10 1 1 0 0 1
 netname=I4_pd
 }
-C 68200 32800 1 270 0 voltage-3.sym
+C 66000 31600 1 0 1 voltage-3.sym
 {
-T 68900 32600 5 8 0 0 270 0 1
+T 65800 32300 5 8 0 0 0 6 1
 device=VOLTAGE_SOURCE
-T 68700 32300 5 10 1 1 0 0 1
-refdes=B_vpc_pd1
-T 68700 32100 5 10 1 1 0 0 1
-value=V={power_clamp_reference} - V(fixture_pd1)
+T 65000 32100 5 10 1 1 0 0 1
+refdes=B_power_clamp_pd1
+T 66800 32100 5 10 1 1 0 0 1
+value=V=pwl({power_clamp_reference} - V(fixture_pd1) $power_clamp0)
 }
-C 68300 31600 1 0 0 gnd-1.sym
-N 68400 32800 69000 32800 4
+C 65000 31500 1 0 0 gnd-1.sym
+N 66600 31800 66000 31800 4
 {
-T 68400 32800 5 10 1 1 0 0 1
-netname=vpc_pd1
-}
-C 70200 32500 1 90 0 vexp-1.sym
-{
-T 69900 33050 5 10 1 1 0 0 1
-refdes=A_power_clamp_pd1
-T 69350 33200 5 10 0 0 90 0 1
-device=vexp
-T 69150 33200 5 10 0 0 90 0 1
-footprint=none
-T 69900 32550 5 10 1 1 0 0 1
-value=power_clamp0
-}
-N 70800 32800 70200 32800 4
-{
-T 70200 32800 5 10 1 1 0 0 1
+T 66000 31800 5 10 1 1 0 0 1
 netname=Ipc_pd1
 }
-C 64800 29900 1 270 0 voltage-3.sym
+C 66000 30800 1 0 1 voltage-3.sym
 {
-T 65500 29700 5 8 0 0 270 0 1
+T 65800 31500 5 8 0 0 0 6 1
 device=VOLTAGE_SOURCE
-T 65300 29400 5 10 1 1 0 0 1
-refdes=B_vpd_pd1
-T 65300 29200 5 10 1 1 0 0 1
-value=V=V(fixture_pd1) - {pulldown_reference}
+T 65000 31300 5 10 1 1 0 0 1
+refdes=B_pulldown_pd1
+T 66800 31300 5 10 1 1 0 0 1
+value=V=pwl(V(fixture_pd1) - {pulldown_reference} $pulldown0)
 }
-C 64900 28700 1 0 0 gnd-1.sym
-N 65000 29900 65600 29900 4
+C 65000 30700 1 0 0 gnd-1.sym
+C 66000 30400 1 180 0 voltage-3.sym
 {
-T 65000 29900 5 10 1 1 0 0 1
-netname=vpd_pd1
-}
-C 66800 29600 1 90 0 vexp-1.sym
-{
-T 66500 30150 5 10 1 1 0 0 1
-refdes=A_pulldown_pd1
-T 65950 30300 5 10 0 0 90 0 1
-device=vexp
-T 65750 30300 5 10 0 0 90 0 1
-footprint=none
-T 66500 29650 5 10 1 1 0 0 1
-value=pulldown0
-}
-C 68200 29900 1 270 0 voltage-3.sym
-{
-T 68900 29700 5 8 0 0 270 0 1
+T 65800 29700 5 8 0 0 180 0 1
 device=VOLTAGE_SOURCE
-T 68700 29400 5 10 1 1 0 0 1
-refdes=B_vgc_pd1
-T 68700 29200 5 10 1 1 0 0 1
-value=V=V(fixture_pd1) - {gnd_clamp_reference}
+T 65000 30500 5 10 1 1 0 0 1
+refdes=B_gnd_clamp_pd1
+T 66800 30500 5 10 1 1 0 0 1
+value=V=pwl(V(fixture_pd1) - {gnd_clamp_reference} $gnd_clamp0)
 }
-C 68300 28700 1 0 0 gnd-1.sym
-N 68400 29900 69000 29900 4
+C 65000 29900 1 0 0 gnd-1.sym
+N 65100 29200 65800 29200 4
 {
-T 68400 29900 5 10 1 1 0 0 1
-netname=vgc_pd1
-}
-C 70200 29600 1 90 0 vexp-1.sym
-{
-T 69900 30150 5 10 1 1 0 0 1
-refdes=A_gnd_clamp_pd1
-T 69350 30300 5 10 0 0 90 0 1
-device=vexp
-T 69150 30300 5 10 0 0 90 0 1
-footprint=none
-T 69900 29650 5 10 1 1 0 0 1
-value=gnd_clamp0
-}
-N 60200 29300 60900 29300 4
-{
-T 60200 29300 5 10 1 1 0 0 1
+T 64900 29200 5 10 1 1 0 0 1
 netname=fixture_pd1
 }

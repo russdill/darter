@@ -14,9 +14,8 @@
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 
-# FIXME: M in IBIS is 1000, but in SPICE we need Meg
-
 import sys
+from string import Template
 
 # table of sections
 supported_sections = set([
@@ -30,6 +29,9 @@ supported_sections = set([
 	'.copyright',
 	'.component',
 	'.component.package',
+	'.component.manufacturer',
+	'.component.pin',
+	'.model_selector',
 	'.model',
 	'.model.add_submodel',
 	'.model.voltage_range',
@@ -58,8 +60,6 @@ supported_sections = set([
 
 ignored_sections = set([
 	'.comment_char',
-	'.component.manufacturer',
-	'.component.pin',
 	'.component.package_model',
 	'.component.package_model.alternate_package_models',
 	'.component.package_model.alternate_package_models.end_alternate_package_models',
@@ -75,7 +75,6 @@ ignored_sections = set([
 	'.component.begin_emi_component.pin_emi',
 	'.component.begin_emi_component.pin_domain_emi',
 	'.component.begin_emi_component.end_emi_component',
-	'.model_selector',
 	'.model.ttgnd',
 	'.model.ttpower',
 	'.model.model_spec',
@@ -155,6 +154,9 @@ unsupported_sections = set([
 sections = frozenset(supported_sections | unsupported_sections | ignored_sections)
 
 def parse_num(val):
+	if isinstance(val, float) or isinstance(val, int):
+		return val
+
 	ext = val.lstrip('+-0123456789.eE')
 	e = 1
 	if len(ext):
@@ -166,7 +168,7 @@ def parse_num(val):
 	return float(val) * e
 
 def param(n, val):
-	print '.param {}={}'.format(n, val)
+	print '.param {}={}'.format(n, parse_num(val))
 
 def range_param(n, row, invert):
 	typ, min, max = row
@@ -174,15 +176,19 @@ def range_param(n, row, invert):
 		min = typ
 	if max == 'NA':
 		max = typ
-	if (parse_num(min) > parse_num(max)) != invert:
+	typ = parse_num(typ)
+	min = parse_num(min)
+	max = parse_num(max)
+	if (min > max) != invert:
 		min, max = max, min
 	print '.param {}={{modv({}, {}, {})}}'.format(n, typ, min, max)
 
 def tbl_models(n, sections):
 	maxval = 0
+	ret = dict()
 	if n in sections:
 		for i, tbl in enumerate(sections[n]):
-
+			data = ''
 			for idx, row in enumerate(tbl.data):
 				if row[2] == 'NA':
 					tbl.data[idx][2] = row[1]
@@ -202,23 +208,28 @@ def tbl_models(n, sections):
 						lv = nv
 						li = ni
 
-			print '.model {}{} pwl(input_domain=0.1 fraction=TRUE'.format(n, i)
+			last = None
+			for line, row in enumerate(tbl.data):
+				var = '{}{}_pwl{}'.format(n, i, line)
+				num = parse_num(row[0])
+				if last != None and num <= last:
+					raise Exception('Non ascending')
+				last = num
+				print '.param {}={{modv({}, {}, {})}}'.format(var,
+						parse_num(row[1]), parse_num(row[2]), parse_num(row[3]))
+				data += '\n+  ,{},{{{}}}'.format(num, var)
+				if num > maxval:
+					maxval = num
 
-			print '+  x_array=['
-			for row in tbl.data:
-				print '+    {}'.format(row[0])
-				if parse_num(row[0]) > maxval:
-					maxval = parse_num(row[0])
-			print '+  ]'
-
-			print '+  y_array=['
-			for row in tbl.data:
-				print '+    {{modv({}, {}, {})}}'.format(row[1], row[2], row[3])
-			print '+  ]'
-			print '+)'
+			ret['{}{}'.format(n, i)] = data
 	else:
-		print '.model {}0 pwl(x_array=[0] y_array=[0])'
+		ret['{}0'.format(n)] = ', 0, 0, 1, 0'
+
 	param('{}_max'.format(n), maxval)
+	return ret
+
+def include(lib, tables):
+	print Template(open(lib, 'rb').read()).substitute(tables)
 
 class section:
 	def __init__(self):
@@ -230,7 +241,7 @@ class section:
 		self.param = dict()
 		self.param_row = dict()
 		self.columns = list()
-		# self.param_vert = dict()
+		self.param_vert = dict()
 		self.parent = None
 		self.unsupported = False
 		
@@ -299,6 +310,12 @@ for line in file:
 			curr_sect.data.append(row)
 			curr_sect.param_row[row[0]] = row[1:]
 
+			vert = dict()
+			for n, item in enumerate(row[1:]):
+				if n < len(curr_sect.columns):
+					vert[curr_sect.columns[n]] = item
+			curr_sect.param_vert[row[0]] = vert
+
 			row = line.split(None, 1)
 			if len(row) > 1:
 				curr_sect.param[row[0]] = row[1]
@@ -316,7 +333,13 @@ for n in [ 'ibis_ver', 'file_name', 'file_rev', 'date',
 		else:
 			print '* {}: {}'.format(main.sections[n][0].name, main.sections[n][0].header)
 
-#for model in main.sections['model_selector'] if 'model_selector' in main.sections else list():
+model_selector = dict()
+
+for model in main.sections['model_selector'] if 'model_selector' in main.sections else list():
+	models = set()
+	for name, desc in model.param.iteritems():
+		models.add(name)
+	model_selector[model.header] = models
 
 for model in main.sections['model'] if 'model' in main.sections else list():
 	Vinl, Vinh = None, None
@@ -380,6 +403,11 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 
 	print '.lib {}'.format(model.header)
 	print '* type - {}'.format(type)
+
+	for sect in model.sections['add_submodel'] if 'add_submodel' in model.sections else list():
+		for key, mode in sect.param.iteritems():
+			print '.lib {} {}'.format(outfile, key)
+
 	if pins == None:
 		pins=''
 	else:
@@ -389,10 +417,6 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		print 'V_en en 0 DC {}'.format(en)
 	print 'V_always_hi always_hi 0 DC 1'
 	print 'B_not_en not_en 0 V=V(en) > 0 ? 0 : 1'
-
-#	print '.subckt dummy d'
-#	print '.ends dummy'
-#	print 'x_dummy 0 dummy'
 
 	print modv_func
 
@@ -449,9 +473,10 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		else:
 			raise Exception('Missing [voltage_range] and [{}]'.format(n))
 
+	tables = dict()
 	for n in [ 'pulldown', 'pullup', 'gnd_clamp', 'power_clamp',
 		   'rising_waveform', 'falling_waveform' ]:
-		tbl_models(n, model.sections)
+		tables.update(tbl_models(n, model.sections))
 
 	for n in [ 'rising_waveform', 'falling_waveform' ]:
 		if n in model.sections:
@@ -476,6 +501,9 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 			break
 			
 
+	for lib in libs:
+		include('{}.inc'.format(lib), tables)
+
 	for sect in model.sections['add_submodel'] if 'add_submodel' in model.sections else list():
 		for key, mode in sect.param.iteritems():
 			if mode == 'Non-Driving':
@@ -487,25 +515,80 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 			else:
 				raise Exception('Unknown submodel mode: {}'.format(mode))
 
-			print '.lib {} {}'.format(outfile, key)
 			print 'x_{} pad vcc vee vdd vss {} {} spec={{spec}}'.format(key, en, key)
-
-	for lib in libs:
-		print '.include {}.inc'.format(lib)
 
 	print '.ends {}'.format(model.header)
 
 	for comp in main.sections['component'] if 'component' in main.sections else list():
 		name = comp.header.replace(' ', '_')
 		print '.subckt {}_{} pad vcc vee {}spec=0'.format(name, model.header, pins)
-		for n, inv in [ [ 'R_pkg', False ], [ 'C_pkg', True ], [ 'L_pkg', True ] ]:
+
+		if 'manufacturer' in comp.sections:
+			print '* Manufacturer: {}'.format(comp.sections['manufacturer'][0].header)
+
+		print modv_func
+		for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
+			n = '{}_pkg'.format(prefix)
 			if 'package' in comp.sections and n in comp.sections['package'][0].param_row:
 				range_param(n, comp.sections['package'][0].param_row[n], inv)
 			else:
 				param(n, '0')
+
 		print '.include ibis_pkg.inc'
 		print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, model.header)
 		print '.ends {}_{}'.format(name, model.header)
+
+		if 'pin' in comp.sections:
+			for pin, vals in comp.sections['pin'][0].param_vert.iteritems():
+				if not 'signal_name' in vals or not 'model_name' in vals:
+					raise Exception('Invalid pin table in {}'.format(comp.header))
+				elif vals['signal_name'] == 'NC' or vals['model_name'] == 'NC':
+					continue
+				elif vals['model_name'] == 'GND' or vals['model_name'] == 'POWER':
+					continue
+				elif vals['model_name'] == model.header:
+					pass
+				elif not vals['model_name'] in model_selector:
+					continue
+				elif not model.header in model_selector[vals['model_name']]:
+					continue
+
+				print '.subckt {}_{}_{} pad vcc vee {}spec=0'.format(name, model.header, pin, pins)
+				print '* {}'.format(vals['signal_name'])
+
+				for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
+					n = '{}_pin'.format(prefix)
+					np = '{}_pkg'.format(prefix)
+					if n in vals and vals[n] != 'NA':
+						param(np, vals[n])
+					elif 'package' in comp.sections and np in comp.sections['package'][0].param_row:
+						range_param(np, comp.sections['package'][0].param_row[np], inv)
+					else:
+						param(n, '0')
+
+				print modv_func
+				print '.include ibis_pkg.inc'
+				print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, model.header)
+				print '.ends {}_{}_{}'.format(name, model.header, pin)
+
+				print '.subckt {}_{}_{} pad vcc vee {}spec=0'.format(name, model.header, vals['signal_name'], pins)
+				print '* pin {}'.format(pin)
+
+				for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
+					n = '{}_pin'.format(prefix)
+					np = '{}_pkg'.format(prefix)
+					if n in vals and vals[n] != 'NA':
+						param(np, vals[n])
+					elif 'package' in comp.sections and np in comp.sections['package'][0].param_row:
+						range_param(np, comp.sections['package'][0].param_row[np], inv)
+					else:
+						param(n, '0')
+
+				print modv_func
+				print '.include ibis_pkg.inc'
+				print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, model.header)
+				print '.ends {}_{}_{}'.format(name, model.header, vals['signal_name'])
+
 
 	print '.endl'
 
@@ -518,23 +601,23 @@ for model in main.sections['submodel'] if 'submodel' in main.sections else list(
 	type = model.param['Submodel_type']
 	print '* type - {}'.format(type)
 
-	tables = [ 'gnd_clamp', 'power_clamp' ]
+	table_names = [ 'gnd_clamp', 'power_clamp' ]
 	if type == 'Dynamic_clamp':
 		lib = 'ibis_dynamic_clamp'
-		tables.append('gnd_pulse_table')
-		tables.append('power_pulse_table')
+		table_names.append('gnd_pulse_table')
+		table_names.append('power_pulse_table')
 #	elif type == 'Bus_hold':
 #		lib = 'ibis_bus_hold'
-#		tables.append('pulldown')
-#		tables.append('pullup')
-#		tables.append('falling_waveform')
-#		tables.append('rising_waveform')
+#		table_names.append('pulldown')
+#		table_names.append('pullup')
+#		table_names.append('falling_waveform')
+#		table_names.append('rising_waveform')
 #	elif type == 'Fall_back':
 #		lib = 'ibis_fall_back'
-#		tables.append('pulldown')
-#		tables.append('pullup')
-#		tables.append('falling_waveform')
-#		tables.append('rising_waveform')
+#		table_names.append('pulldown')
+#		table_names.append('pullup')
+#		table_names.append('falling_waveform')
+#		table_names.append('rising_waveform')
 	else:
 		print '* Unhandled submodel type: {}'.format(type)
 		print '.endl'
@@ -542,9 +625,7 @@ for model in main.sections['submodel'] if 'submodel' in main.sections else list(
 
 	print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
 
-#	print '.subckt dummy d'
-#	print '.ends dummy'
-#	print 'x_dummy 0 dummy'
+	print modv_func
 
 	for n in [ 'V_trigger_r', 'V_trigger_f', 'Off_delay' ]:
 		if n in model.param_row:
@@ -552,10 +633,11 @@ for model in main.sections['submodel'] if 'submodel' in main.sections else list(
 		else:
 			param(n, '0')
 
-	for n in tables:
-		tbl_models(n, model.sections)
+	tables = dict()
+	for n in table_names:
+		tables.update(tbl_models(n, model.sections))
 
-	print '.include {}.inc'.format(lib)
+	include('{}.inc'.format(lib), tables)
 
 	print '.ends {}'.format(model.header)
 	print '.endl'

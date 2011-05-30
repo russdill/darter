@@ -16,7 +16,7 @@ test.net: pi.net
 %.net: %.sch
 	gnetlist -g spice-sdb -o $@ $<
 
-%.lib: %.ibs ibis.py
+%.lib: %.ibs ibis.py *.inc
 	./ibis.py $< $@
 
 %.inc: %.sch
