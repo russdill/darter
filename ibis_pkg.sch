@@ -41,3 +41,9 @@ T 46900 46800 5 10 1 1 0 0 1
 netname=die
 }
 C 49400 45600 1 0 0 gnd-1.sym
+T 46700 47300 8 10 1 0 0 0 1
+use-license=GPL2+
+T 46706 47500 8 10 1 0 0 0 1
+dist-license=GPL2+
+T 46700 47700 8 10 1 0 0 0 1
+author=Russ Dill <Russ.Dill@asu.edu>

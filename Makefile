@@ -1,3 +1,5 @@
+all: $(IBIS_COMPONENTS)
+
 IBIS_COMPONENTS=\
 	ibis_pkg.inc \
 	ibis_input.inc \
@@ -9,18 +11,15 @@ IBIS_COMPONENTS=\
 	ibis_terminator.inc \
 	ibis_dynamic_clamp.inc
 
-all: m62b_bd.lib u69a.lib $(IBIS_COMPONENTS)
- 
-test.net: pi.net
+# Drop off trailing '.end'
+%.inc: %.sch
+	gnetlist -g spice-sdb -o /dev/stderr $< 2>&1 >/dev/null | grep -v '^.end$$' > $@
 
 %.net: %.sch
 	gnetlist -g spice-sdb -o $@ $<
 
-%.lib: %.ibs ibis.py *.inc
-	./ibis.py $< $@
-
-%.inc: %.sch
-	gnetlist -g spice-sdb -o /dev/stderr $< 2>&1 >/dev/null | grep -v '^.end$$' > $@
+%.lib: %.ibs darter.py *.inc
+	./darter.py $< $@
 
 clean:
-	-rm *.lib
+	-rm *.lib $(IBIS_COMPONENTS)

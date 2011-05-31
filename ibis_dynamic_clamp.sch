@@ -71,8 +71,10 @@ T 44200 37500 5 10 1 1 0 0 1
 netname=0
 }
 T 44200 41900 8 10 1 0 0 0 1
-dist-license=GPLv3
+use-license=GPL2+
 T 44206 42100 8 10 1 0 0 0 1
+dist-license=GPL2+
+T 44206 42300 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
 N 44400 39800 45200 39800 4
 {

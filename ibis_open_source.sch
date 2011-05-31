@@ -4,8 +4,10 @@ T 36800 40100 9 10 1 0 0 0 1
 Models for fixture
 L 44900 39800 44900 34000 3 0 0 2 150 150
 T 36800 44000 8 10 1 0 0 0 1
-dist-license=GPLv3
+dist-license=GPL2+
 T 36806 44200 8 10 1 0 0 0 1
+dist-license=GPL2+
+T 36806 44400 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
 T 45000 39700 9 10 1 0 0 0 1
 Fixture 0

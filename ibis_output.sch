@@ -102,8 +102,10 @@ Fixture 1
 T 43700 45800 9 10 1 0 0 0 1
 IBIS Gate Model
 T 36800 45400 8 10 1 0 0 0 1
-dist-license=GPLv3
+use-license=GPL2+
 T 36806 45600 8 10 1 0 0 0 1
+dist-license=GPL2+
+T 36806 45800 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
 C 42800 41500 1 0 0 gnd-1.sym
 N 42700 41800 42900 41800 4

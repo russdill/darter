@@ -277,8 +277,10 @@ netname=fixture0
 T 35200 39900 9 10 1 0 0 0 1
 Models for fixture
 T 35200 43800 8 10 1 0 0 0 1
-dist-license=GPLv3
+use-license=GPL2+
 T 35206 44000 8 10 1 0 0 0 1
+dist-license=GPL2+
+T 35206 44200 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
 T 43400 39500 9 10 1 0 0 0 1
 Fixture 0

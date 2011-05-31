@@ -49,8 +49,10 @@ T 45300 46700 5 10 1 1 0 0 1
 netname=pad
 }
 T 42500 48700 8 10 1 0 0 0 1
-dist-license=GPLv3
+use-license=GPL2+
 T 42506 48900 8 10 1 0 0 0 1
+dist-license=GPL2+
+T 42506 49100 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
 C 44100 44400 1 0 0 gnd-1.sym
 C 43600 44400 1 0 0 gnd-1.sym
