@@ -46,3 +46,22 @@ Current limitations:
   * Output buffers need two rising and falling waveforms each.
   * Open source/sink buffers need one rising and one falling waveform.
   * Ramp data is ignored.
+
+
+IBIS Specification:
+http://www.vhdl.org/ibis/ver5.0/ver5_0.txt
+
+IBIS Cookbook:
+http://www.vhdl.org/ibis/cookbook/cookbook-v4.pdf
+
+Accuracy of IBIS models with reactive loads:
+http://www.vhdl.org/pub/ibis/summits/mar06/muranyi1.pdf
+
+A VHDL-AMS buffer model using IBIS v3.2 data:
+http://www.eda.org/ibis/summits/jun03b/muranyi1.pdf
+
+IBIS Algorithms Revisted:
+http://www.vhdl.org/pub/ibis/summits/jun03a/ross.pdf
+
+Things You Can Learn From V/I Curves:
+http://www.eda.org/pub/ibis/summits/jun05/westerhoff.pdf
