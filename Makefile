@@ -1,5 +1,3 @@
-all: $(IBIS_COMPONENTS)
-
 IBIS_COMPONENTS=\
 	ibis_pkg.inc \
 	ibis_input.inc \
@@ -10,6 +8,8 @@ IBIS_COMPONENTS=\
 	ibis_buffer.inc \
 	ibis_terminator.inc \
 	ibis_dynamic_clamp.inc
+
+all: $(IBIS_COMPONENTS)
 
 # Drop off trailing '.end'
 %.inc: %.sch
@@ -22,4 +22,4 @@ IBIS_COMPONENTS=\
 	./darter.py $< $@
 
 clean:
-	-rm *.lib $(IBIS_COMPONENTS)
+	-rm -f *.lib $(IBIS_COMPONENTS)
