@@ -10,9 +10,9 @@ Darter is very much a work in progress. The basic workflow is:
       - Select the gEDA IBIS symbol associated with the Model_type.
       - Fill in the in the symbol attribute (DQ_FULL_533).
           + Optionally add spec=-1/0/1 for slow, typ, and fast respectively
-          + Optionally prefix model name with package name and '-' for package
+          + Optionally prefix model name with package name and '_' for package
             modelling.
-          + Optionally Suffix model name with '-' and pin name of signal name
+          + Optionally Suffix model name with '_' and pin name of signal name
             for package modelling.
           + eg: MT47H128M16U69A_DQ_FULL_533_DQ14 spec=1 
       - Connect up a stimulus to the IN and EN pins if applicable.
