@@ -358,6 +358,27 @@ for n in [ 'ibis_ver', 'file_name', 'file_rev', 'date',
 		else:
 			print '* {}: {}'.format(main.sections[n][0].name, main.sections[n][0].header)
 
+for model in main.sections['define_package_model'] if 'define_package_model' in main.sections else list():
+	for n in [ 'manufacturer', 'oem', 'description' ]:
+		if n in model.sections:
+			print '* {}: {}'.format(model.sections[n][0].name, model.sections[n][0].header)
+
+
+	'number_of_sections',
+	'pin_numbers',
+
+	'model_data',
+	'resistance_matrix',
+	'resistance_matrix.bandwidth',
+	'resistance_matrix.row',
+	'inductance_matrix',
+	'inductance_matrix.bandwidth',
+	'inductance_matrix.row',
+	'capacitance_matrix',
+	'capacitance_matrix.bandwidth',
+	'capacitance_matrix.row',
+	
+
 # Build a dict of sets that represents the model selector table
 model_selector = dict()
 for model in main.sections['model_selector'] if 'model_selector' in main.sections else list():
