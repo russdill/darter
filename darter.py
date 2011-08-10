@@ -15,6 +15,7 @@
 #  GNU General Public License for more details.
 
 import sys
+import math
 from string import Template
 
 # table of sections
@@ -28,6 +29,7 @@ supported_sections = set([
 	'.disclaimer',
 	'.copyright',
 	'.component',
+	'.component.package_model',
 	'.component.package',
 	'.component.manufacturer',
 	'.component.pin',
@@ -55,12 +57,29 @@ supported_sections = set([
 	'.submodel.gnd_pulse_table',
 	'.submodel.gnd_clamp',
 	'.submodel.power_clamp',
+	'.define_package_model',
+	'.define_package_model.manufacturer',
+	'.define_package_model.oem',
+	'.define_package_model.description',
+	'.define_package_model.number_of_pins',
+	'.define_package_model.pin_numbers',
+	'.define_package_model.model_data',
+	'.define_package_model.model_data.resistance_matrix',
+	'.define_package_model.model_data.resistance_matrix.bandwidth',
+	'.define_package_model.model_data.resistance_matrix.row',
+	'.define_package_model.model_data.inductance_matrix',
+	'.define_package_model.model_data.inductance_matrix.bandwidth',
+	'.define_package_model.model_data.inductance_matrix.row',
+	'.define_package_model.model_data.capacitance_matrix',
+	'.define_package_model.model_data.capacitance_matrix.bandwidth',
+	'.define_package_model.model_data.capacitance_matrix.row',
+	'.define_package_model.model_data.end_model_data',
+	'.define_package_model.end_package_model',
 	'.end'
 ])
 
 ignored_sections = set([
 	'.comment_char',
-	'.component.package_model',
 	'.component.package_model.alternate_package_models',
 	'.component.package_model.alternate_package_models.end_alternate_package_models',
 	'.component.pin_mapping',
@@ -96,25 +115,6 @@ ignored_sections = set([
 	'.model.test_data.diff_rising_waveform_far',
 	'.model.test_data.diff_falling_waveform_far',
 	'.model.test_data.test_load',
-	'.define_package_model',
-	'.define_package_model.manufacturer',
-	'.define_package_model.oem',
-	'.define_package_model.description',
-	'.define_package_model.number_of_sections',
-	'.define_package_model.number_of_pins',
-	'.define_package_model.pin_numbers',
-	'.define_package_model.model_data',
-	'.define_package_model.model_data.resistance_matrix',
-	'.define_package_model.model_data.resistance_matrix.bandwidth',
-	'.define_package_model.model_data.resistance_matrix.row',
-	'.define_package_model.model_data.inductance_matrix',
-	'.define_package_model.model_data.inductance_matrix.bandwidth',
-	'.define_package_model.model_data.inductance_matrix.row',
-	'.define_package_model.model_data.capacitance_matrix',
-	'.define_package_model.model_data.capacitance_matrix.bandwidth',
-	'.define_package_model.model_data.capacitance_matrix.row',
-	'.define_package_model.model_data.end_model_data',
-	'.define_package_model.end_package_model',
 ])
 
 unsupported_sections = set([
@@ -149,6 +149,7 @@ unsupported_sections = set([
 	'.submodel.falling_waveform',
 	'.external_circuit',
 	'.external_circuit.end_external_circuit',
+	'.define_package_model.number_of_sections',
 ])
 
 sections = frozenset(supported_sections | unsupported_sections | ignored_sections)
@@ -167,6 +168,38 @@ def parse_num(val):
 			e = 5
 		e = 10**((e - 5) * 3)
 	return float(val) * e
+
+def parse_matrix(matrix, pin_forward, pin_reverse):
+	rows = dict()
+
+	type = matrix.header.lower()
+	if type == 'banded_matrix' or type == 'full_matrix':
+		for row in matrix.sections['row']:
+			pin = row.header
+			curr_row = dict()
+			idx = pin_reverse[pin]
+			vals = list()
+			for line in row.data:
+				vals += line
+			for val in vals:
+				curr_row[pin_forward[idx]] = parse_num(val)
+				idx += 1
+				if idx == len(pin_forward):
+					idx = 0
+			rows[pin] = curr_row
+
+	elif type == 'sparse_matrix':
+		for row in matrix.sections['row']:
+			pin = row.header
+			curr_row = dict()
+			for sub_pin, val in row.param.iteritems():
+				curr_row[sub_pin] = parse_num(val)
+			rows[pin] = curr_row
+
+	else:
+		raise Exception('Unknown matrix type')
+
+	return rows
 
 # Print out a SPICE param
 def param(n, val):
@@ -358,26 +391,86 @@ for n in [ 'ibis_ver', 'file_name', 'file_rev', 'date',
 		else:
 			print '* {}: {}'.format(main.sections[n][0].name, main.sections[n][0].header)
 
+package_models = dict()
+
 for model in main.sections['define_package_model'] if 'define_package_model' in main.sections else list():
-	for n in [ 'manufacturer', 'oem', 'description' ]:
-		if n in model.sections:
-			print '* {}: {}'.format(model.sections[n][0].name, model.sections[n][0].header)
 
+	if model.unsupported:
+		continue
 
-	'number_of_sections',
-	'pin_numbers',
+	if not 'pin_numbers' in model.sections:
+		# Error: Missing data...
+		continue
 
-	'model_data',
-	'resistance_matrix',
-	'resistance_matrix.bandwidth',
-	'resistance_matrix.row',
-	'inductance_matrix',
-	'inductance_matrix.bandwidth',
-	'inductance_matrix.row',
-	'capacitance_matrix',
-	'capacitance_matrix.bandwidth',
-	'capacitance_matrix.row',
-	
+	if not 'model_data' in model.sections:
+		# Error: Missing data...
+		continue
+
+	pin_forward = list()
+	for line in model.sections['pin_numbers'][0].data:
+		pin_forward += line
+	pin_reverse = dict()
+	for idx, pin in enumerate(pin_forward):
+		pin_reverse[pin] = idx
+
+	data = model.sections['model_data'][0]
+
+	if 'resistance_matrix' in data.sections:
+		r_data = parse_matrix(data.sections['resistance_matrix'][0],
+			pin_forward, pin_reverse)
+	if 'inductance_matrix' in data.sections:
+		l_data = parse_matrix(data.sections['inductance_matrix'][0],
+			pin_forward, pin_reverse)
+	if 'capacitance_matrix' in data.sections:
+		c_data = parse_matrix(data.sections['capacitance_matrix'][0],
+			pin_forward, pin_reverse)
+
+	pm = dict()
+	for pin in pin_forward:
+		tmp = dict()
+		tmp['R'] = r_data[pin][pin]
+		tmp['L'] = l_data[pin][pin]
+		tmp['C'] = c_data[pin][pin]
+		pm[pin] = tmp
+	package_models[model.header] = pm
+
+#	print '.subckt {} {} spec=0'.format(model.header, pin_forward)
+#	for n in [ 'manufacturer', 'oem', 'description' ]:
+#		if n in model.sections:
+#			print '* {}: {}'.format(model.sections[n][0].name, model.sections[n][0].header)
+
+#	for pin, row in r_data.iteritems():
+#		val = 0
+#		if pin in row:
+#			val = row[pin]
+#		print 'R_{} {} {}_r {}'.format(pin, pin, pin, val)
+#		for other, val in row.iteritems():
+#			if other == pin:
+#				continue
+#			print 'R_{}_{} {} {} {}'.format(pin, other, pin, other, -val)
+
+#	for pin, row in l_data.iteritems():
+#		val = 0
+#		if pin in row:
+#			val = row[pin]
+#		print 'L_{} {}_r {}_l {}'.format(pin, pin, pin, val)
+#		for other, coupling in row.iteritems():
+#			if other == pin or val == 0:
+#				continue
+#			other_val = l_data[other][other]
+#			k = coupling / math.sqrt(val * other_val)
+#			print 'K_{}_{} L_{} L_{} {}'.format(pin, other, pin, other, k)
+
+#	for pin, row in c_data.iteritems():
+#		if pin in row:
+#			# FIXME: Which ground?
+#			print 'C_{} {} 0 {}'.format(pin, pin, row[pin])
+#		for other, val in row.iteritems():
+#			if other == pin or val == 0:
+#				continue
+#			print 'C_{}_{} {} {} {}'.format(pin, other, pin, other, -val)
+
+#	print '.ends {}'.format(model.header)
 
 # Build a dict of sets that represents the model selector table
 model_selector = dict()
@@ -579,6 +672,12 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		if 'manufacturer' in comp.sections:
 			print '* Manufacturer: {}'.format(comp.sections['manufacturer'][0].header)
 
+		pm = dict()
+		if 'package_model' in comp.sections:
+			name = comp.sections['package_model'][0].header
+			if name in package_models:
+				pm = package_models[name]
+
 		print modv_func
 		for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
 			n = '{}_pkg'.format(prefix)
@@ -614,6 +713,8 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 					np = '{}_pkg'.format(prefix)
 					if n in vals and vals[n] != 'NA':
 						param(np, vals[n])
+					elif pin in pm:
+						param(np, pm[pin][prefix])
 					elif 'package' in comp.sections and np in comp.sections['package'][0].param_row:
 						range_param(np, comp.sections['package'][0].param_row[np], inv)
 					else:
@@ -632,6 +733,8 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 					np = '{}_pkg'.format(prefix)
 					if n in vals and vals[n] != 'NA':
 						param(np, vals[n])
+					elif pin in pm:
+						param(np, pm[pin][prefix])
 					elif 'package' in comp.sections and np in comp.sections['package'][0].param_row:
 						range_param(np, comp.sections['package'][0].param_row[np], inv)
 					else:
