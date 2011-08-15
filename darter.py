@@ -304,6 +304,7 @@ class section:
 		self.header = ''		# Text after []
 		self.columns = list()		# Text after [] broken into list
 		self.text = list()		# list of all lines, including header
+		self.lines = list()		# list of all lines, excluding header
 		self.data = list()		# list of all lines, not including header broken into words
 		self.param = dict()		# dict of strings '<str> [=] <text....>'
 		self.param_row = dict()		# dict of lists '<str> <item0> <item1> <item2>...'
@@ -377,11 +378,14 @@ for line in file:
 	else:
 		line = line.strip()
 
+		if len(line):
+			curr_sect.lines.append(line)
+
 		if '=' in line:
 			key, _, val = line.partition('=')
 			curr_sect.param[key.strip()] = val.strip()
 
-		if len(line):
+		elif len(line):
 			row = line.split()
 			curr_sect.data.append(row)
 			curr_sect.param_row[row[0]] = row[1:]
@@ -391,10 +395,10 @@ for line in file:
 				if n < len(curr_sect.columns):
 					vert[curr_sect.columns[n]] = item
 			curr_sect.param_vert[row[0]] = vert
-
 			row = line.split(None, 1)
 			if len(row) > 1:
 				curr_sect.param[row[0]] = row[1]
+
 
 	curr_sect.text.append(line.strip())
 
@@ -810,11 +814,14 @@ for board in main.sections['begin_board_description'] if 'begin_board_descriptio
 		nr = 0
 		nl = 0
 		no = 0
-		for line in path.data:
+		next = -1
+		for line in path.lines:
+			line = line.split()
 			if line[0] == 'Fork':
-				net.insert(0, -1)
+				net.insert(0, next)
 				last.append(curr)
 			elif line[0] == 'Endfork':
+				next = net[0]
 				del net[0]
 				curr = last.pop()
 			elif line[0] == 'Node':
