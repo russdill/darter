@@ -17,6 +17,7 @@
 import sys
 import math
 from string import Template
+from string import maketrans
 
 # table of sections
 supported_sections = set([
@@ -288,6 +289,9 @@ def tbl_models(n, sections):
 	param('{}_max'.format(n), maxval)
 	return ret
 
+def ibis_translate(str):
+	return str.translate(maketrans('<>', '__'))
+
 # Convert a SPICE include file, substituting $<var> for vars in 'tables'
 def include(lib, tables):
 	print Template(open(lib, 'rb').read()).substitute(tables)
@@ -523,18 +527,18 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		print '* Unhandled model type: {}'.format(type)
 		continue
 
-	print '.lib {}'.format(model.header)
+	print '.lib {}'.format(ibis_translate(model.header))
 	print '* type - {}'.format(type)
 
 	for sect in model.sections['add_submodel'] if 'add_submodel' in model.sections else list():
 		for key, mode in sect.param.iteritems():
-			print '.lib {} {}'.format(outfile, key)
+			print '.lib {} {}'.format(outfile, ibis_translate(key))
 
 	if pins == None:
 		pins=''
 	else:
 		pins += ' '
-	print '.subckt {} pad vcc vee {}spec=0'.format(model.header, pins)
+	print '.subckt {} pad vcc vee {}spec=0'.format(ibis_translate(model.header), pins)
 	if en != None:
 		print 'V_en en 0 DC {}'.format(en)
 	print 'V_always_hi always_hi 0 DC 1'
@@ -639,14 +643,14 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 			else:
 				raise Exception('Unknown submodel mode: {}'.format(mode))
 
-			print 'x_{} pad vcc vee vdd vss {} {} spec={{spec}}'.format(key, en, key)
+			print 'x_{} pad vcc vee vdd vss {} {} spec={{spec}}'.format(ibis_translate(key), en, ibis_translate(key))
 
-	print '.ends {}'.format(model.header)
+	print '.ends {}'.format(ibis_translate(model.header))
 
 	# Wrap subcircuit in a subcircuit with appropriate per pin component parasitics
 	for comp in main.sections['component'] if 'component' in main.sections else list():
 		name = comp.header.replace(' ', '_')
-		print '.subckt {}_{} pad vcc vee {}spec=0'.format(name, model.header, pins)
+		print '.subckt {}_{} pad vcc vee {}spec=0'.format(ibis_translate(name), ibis_translate(model.header), pins)
 
 		if 'manufacturer' in comp.sections:
 			print '* Manufacturer: {}'.format(comp.sections['manufacturer'][0].header)
@@ -666,8 +670,8 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 				param(n, '0')
 
 		print '.include ibis_pkg.inc'
-		print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, model.header)
-		print '.ends {}_{}'.format(name, model.header)
+		print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
+		print '.ends {}_{}'.format(ibis_translate(name), ibis_translate(model.header))
 
 		if 'pin' in comp.sections:
 			for pin, vals in comp.sections['pin'][0].param_vert.iteritems():
@@ -684,7 +688,8 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 				elif not model.header in model_selector[vals['model_name']]:
 					continue
 
-				print '.subckt {}_{}_{} pad vcc vee {}spec=0'.format(name, model.header, pin, pins)
+				print '.subckt {}_{}_{} pad vcc vee {}spec=0'.format(
+					ibis_translate(name), ibis_translate(model.header), ibis_translate(pin), pins)
 				print '* {}'.format(vals['signal_name'])
 
 				for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
@@ -701,10 +706,12 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 
 				print modv_func
 				print '.include ibis_pkg.inc'
-				print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, model.header)
-				print '.ends {}_{}_{}'.format(name, model.header, pin)
+				print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
+				print '.ends {}_{}_{}'.format(
+					ibis_translate(name), ibis_translate(model.header), ibis_translate(pin))
 
-				print '.subckt {}_{}_{} pad vcc vee {}spec=0'.format(name, model.header, vals['signal_name'], pins)
+				print '.subckt {}_{}_{} pad vcc vee {}spec=0'.format(
+					ibis_translate(name), ibis_translate(model.header), ibis_translate(vals['signal_name']), pins)
 				print '* pin {}'.format(pin)
 
 				for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
@@ -721,8 +728,9 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 
 				print modv_func
 				print '.include ibis_pkg.inc'
-				print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, model.header)
-				print '.ends {}_{}_{}'.format(name, model.header, vals['signal_name'])
+				print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
+				print '.ends {}_{}_{}'.format(
+					ibis_translate(name), ibis_translate(model.header), ibis_translate(vals['signal_name']))
 
 
 	print '.endl'
@@ -730,7 +738,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 # Create submodel subcircuits
 for model in main.sections['submodel'] if 'submodel' in main.sections else list():
 
-	print '.lib {}'.format(model.header)
+	print '.lib {}'.format(ibis_translate(model.header))
 	type = model.param['Submodel_type']
 	print '* type - {}'.format(type)
 
@@ -756,7 +764,7 @@ for model in main.sections['submodel'] if 'submodel' in main.sections else list(
 		print '.endl'
 		continue
 
-	print '.subckt {} pad vcc vee vdd vss en spec=0'.format(model.header)
+	print '.subckt {} pad vcc vee vdd vss en spec=0'.format(ibis_translate(model.header))
 
 	print modv_func
 
@@ -772,12 +780,12 @@ for model in main.sections['submodel'] if 'submodel' in main.sections else list(
 
 	include('{}.inc'.format(lib), tables)
 
-	print '.ends {}'.format(model.header)
+	print '.ends {}'.format(ibis_translate(model.header))
 	print '.endl'
 
 for board in main.sections['begin_board_description'] if 'begin_board_description' in main.sections else list():
 
-	print '.lib {}'.format(board.header)
+	print '.lib {}'.format(ibis_translate(board.header))
 
 	if 'manufacturer' in board.sections:
 		print '* Manufacturer: {}'.format(board.sections['manufacturer'][0].header)
@@ -785,7 +793,7 @@ for board in main.sections['begin_board_description'] if 'begin_board_descriptio
 	pin_mapping = board.sections['pin_list'][0].param
 
 	for path in board.sections['path_description']:
-		if path.data[0][0] != 'Pin':
+		if path.lines[0].split()[0] != 'Pin':
 			raise Exception('First statement in path is not Pin')
 
 		nodes = ''
@@ -816,7 +824,7 @@ for board in main.sections['begin_board_description'] if 'begin_board_descriptio
 				if pin_name:
 					raise Exception('Cannot handle multiple pins in one path')
 				pin_name = line[1]
-				print '.subckt {}_{} net0{}'.format(board.header, pin_name, nodes)
+				print '.subckt {}_{} net0{}'.format(ibis_translate(board.header), ibis_translate(pin_name), nodes)
 				print '* {}'.format(path.header)
 			else:
 				vals = parse_values(line)
@@ -855,9 +863,9 @@ for board in main.sections['begin_board_description'] if 'begin_board_descriptio
 					curr = 'net' + '_'.join([str(v) for v in net])
 					print 'O{} {} 0 {} 0 LTRA{}'.format(no, prev, curr, no)
 					no += 1
-		print '.ends {}_{}'.format(board.header, pin_name)
+		print '.ends {}_{}'.format(ibis_translate(board.header), ibis_translate(pin_name))
 		if pin_name in pin_mapping:
-			print '.subckt {}_{} net0{}'.format(board.header, pin_mapping[pin_name], nodes)
-			print 'X0 net0{} {}_{}'.format(nodes, board.header, pin_name)
-			print '.ends {}_{}'.format(board.header, pin_name)
+			print '.subckt {}_{} net0{}'.format(ibis_translate(board.header), ibis_translate(pin_mapping[pin_name]), nodes)
+			print 'X0 net0{} {}_{}'.format(nodes, ibis_translate(board.header), ibis_translate(pin_name))
+			print '.ends {}_{}'.format(ibis_translate(board.header), ibis_translate(pin_name))
 	print '.endl'
