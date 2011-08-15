@@ -21,5 +21,8 @@ all: $(IBIS_COMPONENTS)
 %.lib: %.ibs darter.py *.inc
 	./darter.py $< $@
 
+%.lib: %.ebd darter.py
+	./darter.py $< $@
+
 clean:
 	-rm -f *.lib $(IBIS_COMPONENTS)
