@@ -485,19 +485,19 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	if type == 'Input': # 4
 		pins = 'in'
 		en = '0'
-		libs.append('ibis_input')
+#		libs.append('ibis_input')
 	elif type == 'I/O': # 8
 		pins = 'vdd vss en out in'
-		libs.append('ibis_input')
+#		libs.append('ibis_input')
 		libs.append('ibis_tristate')
 		Vinl, Vinh = 0.8, 2.0
 	elif type == 'I/O_open_drain' or type == 'I/O_open_sink': # 7
 		pins = 'vdd vss en in'
-		libs.append('ibis_input')
+#		libs.append('ibis_input')
 		libs.append('ibis_open_sink')
 	elif type == 'I/O_open_source': # 7
 		pins = 'vdd vss en in'
-		libs.append('ibis_input')
+#		libs.append('ibis_input')
 		libs.append('ibis_open_source')
 #	elif type == 'Input_ECL':
 #	elif type == 'I/O_ECL':
