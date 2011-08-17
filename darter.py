@@ -485,19 +485,19 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	if type == 'Input': # 4
 		pins = 'in'
 		en = '0'
-#		libs.append('ibis_input')
+		libs.append('ibis_input')
 	elif type == 'I/O': # 8
 		pins = 'vdd vss en out in'
-#		libs.append('ibis_input')
+		libs.append('ibis_input')
 		libs.append('ibis_tristate')
 		Vinl, Vinh = 0.8, 2.0
 	elif type == 'I/O_open_drain' or type == 'I/O_open_sink': # 7
 		pins = 'vdd vss en in'
-#		libs.append('ibis_input')
+		libs.append('ibis_input')
 		libs.append('ibis_open_sink')
 	elif type == 'I/O_open_source': # 7
 		pins = 'vdd vss en in'
-#		libs.append('ibis_input')
+		libs.append('ibis_input')
 		libs.append('ibis_open_source')
 #	elif type == 'Input_ECL':
 #	elif type == 'I/O_ECL':
@@ -545,8 +545,10 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	print '.subckt {} pad vcc vee {}spec=0'.format(ibis_translate(model.header), pins)
 	if en != None:
 		print 'V_en en 0 DC {}'.format(en)
-	print 'V_always_hi always_hi 0 DC 1'
-	print 'B_not_en not_en 0 V=V(en) > 0 ? 0 : 1'
+	print '.MODEL buff d_buffer(rise_delay=1f fall_delay=1f input_load=0)'
+	print 'A_not_en ~en not_en buff'
+	print '.MODEL pullup d_pullup(load=0)'
+	print 'A_always_hi always_hi pullup'
 	print modv_func
 
 	if 'Vinl' in model.param:

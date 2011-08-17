@@ -1,88 +1,33 @@
 v 20110115 2
-B 35200 33700 21900 6100 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
-L 43300 39600 43300 33800 3 0 0 2 150 150
-C 40800 40500 1 0 0 gnd-1.sym
-N 40700 40800 40900 40800 4
+B 43300 33700 13800 6100 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
+C 49600 42600 1 0 0 gnd-1.sym
+N 49500 42900 49700 42900 4
 {
-T 40700 40800 5 10 1 1 0 0 1
+T 49500 42900 5 10 1 1 0 0 1
 netname=0
-}
-C 35200 42800 1 0 0 spice-directive-1.sym
-{
-T 35300 43100 5 10 0 1 0 0 1
-device=directive
-T 35300 43200 5 10 1 1 0 0 1
-refdes=Atime
-T 35200 42900 5 10 1 1 0 0 1
-value=.MODEL time slew(rise_slope=1 fall_slope=10)
-}
-C 35200 42100 1 0 0 spice-directive-1.sym
-{
-T 35300 42400 5 10 0 1 0 0 1
-device=directive
-T 35300 42500 5 10 1 1 0 0 1
-refdes=Apc
-T 35200 41800 5 10 1 1 0 0 3
-value=.PARAM c_comp_tot={C_comp +
-+     C_comp_pullup + C_comp_pulldown +
-+     C_comp_power_clamp + C_comp_gnd_clamp}
-}
-C 35200 41000 1 0 0 spice-directive-1.sym
-{
-T 35300 41300 5 10 0 1 0 0 1
-device=directive
-T 35300 41400 5 10 1 1 0 0 1
-refdes=Amc0
-T 35200 40800 5 10 1 1 0 0 2
-value=.MODEL comp0 d_dt(gain={C_comp_tot+C_fixture0}
-+    out_lower_limit=-1e12 out_upper_limit=1e12)
-}
-C 36500 37500 1 0 0 gnd-1.sym
-C 36300 35000 1 0 0 vdc-1.sym
-{
-T 35800 35950 5 10 1 1 0 0 1
-refdes=B_fu_on
-T 37000 35850 5 10 0 0 0 0 1
-device=VOLTAGE_SOURCE
-T 37000 36050 5 10 0 0 0 0 1
-footprint=none
-T 35700 34500 5 10 1 1 0 0 1
-value=V=V(out) > 0 ? 0 : {falling_waveform_max}
 }
 N 44600 37500 45300 37500 4
 {
 T 44600 37500 5 10 1 1 0 0 1
 netname=fixture0
 }
-C 36500 34700 1 0 0 gnd-1.sym
-C 36300 37800 1 0 0 vdc-1.sym
+N 55400 42500 56600 42500 4
 {
-T 35800 38750 5 10 1 1 0 0 1
-refdes=B_ru_on
-T 37000 38650 5 10 0 0 0 0 1
-device=VOLTAGE_SOURCE
-T 37000 38850 5 10 0 0 0 0 1
-footprint=none
-T 35800 37250 5 10 1 1 0 0 1
-value=V=V(out) > 0 ? {rising_waveform_max} : 0
-}
-N 52400 42300 53600 42300 4
-{
-T 53200 42400 5 10 1 1 0 0 1
+T 56200 42600 5 10 1 1 0 0 1
 netname=pad
 }
-C 52200 42100 1 270 0 current-1.sym
+C 55200 42300 1 270 0 current-1.sym
 {
-T 53200 41500 5 10 0 0 270 0 1
+T 56200 41700 5 10 0 0 270 0 1
 device=CURRENT_SOURCE
-T 52500 41900 5 10 1 1 0 0 1
+T 55500 42100 5 10 1 1 0 0 1
 refdes=B_pd
-T 52500 41300 5 10 1 1 0 0 1
+T 55500 41500 5 10 1 1 0 0 1
 value=I=V(Ipd)*V(Kpd)
 }
-C 52600 41000 1 180 0 vss-1.sym
-N 52400 42300 52400 42100 4
-N 52400 41000 52400 41200 4
+C 55600 41200 1 180 0 vss-1.sym
+N 55400 42500 55400 42300 4
+N 55400 41200 55400 41400 4
 C 46400 37400 1 0 0 resistor-1.sym
 {
 T 46700 37800 5 10 0 0 0 0 1
@@ -109,20 +54,20 @@ netname=f0b
 N 47500 37500 47500 37300 4
 C 47400 36100 1 0 0 gnd-1.sym
 C 44500 36100 1 0 0 gnd-1.sym
-B 43300 40000 11100 4300 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
-C 45500 41300 1 270 0 voltage-3.sym
+B 46600 40200 10500 4300 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
+C 48500 41500 1 270 0 voltage-3.sym
 {
-T 46200 41100 5 8 0 0 270 0 1
+T 49200 41300 5 8 0 0 270 0 1
 device=VOLTAGE_SOURCE
-T 45100 41100 5 10 1 1 0 0 1
+T 48100 41300 5 10 1 1 0 0 1
 refdes=B_Kpd
-T 43700 41500 5 10 1 1 0 0 1
+T 46700 41700 5 10 1 1 0 0 1
 value=V=(I(Vfx0) - V(Icomp0) + V(Ipc0) + V(Igc0)) / V(I2)
 }
-C 45600 40100 1 0 0 gnd-1.sym
-N 45700 41300 46100 41300 4
+C 48600 40300 1 0 0 gnd-1.sym
+N 48700 41500 49100 41500 4
 {
-T 45700 41300 5 10 1 1 0 0 1
+T 48700 41500 5 10 1 1 0 0 1
 netname=Kpd
 }
 C 46200 37700 1 180 0 current-1.sym
@@ -140,61 +85,19 @@ N 46200 37500 46400 37500 4
 T 46200 37500 5 10 1 1 0 0 1
 netname=f0a
 }
-C 38600 38700 1 90 0 vexp-1.sym
+C 51400 41500 1 270 0 voltage-3.sym
 {
-T 38300 39250 5 10 1 1 0 0 1
-refdes=A_ru_time
-T 37750 39400 5 10 0 0 90 0 1
-device=vexp
-T 37550 39400 5 10 0 0 90 0 1
-footprint=none
-T 38300 38750 5 10 1 1 0 0 1
-value=time
-}
-N 38600 39000 40300 39000 4
-{
-T 39000 39000 5 10 1 1 0 0 1
-netname=ru_time
-}
-C 38700 35900 1 90 0 vexp-1.sym
-{
-T 38400 36450 5 10 1 1 0 0 1
-refdes=A_fu_time
-T 37850 36600 5 10 0 0 90 0 1
-device=vexp
-T 37650 36600 5 10 0 0 90 0 1
-footprint=none
-T 38400 35850 5 10 1 1 0 0 1
-value=time
-}
-N 40300 36200 38700 36200 4
-{
-T 39000 36200 5 10 1 1 0 0 1
-netname=fu_time
-}
-N 36600 39000 37400 39000 4
-{
-T 36600 39000 5 10 1 1 0 0 1
-netname=ru_on
-}
-N 36600 36200 37500 36200 4
-{
-T 36600 36200 5 10 1 1 0 0 1
-netname=fu_on
-}
-C 48400 41300 1 270 0 voltage-3.sym
-{
-T 49100 41100 5 8 0 0 270 0 1
+T 52100 41300 5 8 0 0 270 0 1
 device=VOLTAGE_SOURCE
-T 48900 40800 5 10 1 1 0 0 1
+T 51900 41000 5 10 1 1 0 0 1
 refdes=B_pulldown
-T 48900 40600 5 10 1 1 0 0 1
+T 51900 40800 5 10 1 1 0 0 1
 value=V=pwl(V(pad, Vss) $pulldown0)
 }
-C 48500 40100 1 0 0 gnd-1.sym
-N 48600 41300 49200 41300 4
+C 51500 40300 1 0 0 gnd-1.sym
+N 51600 41500 52200 41500 4
 {
-T 48800 41300 5 10 1 1 0 0 1
+T 51800 41500 5 10 1 1 0 0 1
 netname=Ipd
 }
 N 51300 36500 50700 36500 4
@@ -214,7 +117,7 @@ device=VOLTAGE_SOURCE
 T 44700 37100 5 10 1 1 0 0 1
 refdes=B0
 T 44300 35500 5 10 1 1 0 0 3
-value=V=V(ru_on) > 0 ? 
+value=V=V(on) > 0 ? 
 +    pwl(V(ru_time) $rising_waveform0) :
 +    pwl(V(fu_time) $falling_waveform0)
 }
@@ -274,15 +177,107 @@ N 49800 34700 50500 34700 4
 T 49600 34700 5 10 1 1 0 0 1
 netname=fixture0
 }
-T 35200 39900 9 10 1 0 0 0 1
+T 43300 39900 9 10 1 0 0 0 1
 Models for fixture
-T 35200 43800 8 10 1 0 0 0 1
-use-license=GPL2+
-T 35206 44000 8 10 1 0 0 0 1
-dist-license=GPL2+
-T 35206 44200 8 10 1 0 0 0 1
-author=Russ Dill <Russ.Dill@asu.edu>
 T 43400 39500 9 10 1 0 0 0 1
 Fixture 0
-T 43300 44400 9 10 1 0 0 0 1
+T 46300 44600 9 10 1 0 0 0 1
 IBIS Gate Model
+C 37900 43200 1 0 0 spice-directive-1.sym
+{
+T 38000 43500 5 10 0 1 0 0 1
+device=directive
+T 37900 43400 5 10 1 1 180 6 11
+value=.MODEL dac dac_bridge(t_rise=0 t_fall=0)
+.PARAM rising_waveform_max10={rising_waveform_max / 10}
+.MODEL rtime dac_bridge(
++	out_high={rising_waveform_max}
++	t_rise={rising_waveform_max}
++	t_fall={rising_waveform_max10})
+.PARAM falling_waveform_max10={falling_waveform_max / 10}
+.MODEL ftime dac_bridge(
++	out_high={falling_waveform_max}
++	t_rise={falling_waveform_max}
++	t_fall={falling_waveform_max10})
+T 38000 43600 5 10 1 1 0 0 1
+refdes=_dac
+}
+C 37900 40500 1 0 0 spice-directive-1.sym
+{
+T 38000 40800 5 10 0 1 0 0 1
+device=directive
+T 37900 40700 5 10 1 1 180 6 5
+value=.PARAM c_comp_tot={C_comp +
++     C_comp_pullup + C_comp_pulldown +
++     C_comp_power_clamp + C_comp_gnd_clamp}
+.MODEL comp0 d_dt(gain={C_comp_tot+C_fixture0}
++    out_lower_limit=-1e12 out_upper_limit=1e12)
+T 38000 40900 5 10 1 1 0 0 1
+refdes=_comp
+}
+C 44300 43200 1 180 1 current-1.sym
+{
+T 44900 42200 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 44100 43200 5 10 1 1 0 0 1
+refdes=A_rtime
+T 44100 42700 5 10 1 1 0 0 1
+value=rtime
+}
+N 43800 43000 44300 43000 4
+{
+T 43800 43000 5 10 1 1 0 0 1
+netname=[out]
+}
+N 45200 43000 45700 43000 4
+{
+T 45100 43000 5 10 1 1 0 0 1
+netname=[ru_time]
+}
+C 44300 42400 1 180 1 current-1.sym
+{
+T 44900 41400 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 44100 42400 5 10 1 1 0 0 1
+refdes=A_dtime
+T 44100 41900 5 10 1 1 0 0 1
+value=ftime
+}
+N 43800 42200 44300 42200 4
+{
+T 43700 42200 5 10 1 1 0 0 1
+netname=[~out]
+}
+N 45200 42200 45700 42200 4
+{
+T 45100 42200 5 10 1 1 0 0 1
+netname=[fu_time]
+}
+C 44300 41600 1 180 1 current-1.sym
+{
+T 44900 40600 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 44100 41600 5 10 1 1 0 0 1
+refdes=A_sel
+T 44100 41100 5 10 1 1 0 0 1
+value=dac
+}
+N 43800 41400 44300 41400 4
+{
+T 43700 41400 5 10 1 1 0 0 1
+netname=[out]
+}
+N 45200 41400 45700 41400 4
+{
+T 45100 41400 5 10 1 1 0 0 1
+netname=[up]
+}
+B 43300 40200 2900 4300 3 0 0 2 200 200 0 -1 -1 -1 -1 -1
+T 37900 43900 8 10 1 0 0 0 1
+dist-license=GPL2+
+T 37906 44100 8 10 1 0 0 0 1
+dist-license=GPL2+
+T 37906 44300 8 10 1 0 0 0 1
+author=Russ Dill <Russ.Dill@asu.edu>
+T 43300 44600 9 10 1 0 0 0 1
+Control Logic

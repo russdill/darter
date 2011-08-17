@@ -15,13 +15,13 @@ N 46400 39800 47500 39800 4
 T 46900 39800 5 10 1 1 0 0 1
 netname=pp_time
 }
-C 44200 40900 1 0 0 spice-directive-1.sym
+C 44200 41200 1 0 0 spice-directive-1.sym
 {
-T 44300 41200 5 10 0 1 0 0 1
+T 44300 41500 5 10 0 1 0 0 1
 device=directive
-T 44300 41300 5 10 1 1 0 0 1
+T 44300 41600 5 10 1 1 0 0 1
 refdes=Atime
-T 44200 41000 5 10 1 1 0 0 1
+T 44200 41300 5 10 1 1 0 0 1
 value=.MODEL time slew(rise_slope=1 fall_slope=10)
 }
 C 44300 38300 1 0 0 gnd-1.sym
@@ -93,7 +93,7 @@ device=CURRENT_SOURCE
 T 55000 38800 5 10 1 1 0 0 1
 refdes=B_pc
 T 55000 38200 5 10 1 1 0 0 1
-value=I=V(en) > 0 ? pwl(V(power_pulse, pad) $power_clamp0) : 0
+value=I=V(on) > 0 ? pwl(V(power_pulse, pad) $power_clamp0) : 0
 }
 C 54700 37700 1 270 0 current-1.sym
 {
@@ -102,7 +102,7 @@ device=CURRENT_SOURCE
 T 55000 37500 5 10 1 1 0 0 1
 refdes=B_gc
 T 55000 36900 5 10 1 1 0 0 1
-value=I=V(en) > 0 ? pwl(V(pad, ground_pulse) $gnd_clamp0) : 0
+value=I=V(on) > 0 ? pwl(V(pad, ground_pulse) $gnd_clamp0) : 0
 }
 N 54900 38100 54900 37700 4
 N 54900 39000 54900 39200 4
@@ -144,3 +144,31 @@ value=V=pwl(V(gp_time) $gnd_pulse_table0)
 }
 C 49000 37900 1 0 0 vcc-1.sym
 C 49400 37100 1 180 0 vee-1.sym
+C 49000 41600 1 180 1 current-1.sym
+{
+T 49600 40600 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 48800 41600 5 10 1 1 0 0 1
+refdes=A_sel
+T 48800 41100 5 10 1 1 0 0 1
+value=dac
+}
+N 48400 41400 49000 41400 4
+{
+T 48400 41400 5 10 1 1 0 0 1
+netname=[en]
+}
+N 49900 41400 50200 41400 4
+{
+T 49800 41400 5 10 1 1 0 0 1
+netname=[on]
+}
+C 44200 40600 1 0 0 spice-directive-1.sym
+{
+T 44300 40900 5 10 0 1 0 0 1
+device=directive
+T 44200 40800 5 10 1 1 180 6 1
+value=.MODEL dac dac_bridge(t_rise=0 t_fall=0)
+T 44300 41000 5 10 1 1 0 0 1
+refdes=_dac
+}
