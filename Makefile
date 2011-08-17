@@ -24,5 +24,8 @@ all: $(IBIS_COMPONENTS)
 %.lib: %.ebd darter.py
 	./darter.py $< $@
 
+%.dat: %.dat.in gen_dat.py
+	./gen_dat.py $< $@
+
 clean:
 	-rm -f *.lib $(IBIS_COMPONENTS)
