@@ -154,10 +154,10 @@ class spice_read():
     ngspice-rework-17 file ./src/frontend/rawfile.c
     """
 
-    def __init__(self, filename):
+    def __init__(self, file):
         self.plots = []
         self.set_default_values()
-        error = self.readfile(filename)
+        error = self.readfile(file)
         if error:
             ## FIXME create an assertion
             print "error in reading the file"
@@ -172,8 +172,7 @@ class spice_read():
         self.real = True
         self.vectors = []
 
-    def readfile(self,filename):
-        f = open(filename, "rb")
+    def readfile(self,f):
         while (1):
             line = f.readline()
             if line == "":   ## EOF
@@ -304,7 +303,7 @@ if __name__ == "__main__":
     ## plot out some informations about the spice files given by commandline
     for f in sys.argv[1:]:
         print 'The file: "' + f + '" contains the following plots:' 
-        for i,p in enumerate(spice_read(f).get_plots()):
+        for i,p in enumerate(spice_read(open(f, "rb")).get_plots()):
             print '  Plot', i, 'with the attributes'
             print '    Title: ' , p.title
             print '    Date: ', p.date
