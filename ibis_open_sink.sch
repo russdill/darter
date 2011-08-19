@@ -62,7 +62,7 @@ device=VOLTAGE_SOURCE
 T 48100 41300 5 10 1 1 0 0 1
 refdes=B_Kpd
 T 46700 41700 5 10 1 1 0 0 1
-value=V=(I(Vfx0) - V(Icomp0) + V(Ipc0) + V(Igc0)) / V(I2)
+value=V=(I(Vfx0) - V(Icomp0) - V(Ipc0) - V(Igc0)) / V(I2)
 }
 C 48600 40300 1 0 0 gnd-1.sym
 N 48700 41500 49100 41500 4

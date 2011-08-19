@@ -70,7 +70,7 @@ device=VOLTAGE_SOURCE
 T 49700 43500 5 10 1 1 0 0 1
 refdes=B_Kpu
 T 48400 43900 5 10 1 1 0 0 1
-value=V=(I(Vfx0) - V(Icomp0) + V(Ipc0) + V(Igc0)) / V(I3)
+value=V=(I(Vfx0) - V(Icomp0) - V(Ipc0) - V(Igc0)) / V(I3)
 }
 C 50200 42500 1 0 0 gnd-1.sym
 N 50300 43700 50700 43700 4

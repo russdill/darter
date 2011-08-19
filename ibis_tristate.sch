@@ -65,8 +65,8 @@ device=VOLTAGE_SOURCE
 T 63500 42500 5 10 1 1 0 0 1
 refdes=B_Kpd
 T 61200 42900 5 10 1 1 0 0 3
-value=V=((I(Vfx_pd0) - V(Icomp_pd0) + V(Ipc_pd0) + V(Igc_pd0)) * -V(I4_pd) +
-+      (I(Vfx_pd1) - V(Icomp_pd1) + V(Ipc_pd1) + V(Igc_pd1)) * V(I3_pd)) /
+value=V=((I(Vfx_pd0) - V(Icomp_pd0) - V(Ipc_pd0) - V(Igc_pd0)) * -V(I4_pd) +
++      (I(Vfx_pd1) - V(Icomp_pd1) - V(Ipc_pd1) - V(Igc_pd1)) * V(I3_pd)) /
 +   (V(I1_pd) * V(I3_pd) - V(I2_pd) * V(I4_pd))
 }
 C 63900 44800 1 270 0 voltage-3.sym
@@ -76,8 +76,8 @@ device=VOLTAGE_SOURCE
 T 63500 44600 5 10 1 1 0 0 1
 refdes=B_Kpu
 T 61200 45000 5 10 1 1 0 0 3
-value=V=((I(Vfx_pu0) - V(Icomp_pu0) + V(Ipc_pu0) + V(Igc_pu0)) * V(I1_pu) +
-+    (I(Vfx_pu1) - V(Icomp_pu1) + V(Ipc_pu1) + V(Igc_pu1)) * -V(I2_pu)) /
+value=V=((I(Vfx_pu0) - V(Icomp_pu0) - V(Ipc_pu0) - V(Igc_pu0)) * V(I1_pu) +
++    (I(Vfx_pu1) - V(Icomp_pu1) - V(Ipc_pu1) - V(Igc_pu1)) * -V(I2_pu)) /
 +    (V(I1_pu) * V(I3_pu) - V(I2_pu) * V(I4_pu))
 }
 C 64000 43600 1 0 0 gnd-1.sym
