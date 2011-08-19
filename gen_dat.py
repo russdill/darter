@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  gen_dat.py
+#  gen_dat.py - Generate d_source tabular data from simplified input
 #
 #  Copyright (C) 2011 Russ Dill <Russ.Dill@asu.edu>
 #
@@ -13,6 +13,33 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
+#
+#
+# The ngspice d_source reads data from a file with a repeatative format:
+#
+# <time> <node0> <node1> <node2> ....
+#
+# At each time unit, the value of each node must be listed. gen_dat.py
+# allows each line to only contain nodes that have changed:
+#
+# <abs time|+offset> [<nodename>=<val>]* [~<nodenome>]*
+#
+# The first line must contain all nodenames and their initial values.
+#
+# 0	ab=0 bc=1 ee=0 tc=0
+# +5n	ab=1
+# +10n	~bc
+# 20n	tc=1
+#
+# Would output:
+#
+# * t		ab	bc	ee	tc
+# 0.0		0s	1s	0s	0s
+# 5e-09		1s	1s	0s	0s
+# 1.5e-08	1s	0s	0s	0s
+# 2e-08		1s	0s	0s	1s
+#
+# Note that the nodenames do not actually make it into the output.
 
 import sys
 import math
@@ -74,17 +101,17 @@ for line in sys.stdin:
 		if first and var not in order:
 			order.append(var)
 	if first:
-		out = '* t\t'
+		out = '{:12}'.format('* t')
 		for var in order:
-			out += '\t{}'.format(var)
+			out += ' {{:{}}}'.format(len(var)).format(var)
 		print out
 		first = False
 	if time[0] == '+':
 		now += parse_num(time[1:])
 	else:
 		now = parse_num(time)
-	out = '{}\t'.format(now)
+	out = '{:<12}'.format(now)
 	for var in order:
-		out += '\t{}'.format(vars[var])
+		out += ' {{:{}}}'.format(len(var)).format(vars[var])
 	print out
 
