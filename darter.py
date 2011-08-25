@@ -486,7 +486,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 
 	if type == 'Input': # 4
 		pins = 'in'
-		en = '0'
+		en = 'pulldown'
 		libs.append('ibis_input')
 	elif type == 'I/O': # 8
 		pins = 'vdd vss en out in'
@@ -505,10 +505,10 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 #	elif type == 'I/O_ECL':
 	elif type == 'Terminator': # 3
 		libs.append('ibis_terminator')
-		en = '0'
+		en = 'pulldown'
 	elif type == 'Output': # 6
 		pins = 'vdd vss out'
-		en = '1'
+		en = 'pullup'
 		libs.append('ibis_output')
 	elif type == '3-state': # 7
 		pins = 'vdd vss en out'
@@ -545,11 +545,12 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	else:
 		pins += ' '
 	print '.subckt {} pad vcc vee {}spec=0'.format(ibis_translate(model.header), pins)
+	print '.model pullup d_pullup(load=0)'
+	print '.model pulldown d_pulldown(load=0)'
+	print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'
 	if en != None:
-		print 'V_en en 0 DC {}'.format(en)
-	print '.MODEL buff d_buffer(rise_delay=1f fall_delay=1f input_load=0)'
-	print 'A_not_en ~en not_en buff'
-	print '.MODEL pullup d_pullup(load=0)'
+		print 'A_en en {}'.format(en)
+	print 'A_not_en en not_en inv'
 	print 'A_always_hi always_hi pullup'
 	print modv_func
 
