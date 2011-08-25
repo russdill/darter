@@ -251,12 +251,12 @@ device=directive
 T 39500 43400 5 10 1 1 180 6 11
 value=.MODEL dac dac_bridge(t_rise=0 t_fall=0)
 .PARAM rising_waveform_max10={rising_waveform_max / 10}
-.MODEL rtime dac_bridge(
+.MODEL rtime dac_bridge(out_low=0
 +	out_high={rising_waveform_max}
 +	t_rise={rising_waveform_max}
 +	t_fall={rising_waveform_max10})
 .PARAM falling_waveform_max10={falling_waveform_max / 10}
-.MODEL ftime dac_bridge(
+.MODEL ftime dac_bridge(out_low=0
 +	out_high={falling_waveform_max}
 +	t_rise={falling_waveform_max}
 +	t_fall={falling_waveform_max10})
