@@ -552,6 +552,10 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		print 'A_en en {}'.format(en)
 	print 'A_not_en en not_en inv'
 	print 'A_always_hi always_hi pullup'
+	if not 'vdd' in pins:
+		print 'Rvdd vcc vdd 0'
+	if not 'vss' in pins:
+		print 'Rvss vss vee 0'
 	print modv_func
 
 	if 'Vinl' in model.param:
