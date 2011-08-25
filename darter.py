@@ -290,7 +290,9 @@ def tbl_models(n, sections):
 	return ret
 
 def ibis_translate(str):
-	return str.translate(maketrans('<>', '__'))
+	str = str.translate(maketrans('<>', '__'))
+	str = str.translate(maketrans('#', 'c'))
+	return str
 
 # Convert a SPICE include file, substituting $<var> for vars in 'tables'
 def include(lib, tables):
