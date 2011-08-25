@@ -27,5 +27,8 @@ all: $(IBIS_COMPONENTS)
 %.dat: %.dat.in gen_dat.py
 	./gen_dat.py $< $@
 
+%.in: %.in.in gen_stream.py
+	./gen_stream.py -t $< -o $@
+
 clean:
 	-rm -f *.lib $(IBIS_COMPONENTS)
