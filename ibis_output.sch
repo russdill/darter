@@ -86,8 +86,8 @@ device=VOLTAGE_SOURCE
 T 63500 42500 5 10 1 1 0 0 1
 refdes=B_Kpd
 T 62100 42900 5 10 1 1 0 0 3
-value=V=((I(Vfx0) - V(Icomp0) - V(Ipc0) - V(Igc0)) * V(I4) +
-+      (I(Vfx1) - V(Icomp1) - V(Ipc0) - V(Igc0)) * -V(I3)) /
+value=V=((I(Vfx0) - V(Icomp0) - V(Ipc0) - V(Igc0)) * -V(I4) +
++      (I(Vfx1) - V(Icomp1) - V(Ipc0) - V(Igc0)) * V(I3)) /
 +   (V(I1) * V(I3) - V(I2) * V(I4))
 }
 C 63900 44800 1 270 0 voltage-3.sym
@@ -99,7 +99,7 @@ refdes=B_Kpu
 T 62200 45000 5 10 1 1 0 0 3
 value=V=((I(Vfx0) - V(Icomp0) - V(Ipc0) - V(Igc0)) * V(I1) + 
 +      (I(Vfx1) - V(Icomp1) - V(Ipc1) - V(Igc1)) * -V(I2)) /
-+    ( V(I1) * V(I3) - V(I2) * V(I4))
++     (V(I1) * V(I3) - V(I2) * V(I4))
 }
 C 64000 43600 1 0 0 gnd-1.sym
 C 64000 41500 1 0 0 gnd-1.sym
