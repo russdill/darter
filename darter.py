@@ -18,6 +18,8 @@ import sys
 import math
 from string import Template
 from string import maketrans
+from scipy.interpolate import interp1d
+from scipy.misc import derivative
 
 # table of sections
 supported_sections = set([
@@ -36,6 +38,7 @@ supported_sections = set([
 	'.component.pin',
 	'.model_selector',
 	'.model',
+	'.model.model_spec',
 	'.model.add_submodel',
 	'.model.voltage_range',
 	'.model.pullup_reference',
@@ -103,7 +106,6 @@ ignored_sections = set([
 	'.component.begin_emi_component.end_emi_component',
 	'.model.ttgnd',
 	'.model.ttpower',
-	'.model.model_spec',
 	'.model.receiver_thresholds',
 	'.model.temperature_range',
 	'.model.external_reference',
@@ -186,7 +188,7 @@ def parse_matrix(matrix, pin_forward, pin_reverse):
 			pin = row.header
 			curr_row = dict()
 			idx = pin_reverse[pin]
-			vals = list()
+			vals = []
 			for line in row.data:
 				vals += line
 			for val in vals:
@@ -211,7 +213,7 @@ def parse_matrix(matrix, pin_forward, pin_reverse):
 
 def parse_values(line):
 	line = [v for v in line if v != '=']
-	args = list()
+	args = []
 	for item in line:
 		for a in item.split('='):
 			if a:
@@ -222,31 +224,32 @@ def parse_values(line):
 def param(n, val):
 	print '.param {}={}'.format(n, parse_num(val))
 
+def range_list(row, invert):
+	typ, rmin, rmax = row
+	if rmin == 'NA':
+		rmin = typ
+	if rmax == 'NA':
+		rmax = typ
+	typ = parse_num(typ)
+	rmin = parse_num(rmin)
+	rmax = parse_num(rmax)
+	if (rmin > rmax) != invert:
+		rmin, rmax = rmax, rmin
+	return typ, rmin, rmax
+
 # Print out a SPICE param that can vary between typ, min, and max based on spec
 # The function ensures that min is less then max if invert is false,
 # and max is less then min otherwise.
 def range_param(n, row, invert):
-	typ, min, max = row
-	if min == 'NA':
-		min = typ
-	if max == 'NA':
-		max = typ
-	typ = parse_num(typ)
-	min = parse_num(min)
-	max = parse_num(max)
-	if (min > max) != invert:
-		min, max = max, min
+	typ, min, max = range_list(row, invert)
 	print '.param {}={{modv({}, {}, {})}}'.format(n, typ, min, max)
 
-# Print out a series of params for tabular data.
-# Return a set of strings that can be used to emit
-# a pwl B-source based on the table of data.
-def tbl_models(n, sections):
-	maxval = 0
-	ret = dict()
-	if n in sections:
-		for i, tbl in enumerate(sections[n]):
-			data = ''
+def parse_tbl_model(name, sections):
+	ret = []
+	if name in sections:
+		for i, tbl in enumerate(sections[name]):
+			data = [ [], [], [], [] ]
+
 			for idx, row in enumerate(tbl.data):
 				if row[2] == 'NA':
 					tbl.data[idx][2] = row[1]
@@ -269,24 +272,155 @@ def tbl_models(n, sections):
 						li = ni
 
 			last = None
-			for line, row in enumerate(tbl.data):
-				var = '{}{}_pwl{}'.format(n, i, line)
+			for row in tbl.data:
 				num = parse_num(row[0])
 				if last != None and num <= last:
 					raise Exception('Non ascending')
 				last = num
-				print '.param {}={{modv({}, {}, {})}}'.format(var,
-						parse_num(row[1]), parse_num(row[2]), parse_num(row[3]))
-				data += '\n+  ,{},{{{}}}'.format(num, var)
-				if num > maxval:
-					maxval = num
-
-			ret['{}{}'.format(n, i)] = data
+				for j in 0, 1, 2, 3:
+					data[j].append(parse_num(row[j]))
+			ret.append(data)
 	else:
-		ret['{}0'.format(n)] = ', 0, 0, 1, 0'
+		ret.append([ [0, 1], [0, 0], [0, 0], [0, 0] ])
+	return ret
+
+# Print out a series of max x .params for tabular data
+# Return a set of strings that can be used to emit
+# a pwl B-source based on the table of data.
+def dump_tbl_models(name, table):
+	maxval = 0
+	ret = dict()
+	if table:
+		for n, tbl in enumerate(table):
+			for i, type in enumerate([ 'typ', 'min', 'max' ]):
+				data = ''.join(map(lambda x, y: '\n+    ,{},{}'.format(x, y), tbl[0], tbl[i + 1]))
+				ret['{}{}_{}'.format(name, n, type)] = data
+			maxval = max(maxval, max(tbl[0]))
+	else:
+		for type in [ 'typ', 'min', 'max' ]:
+			ret['{}0_{}'.format(name, type)] = ', 0, 0, 1, 0'
 
 	# Maximum x value, useful for time based tables.
-	param('{}_max'.format(n), maxval)
+	param('{}_max'.format(name), maxval)
+
+	return ret
+
+# Make the IV functions extend out from -100 to 100
+def interp_iv(_x, _y):
+	x, y = list(_x), list(_y)
+	x_min, x_max = -100, 100
+	if x_min < _x[0]:
+		y.insert(0, (_x[0] - x_min) * (_y[1] - _y[0]) / (_x[1] - _x[0]))
+		x.insert(0, x_min)
+	if x_max > _x[-1]:
+		y.append((x_max -_x[-1]) * (_y[-2] - _y[-1]) / (_x[-2] - _x[-1]))
+		x.append(x_max)
+	return interp1d(x, y, kind=1)
+
+# Make the waveform extent out far enough to take the derivative at endpoints
+def interp_wfm(_x, _y):
+	x, y = list(_x), list(_y)
+	x.insert(0, 2 * _x[0] - _x[1])
+	x.append(2 * _x[-1] - _x[-2])
+	y.insert(0, _y[0])
+	y.append(_y[-1])
+	return interp1d(x, y, kind='cubic')
+
+def fixture(refs, data, nfixtures):
+	ret = dict()
+	pd = [lambda x: 0] * 3
+	pu = [lambda x: 0] * 3
+	gc = [lambda x: 0] * 3
+	pc = [lambda x: 0] * 3
+	for i in range(3):
+		pc[i] = interp_iv(data['power_clamp'][0][0], data['power_clamp'][0][i + 1])
+		gc[i] = interp_iv(data['gnd_clamp'][0][0], data['gnd_clamp'][0][i + 1])
+		pu[i] = interp_iv(data['pullup'][0][0], data['pullup'][0][i + 1])
+		pd[i] = interp_iv(data['pulldown'][0][0], data['pulldown'][0][i + 1])
+	for name in [ 'rising', 'falling' ]:
+		waveform = data[name + '_waveform']
+		time = set()
+		for n in range(nfixtures):
+			time = time | set(waveform[n][0])
+		time = list(time)
+		time.sort()
+
+		kpu = None
+		kpd = None
+		if nfixtures > 1:
+			kpu = [ time, [], [], [] ]
+			kpd = [ time, [], [], [] ]
+
+		for i in range(3):
+			c_comp = []
+			wfm = []
+			for n in range(nfixtures):
+				c_comp.append(refs['c_comp'][i] + refs['C_fixture'][n])
+				wfm.append(interp_wfm(waveform[n][0], waveform[n][i + 1]))
+
+			curr_x = list()
+			last_dx = list()
+			dx = list()
+			next_x = list()
+			idx = list()
+			for n in range(nfixtures):
+				curr_x.append(waveform[n][0][0])
+				last_dx.append(float("inf"))
+				dx.append(0)
+				next_x.append(0)
+				idx.append(0)
+			for t in time:
+				Ifx = []
+				Ipu = []
+				Ipd = []
+				for n in range(nfixtures):
+					y = wfm[n](t)
+					I = (refs['V_fixture'][n][i] - y) / refs['R_fixture'][n]
+					if math.isnan(I):
+						raise Exception('I')
+					Igc = gc[i](y - refs['gnd_clamp'][i])
+					Ipc = pc[i](refs['power_clamp'][i] - y)
+
+					# Don't put dx past the next or prev time point
+					while idx[n] < len(waveform[n][0]) and waveform[n][0][idx[n]] <= t:
+						dx = None
+						idx[n] += 1
+					if not dx:
+						if idx[n] < len(waveform[n][0]):
+							next_x[n] = waveform[n][0][idx[n]]
+							next_dx = next_x[n] - curr_x[n]
+						dx = min(next_dx, last_dx[n]) / 2
+						last_dx[n] = next_dx
+						curr_x[n] = next_x[n]
+
+					Icomp = derivative(wfm[n], t, dx=dx) * c_comp[n]
+					Ifx.append(I - (Igc + Ipc + Icomp))
+					Ipu.append(pu[i](refs['pullup'][i] - y))
+					Ipd.append(pd[i](y - refs['pulldown'][i]))
+				if nfixtures > 1:
+					denom = Ipd[1] * Ipu[0] - Ipd[0] * Ipu[1]
+					kpu[i + 1].append((Ifx[0] * Ipd[1] - Ifx[1] * Ipd[0]) / denom)
+					kpd[i + 1].append((Ifx[1] * Ipu[0] - Ifx[0] * Ipu[1]) / denom)
+				else:
+					if not kpu and not kpd:
+						if Ipu[0] != 0 and Ipd[0] != 0:
+							raise Exception('Insufficient waveforms for fixture')
+						elif Ipu[0] != 0:
+							isos = True
+							kpu = [ time, [], [], [] ]
+							kpd = [[0, 1], [0, 0], [0, 0], [0, 0]]
+						elif Ipd[0] != 0:
+							isos = False
+							kpu = [[0, 1], [0, 0], [0, 0], [0, 0]]
+							kpd = [ time, [], [], [] ]
+						else:
+							raise Exception('Too many waveforms for fixture')
+					if isos:
+						kpu[i + 1].append(Ifx[0] / Ipu[0])
+					else:
+						kpd[i + 1].append(Ifx[0] / Ipd[0])
+		ret[name + '_kpu'] = [ kpu ]
+		ret[name + '_kpd'] = [ kpd ]
 	return ret
 
 def ibis_translate(str):
@@ -304,10 +438,10 @@ class section:
 		self.sections = dict()		# Sub-sections
 		self.name = ''			# String in []
 		self.header = ''		# Text after []
-		self.columns = list()		# Text after [] broken into list
-		self.text = list()		# list of all lines, including header
-		self.lines = list()		# list of all lines, excluding header
-		self.data = list()		# list of all lines, not including header broken into words
+		self.columns = []		# Text after [] broken into list
+		self.text = []		# list of all lines, including header
+		self.lines = []		# list of all lines, excluding header
+		self.data = []		# list of all lines, not including header broken into words
 		self.param = dict()		# dict of strings '<str> [=] <text....>'
 		self.param_row = dict()		# dict of lists '<str> <item0> <item1> <item2>...'
 		self.param_vert = dict()	# dict of dict, similar to param_row, but indexed by column name
@@ -362,7 +496,7 @@ for line in file:
 		new_section.columns = line.split()
 		new_section.name = name
 		if not key in curr_sect.sections:
-			curr_sect.sections[key] = list()
+			curr_sect.sections[key] = []
 		curr_sect.sections[key].append(new_section)
 		curr_sect = new_section
 
@@ -426,7 +560,7 @@ for n in [ 'ibis_ver', 'file_name', 'file_rev', 'date',
 
 package_models = dict()
 
-for model in main.sections['define_package_model'] if 'define_package_model' in main.sections else list():
+for model in main.sections['define_package_model'] if 'define_package_model' in main.sections else []:
 
 
 	if not 'pin_numbers' in model.sections:
@@ -437,7 +571,7 @@ for model in main.sections['define_package_model'] if 'define_package_model' in 
 		# Error: Missing data...
 		continue
 
-	pin_forward = list()
+	pin_forward = []
 	for line in model.sections['pin_numbers'][0].data:
 		pin_forward += line
 	pin_reverse = dict()
@@ -467,14 +601,14 @@ for model in main.sections['define_package_model'] if 'define_package_model' in 
 
 # Build a dict of sets that represents the model selector table
 model_selector = dict()
-for model in main.sections['model_selector'] if 'model_selector' in main.sections else list():
+for model in main.sections['model_selector'] if 'model_selector' in main.sections else []:
 	models = set()
 	for name, desc in model.param.iteritems():
 		models.add(name)
 	model_selector[model.header] = models
 
 # Process each model
-for model in main.sections['model'] if 'model' in main.sections else list():
+for model in main.sections['model'] if 'model' in main.sections else []:
 	Vinl, Vinh = None, None
 
 	type = model.param['Model_type']
@@ -483,24 +617,34 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	libs = [ 'ibis_buffer' ]
 	pins = None
 	en = None
+	out = None
+	nfixtures = 0
 
 	if type == 'Input': # 4
 		pins = 'in'
 		en = 'pulldown'
 		libs.append('ibis_input')
+		Vinl, Vinh = 0.8, 2.0
 	elif type == 'I/O': # 8
 		pins = 'vdd vss en out in'
 		libs.append('ibis_input')
-		libs.append('ibis_tristate')
+		libs.append('ibis_output')
+		nfixtures = 2
 		Vinl, Vinh = 0.8, 2.0
 	elif type == 'I/O_open_drain' or type == 'I/O_open_sink': # 7
 		pins = 'vdd vss en in'
+		out = 'pulldown'
 		libs.append('ibis_input')
-		libs.append('ibis_open_sink')
+		libs.append('ibis_output')
+		nfixtures = 1
+		Vinl, Vinh = 0.8, 2.0
 	elif type == 'I/O_open_source': # 7
 		pins = 'vdd vss en in'
+		out = 'pullup'
 		libs.append('ibis_input')
-		libs.append('ibis_open_source')
+		libs.append('ibis_output')
+		nfixtures = 1
+		Vinl, Vinh = 0.8, 2.0
 #	elif type == 'Input_ECL':
 #	elif type == 'I/O_ECL':
 	elif type == 'Terminator': # 3
@@ -510,15 +654,21 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		pins = 'vdd vss out'
 		en = 'pullup'
 		libs.append('ibis_output')
+		nfixtures = 2
 	elif type == '3-state': # 7
 		pins = 'vdd vss en out'
-		libs.append('ibis_tristate')
+		libs.append('ibis_output')
+		nfixtures = 2
 	elif type == 'Open_sink' or type == 'Open_drain': # 6
 		pins = 'vdd vss en'
-		libs.append('ibis_open_sink')
+		out = 'pulldown'
+		libs.append('ibis_output')
+		nfixtures = 1
 	elif type == 'Open_source': # 6
 		pins = 'vdd vss en'
-		libs.append('ibis_open_source')
+		out = 'pullup'
+		libs.append('ibis_output')
+		nfixtures = 1
 #	elif type == 'Input_ECL':
 #	elif type == 'Output_ECL':
 #	elif type == 'I/O_ECL':
@@ -533,10 +683,16 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 		print '* Unhandled model type: {}'.format(type)
 		continue
 
+	defaults = dict()
+	if Vinl != None:
+		defaults['Vinl'] = 0.8
+	if Vinh != None:
+		defaults['Vinh'] = 2.0
+
 	print '.lib {}'.format(ibis_translate(model.header))
 	print '* type - {}'.format(type)
 
-	for sect in model.sections['add_submodel'] if 'add_submodel' in model.sections else list():
+	for sect in model.sections['add_submodel'] if 'add_submodel' in model.sections else []:
 		for key, mode in sect.param.iteritems():
 			print '.lib {} {}'.format(outfile, ibis_translate(key))
 
@@ -550,28 +706,33 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'
 	if en != None:
 		print 'A_en en {}'.format(en)
+	if out != None:
+		print 'A_out out {}'.format(out)
 	print 'A_not_en en not_en inv'
 	print 'A_always_hi always_hi pullup'
-	if not 'vdd' in pins:
-		print 'Rvdd vcc vdd 0'
-	if not 'vss' in pins:
-		print 'Rvss vss vee 0'
 	print modv_func
 
-	if 'Vinl' in model.param:
-		Vinl = model.param['Vinl']
-	if Vinl != None:
-		param('Vinl', Vinl)
-	if 'Vinh' in model.param:
-		Vinh = model.param['Vinh']
-	if Vinh != None:
-		param('Vinh', Vinh)
+	model_spec = None
+	if 'model_spec' in model.sections:
+		model_spec = model.sections['model_spec'][0]
+	for n in 'Vinl', 'Vinh', 'Vmeas':
+		if model_spec and n in model_spec.param_row:
+			range_param(n, model_spec.param_row[n], False)
+		elif n in model.param:
+			param(n, model.param[n])
+		elif n in defaults:
+			param(n, defaults[n])
 
 	need_c_comp = True
+	c_comp_total = [ 0, 0, 0 ]
 	for n in [ 'C_comp_pullup', 'C_comp_pulldown',
                    'C_comp_power_clamp', 'C_comp_gnd_clamp' ]:
 		if n in model.param_row:
 			range_param(n, model.param_row[n], True)
+			typ, rmin, rmax = range_list(model.param_row[n], True)
+			c_comp_total[0] += typ
+			c_comp_total[1] += rmin
+			c_comp_total[2] += rmax
 			need_c_comp = False
 		else:
 			param(n, '0')
@@ -579,8 +740,15 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	# Set C_comp to zero if broken out value is available
 	if need_c_comp and 'C_comp' in model.param_row:
 		range_param('C_comp', model.param_row['C_comp'], True)
+		typ, rmin, rmax = range_list(model.param_row['C_comp'], True)
+		c_comp_total[0] = typ
+		c_comp_total[1] = rmin
+		c_comp_total[2] = rmax
 	else:
 		param('C_comp', '0')
+
+	refs = dict()
+	refs['c_comp'] = c_comp_total
 
 	for n in [ 'rgnd', 'rpower', 'rac' ]:
 		if n in model.sections:
@@ -593,59 +761,76 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	else:
 		param('cac', '0')
 
-	for n in [ 'gnd_clamp_reference', 'pulldown_reference', 'external_reference' ]:
-		if n in model.sections:
-			range_param(n, model.sections[n][0].columns, True)
+	for n in [ 'gnd_clamp', 'pulldown', 'external' ]:
+		full = n + '_reference'
+		if full in model.sections:
+			refs[n] = range_list(model.sections[full][0].columns, True)
 		else:
-			param(n, '0')
+			refs[n] = [ 0, 0, 0 ]
 
 	if 'voltage_range' in model.sections:
-		range = model.sections['voltage_range'][0].columns
+		vrange = model.sections['voltage_range'][0].columns
 	else:
-		range = None
+		vrange = None
 
-	for n in [ 'power_clamp_reference', 'pullup_reference' ]:
-		if n in model.sections:
-			range_param(n, model.sections[n][0].columns, False)
-		elif range != None:
-			range_param(n, range, False)
+	for n in [ 'power_clamp', 'pullup' ]:
+		full = n + '_reference'
+		if full in model.sections:
+			refs[n] = range_list(model.sections[full][0].columns, False)
+		elif vrange != None:
+			refs[n] = range_list(vrange, False)
 		else:
-			raise Exception('Missing [voltage_range] and [{}]'.format(n))
-
-	tables = dict()
-	for n in [ 'pulldown', 'pullup', 'gnd_clamp', 'power_clamp',
-		   'rising_waveform', 'falling_waveform' ]:
-		tables.update(tbl_models(n, model.sections))
+			raise Exception('Missing [voltage_range] and [{}]'.format(full))
 
 	for n in [ 'rising_waveform', 'falling_waveform' ]:
 		if n in model.sections:
 			for i, tbl in enumerate(model.sections[n]):
 				for f in [ 'R_fixture', 'C_fixture' ]:
+					if not f in refs:
+						refs[f] = []
 					if f in tbl.param:
-						param('{}{}'.format(f, i), tbl.param[f])
+						refs[f].append(parse_num(tbl.param[f]))
 					else:
-						param('{}{}'.format(f, i), 0)
+						refs[f].append(0)
+				if not 'V_fixture' in refs:
+					refs['V_fixture'] = []
 				if 'V_fixture' in tbl.param:
 					typ = tbl.param['V_fixture']
-					min, max = 'NA', 'NA'
+					vmin, vmax = typ, typ
 					if 'V_fixture_min' in tbl.param:
-						min = tbl.param['V_fixture_min']
+						vmin = tbl.param['V_fixture_min']
 					if 'V_fixture_max' in tbl.param:
-						max = tbl.param['V_fixture_max']
-					range_param('V_fixture{}'.format(i), [ typ, min, max ], False)
+						vmax = tbl.param['V_fixture_max']
+					refs['V_fixture'].append(range_list([typ, vmin, vmax], False))
+				else:
+					refs['V_fixture'].append([0, 0, 0])
 				for f in [ 'L_fixture', 'R_dut', 'L_dut', 'C_dut' ]:
 					if f in tbl.param:
 						print >> sys.stderr, 'Error: {} not supported in {}'.format(f, model.name)
 			# FIXME: We silently ignore non-matching fixtures
 			break
-			
+
+	data = dict()
+	for n in [ 'pulldown', 'pullup', 'gnd_clamp', 'power_clamp' ]:
+		data[n] = parse_tbl_model(n, model.sections)
+
+	if nfixtures > 0:
+		fixture_data = dict()
+		for n in [ 'rising_waveform', 'falling_waveform' ]:
+			fixture_data[n] = parse_tbl_model(n, model.sections)
+		fixture_data.update(data)
+		data.update(fixture(refs, fixture_data, nfixtures))
+
+	tables = dict()
+	for name, tbl in data.iteritems():
+		tables.update(dump_tbl_models(name, tbl))
 
 	# Include necessary circuits
 	for lib in libs:
 		include('{}.inc'.format(lib), tables)
 
 	# Include necessary submodel circuits
-	for sect in model.sections['add_submodel'] if 'add_submodel' in model.sections else list():
+	for sect in model.sections['add_submodel'] if 'add_submodel' in model.sections else []:
 		for key, mode in sect.param.iteritems():
 			if mode == 'Non-Driving':
 				en = 'not_en'
@@ -661,7 +846,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	print '.ends {}'.format(ibis_translate(model.header))
 
 	# Wrap subcircuit in a subcircuit with appropriate per pin component parasitics
-	for comp in main.sections['component'] if 'component' in main.sections else list():
+	for comp in main.sections['component'] if 'component' in main.sections else []:
 		name = comp.header.replace(' ', '_')
 		print '.subckt {}_{} pad vcc vee {}spec=0'.format(ibis_translate(name), ibis_translate(model.header), pins)
 
@@ -683,7 +868,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 				param(n, '0')
 
 		print '.include ibis_pkg.inc'
-		print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
+		print 'x die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
 		print '.ends {}_{}'.format(ibis_translate(name), ibis_translate(model.header))
 
 		if 'pin' in comp.sections:
@@ -719,7 +904,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 
 				print modv_func
 				print '.include ibis_pkg.inc'
-				print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
+				print 'x die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
 				print '.ends {}_{}_{}'.format(
 					ibis_translate(name), ibis_translate(model.header), ibis_translate(pin))
 
@@ -741,7 +926,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 
 				print modv_func
 				print '.include ibis_pkg.inc'
-				print 'x0 die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
+				print 'x die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
 				print '.ends {}_{}_{}'.format(
 					ibis_translate(name), ibis_translate(model.header), ibis_translate(vals['signal_name']))
 
@@ -749,7 +934,7 @@ for model in main.sections['model'] if 'model' in main.sections else list():
 	print '.endl'
 
 # Create submodel subcircuits
-for model in main.sections['submodel'] if 'submodel' in main.sections else list():
+for model in main.sections['submodel'] if 'submodel' in main.sections else []:
 
 	print '.lib {}'.format(ibis_translate(model.header))
 	type = model.param['Submodel_type']
@@ -781,22 +966,26 @@ for model in main.sections['submodel'] if 'submodel' in main.sections else list(
 
 	print modv_func
 
-	for n in [ 'V_trigger_r', 'V_trigger_f', 'Off_delay' ]:
-		if n in model.param_row:
-			range_param(n, model.param_row[n], False)
+	submodel_spec = None
+	if 'submodel_spec' in model.sections:
+		submodel_spec = model.sections['submodel_spec']
+	for n in 'V_trigger_r', 'V_trigger_f', 'Off_delay':
+		if submodel_spec and n in submodel_spec.param_row:
+			range_param(n, submodel_spec.param_row[n], False)
 		else:
 			param(n, '0')
 
 	tables = dict()
 	for n in table_names:
-		tables.update(tbl_models(n, model.sections))
+		table = parse_tbl_model(n, model.sections)
+		tables.update(dump_tbl_models(n, table))
 
 	include('{}.inc'.format(lib), tables)
 
 	print '.ends {}'.format(ibis_translate(model.header))
 	print '.endl'
 
-for board in main.sections['begin_board_description'] if 'begin_board_description' in main.sections else list():
+for board in main.sections['begin_board_description'] if 'begin_board_description' in main.sections else []:
 
 	print '.lib {}'.format(ibis_translate(board.header))
 
@@ -815,8 +1004,8 @@ for board in main.sections['begin_board_description'] if 'begin_board_descriptio
 				nodes += ' ' + line[1]
 
 		pin_name = ''
-		net = list()
-		last = list()
+		net = []
+		last = []
 		net.append(0)
 		curr = 'net' + '_'.join([str(v) for v in net])
 		nc = 0

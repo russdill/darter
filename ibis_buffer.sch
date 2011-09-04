@@ -27,46 +27,23 @@ T 49900 46300 5 10 1 1 0 0 1
 value={C_comp_power_clamp}
 }
 N 49800 45700 49800 46100 4
-N 46600 45900 49800 45900 4
+N 49200 45900 49800 45900 4
 N 49800 44700 49800 44800 4
 N 49200 47100 49800 47100 4
 N 49800 47100 49800 47000 4
-C 46800 44700 1 180 0 vss-1.sym
-C 46800 46100 1 90 0 capacitor-1.sym
-{
-T 46100 46300 5 10 0 0 90 0 1
-device=CAPACITOR
-T 46700 46700 5 10 1 1 0 0 1
-refdes=C_comp_pu
-T 45900 46300 5 10 0 0 90 0 1
-symversion=0.1
-T 46700 46300 5 10 1 1 0 0 1
-value={C_comp_pullup}
-}
-C 46800 44800 1 90 0 capacitor-1.sym
-{
-T 46100 45000 5 10 0 0 90 0 1
-device=CAPACITOR
-T 46700 45400 5 10 1 1 0 0 1
-refdes=C_comp_pd
-T 45900 45000 5 10 0 0 90 0 1
-symversion=0.1
-T 46700 45000 5 10 1 1 0 0 1
-value={C_comp_pulldown}
-}
-C 46400 47100 1 0 0 vdd-1.sym
-N 46600 46100 46600 45700 4
-N 46600 47100 46600 47000 4
-N 46600 44700 46600 44800 4
 N 49800 44700 49200 44700 4
 C 49400 46100 1 90 0 current-1.sym
 {
 T 48400 46700 5 10 0 0 90 0 1
 device=CURRENT_SOURCE
-T 48700 46200 5 10 1 1 0 0 1
+T 48700 46800 5 10 1 1 0 0 1
 refdes=B_pc
-T 48300 47700 5 10 1 1 0 0 1
-value=I=pwl(V(Vcc,pad) $power_clamp0)
+T 45100 47000 5 10 1 1 180 6 5
+value=I=modv(
++	pwl(V(Vcc,pad) $power_clamp0_typ),
++	pwl(V(Vcc,pad) $power_clamp0_min),
++	pwl(V(Vcc,pad) $power_clamp0_max))
+
 }
 C 49000 45700 1 270 0 current-1.sym
 {
@@ -74,15 +51,17 @@ T 50000 45100 5 10 0 0 270 0 1
 device=CURRENT_SOURCE
 T 48700 45500 5 10 1 1 0 0 1
 refdes=B_gc
-T 48200 44100 5 10 1 1 0 0 1
-value=I=pwl(V(pad, Vee) $gnd_clamp0)
+T 45100 45700 5 10 1 1 180 6 4
+value=I=modv(
++	pwl(V(pad, Vee) $gnd_clamp0_typ),
++	pwl(V(pad, Vee) $gnd_clamp0_min),
++	pwl(V(pad, Vee) $gnd_clamp0_max))
 }
-N 49200 45900 49200 45700 4
+N 49200 45700 49200 46100 4
 N 49200 47000 49200 47200 4
 N 49200 44600 49200 44800 4
 C 49000 47200 1 0 0 vcc-1.sym
 C 49400 44600 1 180 0 vee-1.sym
-C 51900 44500 1 0 0 gnd-1.sym
 N 52000 45700 52000 45900 4
 C 52200 44800 1 90 0 capacitor-1.sym
 {
@@ -95,17 +74,15 @@ symversion=0.1
 T 52100 45000 5 10 1 1 0 0 1
 value={C_comp}
 }
-N 49200 45900 49200 46100 4
-T 46400 47900 8 10 1 0 0 0 1
+T 45200 47900 8 10 1 0 0 0 1
 use-license=GPL2+
-T 46406 48100 8 10 1 0 0 0 1
+T 45206 48100 8 10 1 0 0 0 1
 dist-license=GPL2+
-T 46400 48300 8 10 1 0 0 0 1
+T 45200 48300 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
-C 47700 44300 1 0 0 gnd-1.sym
-N 47600 44600 47800 44600 4
+N 47400 43800 47600 43800 4
 {
-T 47600 44600 5 10 1 1 0 0 1
+T 47400 43800 5 10 1 1 0 0 1
 netname=0
 }
 C 53400 44800 1 90 0 resistor-1.sym
@@ -118,4 +95,21 @@ T 53400 45000 5 10 1 1 0 0 1
 value=1e18
 }
 N 53300 45700 53300 45900 4
+C 52200 44800 1 180 0 vee-1.sym
+C 45000 44000 1 270 0 voltage-3.sym
+{
+T 45700 43800 5 8 0 0 270 0 1
+device=VOLTAGE_SOURCE
+T 45300 43800 5 10 1 1 0 0 1
+refdes=B_meas
+T 45300 43200 5 10 1 1 0 0 1
+value=V=V(pad) - V(Vee)
+}
+C 47300 43500 1 0 0 gnd-1.sym
+C 45100 42800 1 0 0 gnd-1.sym
 C 53200 44500 1 0 0 gnd-1.sym
+N 45200 44000 45800 44000 4
+{
+T 45300 44000 5 10 1 1 0 0 1
+netname=meas
+}

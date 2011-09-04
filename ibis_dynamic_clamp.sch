@@ -33,8 +33,8 @@ T 44800 36150 5 10 0 0 0 0 1
 device=VOLTAGE_SOURCE
 T 44800 36350 5 10 0 0 0 0 1
 footprint=none
-T 43600 34750 5 10 1 1 0 0 1
-value=V=V(pad) < {V_trigger_f} ? {gnd_pulse_table_max} :0
+T 42100 34750 5 10 1 1 0 0 1
+value=V=V(on) > 0 ? (V(pad) < {V_trigger_f} ? {gnd_pulse_table0_max} : 0) : 0
 }
 C 46500 36200 1 90 0 vexp-1.sym
 {
@@ -61,8 +61,8 @@ T 44800 39450 5 10 0 0 0 0 1
 device=VOLTAGE_SOURCE
 T 44800 39650 5 10 0 0 0 0 1
 footprint=none
-T 43600 38150 5 10 1 1 0 0 1
-value=V=V(pad) > {V_trigger_r} ? {power_pulse_table_max} : 0
+T 42200 38050 5 10 1 1 0 0 1
+value=V=V(on) > 0 ? (V(pad) > {V_trigger_r} ? {power_pulse_table0_max} : 0) : 0
 }
 C 44300 37200 1 0 0 gnd-1.sym
 N 44200 37500 44400 37500 4
@@ -92,8 +92,11 @@ T 54100 38700 5 10 0 0 90 0 1
 device=CURRENT_SOURCE
 T 55000 38800 5 10 1 1 0 0 1
 refdes=B_pc
-T 55000 38200 5 10 1 1 0 0 1
-value=I=V(on) > 0 ? pwl(V(power_pulse, pad) $power_clamp0) : 0
+T 55600 38500 5 10 1 1 0 0 4
+value=I=modv(
++	pwl(V(power_pulse,pad) $power_clamp0_typ),
++	pwl(V(power_pulse,pad) $power_clamp0_min),
++	pwl(V(power_pulse,pad) $power_clamp0_max))
 }
 C 54700 37700 1 270 0 current-1.sym
 {
@@ -101,8 +104,11 @@ T 55700 37100 5 10 0 0 270 0 1
 device=CURRENT_SOURCE
 T 55000 37500 5 10 1 1 0 0 1
 refdes=B_gc
-T 55000 36900 5 10 1 1 0 0 1
-value=I=V(on) > 0 ? pwl(V(pad, ground_pulse) $gnd_clamp0) : 0
+T 55600 36900 5 10 1 1 0 0 4
+value=I=modv(
++	pwl(V(pad, ground_pulse) $gnd_clamp0_typ),
++	pwl(V(pad, ground_pulse) $gnd_clamp0_min),
++	pwl(V(pad, ground_pulse) $gnd_clamp0_max))
 }
 N 54900 38100 54900 37700 4
 N 54900 39000 54900 39200 4
@@ -125,8 +131,11 @@ T 49900 38400 5 8 0 0 0 6 1
 device=VOLTAGE_SOURCE
 T 49400 38200 5 10 1 1 0 0 1
 refdes=B_power_pulse0
-T 50900 38200 5 10 1 1 0 0 1
-value=V=pwl(V(pp_time) $power_pulse_table0)
+T 49200 38600 5 10 1 1 0 0 4
+value=V=modv(
++	pwl(V(pp_time) $power_pulse_table0_typ),
++	pwl(V(pp_time) $power_pulse_table0_min),
++	pwl(V(pp_time) $power_pulse_table0_max))
 }
 N 50700 37900 50100 37900 4
 {
@@ -139,8 +148,11 @@ T 49400 36600 5 8 0 0 180 6 1
 device=VOLTAGE_SOURCE
 T 49400 37400 5 10 1 1 0 0 1
 refdes=B_gnd_pulse0
-T 50900 37400 5 10 1 1 0 0 1
-value=V=pwl(V(gp_time) $gnd_pulse_table0)
+T 49400 35900 5 10 1 1 0 0 4
+value=V=modv(
++	pwl(V(gp_time) $gnd_pulse_table0_typ),
++	pwl(V(gp_time) $gnd_pulse_table0_min),
++	pwl(V(gp_time) $gnd_pulse_table0_max))
 }
 C 49000 37900 1 0 0 vcc-1.sym
 C 49400 37100 1 180 0 vee-1.sym
