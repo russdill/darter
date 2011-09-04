@@ -20,8 +20,8 @@ import spice_read
 from pylab import *
 
 def parse_num(val):
-	if isinstance(val, float) or isinstance(val, int):
-		return val
+	if isinstance(val, float) or isinstance(val, int) or val == "inf":
+		return float(val)
 
 	ext = val.lstrip('+-0123456789.eE')
 	e = 1
@@ -51,8 +51,8 @@ def plot_at(vector, idx, timestep, steps):
 		x_end -= end - len(vector)
 		end = len(vector)
 
-	y = [ x * timestep for x in range(x_begin, x_end) ]
-	plot(y, vector[begin:end], color='blue')
+	x = [ x * timestep for x in range(x_begin, x_end) ]
+	plot(x, vector[begin:end], color='blue')
 
 parser = argparse.ArgumentParser(conflict_handler='resolve')
 parser.add_argument('-w', '--width', type=str, required=True,
@@ -63,14 +63,20 @@ parser.add_argument('input', type=argparse.FileType('rb'),
 	help='Spice3f5 input file')
 parser.add_argument('output', type=argparse.FileType('wb'), nargs='?',
 	help='Plot output file')
+parser.add_argument('-o', '--offset', default='0', type=str,
+	help='Display offset (default: %(default)s)')
 parser.add_argument('-s', '--start', default='0', type=str,
-	help='First manual trigger (default: %(default)s)')
+	help='Time start value (default: %(default)s)')
+parser.add_argument('-e', '--end', default='inf', type=str,
+	help='Time end value (default: %(default)s)')
 parser.add_argument('-p', '--period', type=str,
 	help='Manual trigger period')
-parser.add_argument('-r', '--rising-trigger', type=str, nargs=2,
-	help="Auto rising trigger <vector> <voltage>")
-parser.add_argument('-f', '--falling-trigger', type=str, nargs=2,
-	help="Auto falling trigger <vector> <voltage>")
+parser.add_argument('-t', '--trigger', type=str,
+	help="Auto trigger")
+parser.add_argument('-r', '--rising-trigger', type=str,
+	help="Auto rising trigger voltage")
+parser.add_argument('-f', '--falling-trigger', type=str,
+	help="Auto falling trigger voltage")
 parser.add_argument('-h', '--hysteresis', default='0', type=str,
 	help='Auto trigger voltage hysteresis (default: %(default)s)')
 
@@ -83,60 +89,80 @@ end_time = time[-1] + timestep
 
 width = parse_num(args.width)
 steps = int(width / timestep)
+offset = parse_num(args.offset)
+
 start = parse_num(args.start)
+end = parse_num(args.end)
 
 xlim(-width / 2, width / 2)
 
+samples = 0
+
 if args.period:
 	period = parse_num(args.period)
-	center = start
-	while center < end_time:
+	center = offset + start
+	while center < min(end, end_time):
+		samples += 1
 		plot_at(vector, int(center / timestep), timestep, steps)
 		center += period
-else:
+
+elif args.trigger:
 	hyst = parse_num(args.hysteresis)
-	fvect = None
-	rvect = None
+	vect = get_vector(vectors, args.trigger)
+
+	if not args.falling_trigger and not args.rising_trigger:
+		raise Exception('No trigger value given')
+	both = args.falling_trigger and args.rising_trigger
+
+	if start < 0:
+		start_idx = 0
+	else:
+		start_idx = int(start / timestep)
+	if end > end_time:
+		end_idx = len(time)
+	else:
+		end_idx = int(math.ceil(end / timestep))
+
 	if args.falling_trigger:
-		fvect = get_vector(vectors, args.falling_trigger[0])
-		fv = parse_num(args.falling_trigger[1])
-		fstate = fvect[0] <= fv
+		fv = parse_num(args.falling_trigger)
+		fstate = vect[start_idx] <= fv
 	if args.rising_trigger:
-		rvect = get_vector(vectors, args.rising_trigger[0])
-		rv = parse_num(args.rising_trigger[1])
-		rstate = rvect[0] >= rv
-	both = False
-	if len(fvect) and len(rvect):
-		both = args.rising_trigger[0] == args.falling_trigger[0]
-	idx = 0
-	while idx < len(time):
-		curr = int(idx + start / timestep)
+		rv = parse_num(args.rising_trigger)
+		rstate = vect[start_idx] >= rv
+
+	idx = start_idx
+	while idx < end_idx:
+ 		curr = int(idx + offset / timestep)
 		if both:
-			if (rstate and fvect[idx] <= fv) or (not rstate and rvect[idx] >= rv):
+			if (rstate and vect[idx] <= fv) or (not rstate and vect[idx] >= rv):
 				rstate = not rstate
+				samples += 1
 				plot_at(vector, curr, timestep, steps)
-		if len(fvect) and not both:
-			print fstate, fv, vector[idx]
-			if fstate and fvect[idx] > fv + hyst:
+		if args.falling_trigger and not both:
+			if fstate and vect[idx] > fv + hyst:
 				fstate = False
 			elif not fstate and fvect[idx] <= fv:
 				fstate = True
+				samples += 1
 				plot_at(vector, curr, timestep, steps)
-		if len(rvect) and not both:
-			print rstate, rv, rvect[idx]
-			if rstate and vector[idx] < rv - hyst:
+		if args.rising_trigger and not both:
+			if rstate and vect[idx] < rv - hyst:
 				rstate = False
-			elif not rstate and rvect[idx] >= rv:
+			elif not rstate and vect[idx] >= rv:
 				rstate = True
+				samples += 1
 				plot_at(vector, curr, timestep, steps)
 		idx += 1
-
+else:
+	raise Exception('No stimulus given')
 
 title(args.vector)
 ylabel('Volts')
 xlabel('Time (s)')
-
 grid()
+
+print 'Processed {} samples'.format(samples)
+
 if args.output:
 	savefig(args.output)
 else:
