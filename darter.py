@@ -1029,7 +1029,7 @@ for board in main.sections['begin_board_description'] if 'begin_board_descriptio
 				if pin_name:
 					raise Exception('Cannot handle multiple pins in one path')
 				pin_name = line[1]
-				print '.subckt {}_{} net0{}'.format(ibis_translate(board.header), ibis_translate(pin_name), nodes)
+				print '.subckt {}_{} net0 gnd{}'.format(ibis_translate(board.header), ibis_translate(pin_name), nodes)
 				print '* {}'.format(path.header)
 			else:
 				vals = parse_values(line)
@@ -1040,7 +1040,7 @@ for board in main.sections['begin_board_description'] if 'begin_board_descriptio
 					if 'L' in vals or 'R' in vals:
 						c /= 2
 					if c != 0:
-						print 'C{} {} 0 {}'.format(nc, curr, c)
+						print 'C{} {} gnd {}'.format(nc, curr, c)
 						nc += 1
 					if 'R' in vals:
 						prev = curr
@@ -1055,7 +1055,7 @@ for board in main.sections['begin_board_description'] if 'begin_board_descriptio
 						print 'L{} {} {} {}'.format(nl, prev, curr, vals['L'])
 						nl += 1
 					if 'L' in vals or 'R' in vals and c != 0:
-						print 'C{} {} 0 {}'.format(nc, curr, c)
+						print 'C{} {} gnd {}'.format(nc, curr, c)
 						nc += 1
 				else:
 					args = ''
@@ -1066,11 +1066,11 @@ for board in main.sections['begin_board_description'] if 'begin_board_descriptio
 					prev = curr
 					net[0] += 1
 					curr = 'net' + '_'.join([str(v) for v in net])
-					print 'O{} {} 0 {} 0 LTRA{}'.format(no, prev, curr, no)
+					print 'O{} {} gnd {} gnd LTRA{}'.format(no, prev, curr, no)
 					no += 1
 		print '.ends {}_{}'.format(ibis_translate(board.header), ibis_translate(pin_name))
 		if pin_name in pin_mapping:
-			print '.subckt {}_{} net0{}'.format(ibis_translate(board.header), ibis_translate(pin_mapping[pin_name]), nodes)
-			print 'X0 net0{} {}_{}'.format(nodes, ibis_translate(board.header), ibis_translate(pin_name))
+			print '.subckt {}_{} net0 gnd{}'.format(ibis_translate(board.header), ibis_translate(pin_mapping[pin_name]), nodes)
+			print 'x net0 gnd{} {}_{}'.format(nodes, ibis_translate(board.header), ibis_translate(pin_name))
 			print '.ends {}_{}'.format(ibis_translate(board.header), ibis_translate(pin_name))
 	print '.endl'
