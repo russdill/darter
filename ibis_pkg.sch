@@ -46,7 +46,8 @@ T 46706 47500 8 10 1 0 0 0 1
 dist-license=GPL2+
 T 46700 47700 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
-C 49700 45900 1 180 0 vee-1.sym
-T 46400 45100 9 10 1 0 0 0 2
-FIXME: This shouldn't really be Vee, but the
-external board ground.
+C 49700 45900 1 180 0 generic-power.sym
+{
+T 49500 45650 5 10 1 1 180 3 1
+net=Gnd:1
+}

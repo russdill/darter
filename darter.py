@@ -36,7 +36,6 @@ supported_sections = set([
 	'.component.package',
 	'.component.manufacturer',
 	'.component.pin',
-	'.model_selector',
 	'.model',
 	'.model.model_spec',
 	'.model.add_submodel',
@@ -104,6 +103,7 @@ ignored_sections = set([
 	'.component.begin_emi_component.pin_emi',
 	'.component.begin_emi_component.pin_domain_emi',
 	'.component.begin_emi_component.end_emi_component',
+	'.model_selector',
 	'.model.ttgnd',
 	'.model.ttpower',
 	'.model.receiver_thresholds',
@@ -639,14 +639,6 @@ for model in main.sections['define_package_model'] if 'define_package_model' in 
 		pm[pin] = tmp
 	package_models[model.header] = pm
 
-# Build a dict of sets that represents the model selector table
-model_selector = dict()
-for model in main.sections['model_selector'] if 'model_selector' in main.sections else []:
-	models = set()
-	for name, desc in model.param.iteritems():
-		models.add(name)
-	model_selector[model.header] = models
-
 # Process each model
 for model in main.sections['model'] if 'model' in main.sections else []:
 	Vinl, Vinh = None, None
@@ -895,51 +887,59 @@ for model in main.sections['model'] if 'model' in main.sections else []:
 			print 'x_{} pad vcc vee vdd vss {} {} spec={{spec}}'.format(ibis_translate(key), en, ibis_translate(key))
 
 	print '.ends {}'.format(ibis_translate(model.header))
+	print '.endl'
 
-	# Wrap subcircuit in a subcircuit with appropriate per pin component parasitics
-	for comp in main.sections['component'] if 'component' in main.sections else []:
-		name = comp.header.replace(' ', '_')
-		print '.subckt {}_{} pad vcc vee {}spec=0'.format(ibis_translate(name), ibis_translate(model.header), pins)
+# Generate pin component parasitics
+for comp in main.sections['component'] if 'component' in main.sections else []:
+	name = ibis_translate(comp.header)
 
-		if 'manufacturer' in comp.sections:
-			print '* Manufacturer: {}'.format(comp.sections['manufacturer'][0].header)
+	print '.lib {}'.format(ibis_translate(comp.header))
+	print '.subckt {} pad gnd die spec=0'.format(name)
 
-		pm = dict()
-		if 'package_model' in comp.sections:
-			name = comp.sections['package_model'][0].header
-			if name in package_models:
-				pm = package_models[name]
+	if 'manufacturer' in comp.sections:
+		print '* Manufacturer: {}'.format(comp.sections['manufacturer'][0].header)
 
-		print modv_func
-		for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
-			n = '{}_pkg'.format(prefix)
-			if 'package' in comp.sections and n in comp.sections['package'][0].param_row:
-				range_param(n, comp.sections['package'][0].param_row[n], inv)
-			else:
-				param(n, '0')
+	pm = dict()
+	if 'package_model' in comp.sections:
+		pkg = comp.sections['package_model'][0].header
+		if pkg in package_models:
+			pm = package_models[pkg]
 
-		print '.include ibis_pkg.inc'
-		print 'x die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
-		print '.ends {}_{}'.format(ibis_translate(name), ibis_translate(model.header))
+	print modv_func
+	for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
+		n = '{}_pkg'.format(prefix)
+		if 'package' in comp.sections and n in comp.sections['package'][0].param_row:
+			range_param(n, comp.sections['package'][0].param_row[n], inv)
+		else:
+			param(n, '0')
 
-		if 'pin' in comp.sections:
-			for pin, vals in comp.sections['pin'][0].param_vert.iteritems():
-				if not 'signal_name' in vals or not 'model_name' in vals:
-					raise Exception('Invalid pin table in {}'.format(comp.header))
-				elif vals['signal_name'] == 'NC' or vals['model_name'] == 'NC':
+	print '.include ibis_pkg.inc'
+	print '.ends {}'.format(name)
+
+	listed = set()
+	if 'pin' in comp.sections:
+		for pin, vals in comp.sections['pin'][0].param_vert.iteritems():
+			if not 'signal_name' in vals or not 'model_name' in vals:
+				raise Exception('Invalid pin table in {}'.format(comp.header))
+			elif vals['signal_name'] == 'NC' or vals['model_name'] == 'NC':
+				continue
+
+			if (not n in vals or vals[n] == 'NA') and not pin in pm:
+				continue
+
+			for sub, signal in [ [ pin, False ], [ vals['signal_name'], True ] ]:
+				# Ignore duplicated pins (power/ground)
+				# NOTE: This may or may not be throwing away
+				# data depending in the IBIS model
+				if signal and sub in listed:
 					continue
-				elif vals['model_name'] == 'GND' or vals['model_name'] == 'POWER':
-					continue
-				elif vals['model_name'] == model.header:
-					pass
-				elif not vals['model_name'] in model_selector:
-					continue
-				elif not model.header in model_selector[vals['model_name']]:
-					continue
 
-				print '.subckt {}_{}_{} pad vcc vee {}spec=0'.format(
-					ibis_translate(name), ibis_translate(model.header), ibis_translate(pin), pins)
-				print '* {}'.format(vals['signal_name'])
+				print '.subckt {}_{} pad gnd die spec=0'.format(name,
+								ibis_translate(sub))
+				if signal:
+					print '* pin {}'.format(pin)
+				else:
+					print '* {}'.format(vals['signal_name'])
 
 				for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
 					n = '{}_pin'.format(prefix)
@@ -948,40 +948,15 @@ for model in main.sections['model'] if 'model' in main.sections else []:
 						param(np, vals[n])
 					elif pin in pm:
 						param(np, pm[pin][prefix])
-					elif 'package' in comp.sections and np in comp.sections['package'][0].param_row:
-						range_param(np, comp.sections['package'][0].param_row[np], inv)
-					else:
-						param(n, '0')
+#					elif 'package' in comp.sections and np in comp.sections['package'][0].param_row:
+#						range_param(np, comp.sections['package'][0].param_row[np], inv)
+#					else:
+#						param(n, '0')
 
 				print modv_func
 				print '.include ibis_pkg.inc'
-				print 'x die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
-				print '.ends {}_{}_{}'.format(
-					ibis_translate(name), ibis_translate(model.header), ibis_translate(pin))
-
-				print '.subckt {}_{}_{} pad vcc vee {}spec=0'.format(
-					ibis_translate(name), ibis_translate(model.header), ibis_translate(vals['signal_name']), pins)
-				print '* pin {}'.format(pin)
-
-				for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
-					n = '{}_pin'.format(prefix)
-					np = '{}_pkg'.format(prefix)
-					if n in vals and vals[n] != 'NA':
-						param(np, vals[n])
-					elif pin in pm:
-						param(np, pm[pin][prefix])
-					elif 'package' in comp.sections and np in comp.sections['package'][0].param_row:
-						range_param(np, comp.sections['package'][0].param_row[np], inv)
-					else:
-						param(n, '0')
-
-				print modv_func
-				print '.include ibis_pkg.inc'
-				print 'x die vcc vee {}{} spec={{spec}}'.format(pins, ibis_translate(model.header))
-				print '.ends {}_{}_{}'.format(
-					ibis_translate(name), ibis_translate(model.header), ibis_translate(vals['signal_name']))
-
-
+				print '.ends {}_{}'.format(name, ibis_translate(sub))
+			listed.add(vals['signal_name'])
 	print '.endl'
 
 # Create submodel subcircuits
