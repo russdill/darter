@@ -455,7 +455,7 @@ def fixture(refs, data, nfixtures):
 	return ret
 
 def ibis_translate(str):
-	str = str.translate(maketrans('<>', '__'))
+	str = str.translate(maketrans('<>- ', '____'))
 	str = str.translate(maketrans('#', 'c'))
 	return str
 
