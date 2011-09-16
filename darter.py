@@ -343,6 +343,10 @@ def fixture(refs, data, nfixtures):
 	pu = [lambda x: 0] * 3
 	gc = [lambda x: 0] * 3
 	pc = [lambda x: 0] * 3
+	kpu_dA_max = [ 0 ] * 3
+	kpu_dA_min = [ 0 ] * 3
+	kpd_dA_max = [ 0 ] * 3
+	kpd_dA_min = [ 0 ] * 3
 	for i in range(3):
 		pc[i] = interp_iv(data['power_clamp'][0][0], data['power_clamp'][0][i + 1])
 		gc[i] = interp_iv(data['gnd_clamp'][0][0], data['gnd_clamp'][0][i + 1])
@@ -380,7 +384,7 @@ def fixture(refs, data, nfixtures):
 				dx.append(0)
 				next_x.append(0)
 				idx.append(0)
-			for t in time:
+			for timestep, t in enumerate(time):
 				Ifx = []
 				Ipu = []
 				Ipd = []
@@ -430,8 +434,24 @@ def fixture(refs, data, nfixtures):
 						kpu[i + 1].append(Ifx[0] / Ipu[0])
 					else:
 						kpd[i + 1].append(Ifx[0] / Ipd[0])
+				if t > 0:
+					if nfixtures > 1 or isos:
+						dA = kpu[i + 1][timestep] - kpu[i + 1][timestep - 1]
+						dA /= t - prev_t
+						kpu_dA_min[i] = max(kpu_dA_min[i], -dA)
+						kpu_dA_max[i] = max(kpu_dA_max[i], dA)
+					if nfixtures > 1 or not isos:
+						dA = kpd[i + 1][timestep] - kpd[i + 1][timestep - 1]
+						dA /= t - prev_t
+						kpd_dA_min[i] = max(kpd_dA_min[i], -dA)
+						kpd_dA_max[i] = max(kpd_dA_max[i], dA)
+				prev_t = t
 		ret[name + '_kpu'] = [ kpu ]
 		ret[name + '_kpd'] = [ kpd ]
+	range_param_raw('kpu_da_min', kpu_dA_min)
+	range_param_raw('kpu_da_max', kpu_dA_max)
+	range_param_raw('kpd_da_min', kpd_dA_min)
+	range_param_raw('kpd_da_max', kpd_dA_max)
 	return ret
 
 def ibis_translate(str):
