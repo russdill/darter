@@ -328,6 +328,15 @@ def interp_iv(_x, _y):
 		x.append(x_max)
 	return interp1d(x, y, kind=1)
 
+# Flatten the extents of a pwl
+def limit_table(tbls):
+	for tbl in tbls if tbls else []:
+		tbl[0].insert(0, tbl[0][0] - 1)
+		tbl[0].append(tbl[0][-1] + 1)
+		for sub in tbl[1:]:
+			sub.insert(0, sub[0])
+			sub.append(sub[-1])
+
 # Make the waveform extent out far enough to take the derivative at endpoints
 def interp_wfm(_x, _y):
 	x, y = list(_x), list(_y)
@@ -843,7 +852,9 @@ for model in main.sections['model'] if 'model' in main.sections else []:
 
 	data = dict()
 	for n in [ 'pulldown', 'pullup', 'gnd_clamp', 'power_clamp' ]:
-		data[n] = parse_tbl_model(n, model.sections)
+		tbl = parse_tbl_model(n, model.sections)
+		limit_table(tbl)
+		data[n] = tbl
 
 	if nfixtures > 0:
 		fixture_data = dict()
