@@ -763,29 +763,38 @@ for model in main.sections['model'] if 'model' in main.sections else []:
 		elif n in defaults:
 			param(n, defaults[n])
 
+	c_comp_list = [ 'C_comp_power_clamp', 'C_comp_gnd_clamp' ]
+	if 'vdd' in pins:
+		c_comp_list.append('C_comp_pulldown')
+	if 'vss' in pins:
+		c_comp_list.append('C_comp_pullup')
+
 	need_c_comp = True
 	c_comp_total = [ 0, 0, 0 ]
-	for n in [ 'C_comp_pullup', 'C_comp_pulldown',
-                   'C_comp_power_clamp', 'C_comp_gnd_clamp' ]:
+	for n in c_comp_list:
 		if n in model.param_row:
-			range_param(n, model.param_row[n], True)
-			typ, rmin, rmax = range_list(model.param_row[n], True)
-			c_comp_total[0] += typ
-			c_comp_total[1] += rmin
-			c_comp_total[2] += rmax
 			need_c_comp = False
-		else:
-			param(n, '0')
-
-	# Set C_comp to zero if broken out value is available
-	if need_c_comp and 'C_comp' in model.param_row:
-		range_param('C_comp', model.param_row['C_comp'], True)
+	if need_c_comp:
 		typ, rmin, rmax = range_list(model.param_row['C_comp'], True)
 		c_comp_total[0] = typ
 		c_comp_total[1] = rmin
 		c_comp_total[2] = rmax
+		div = len(c_comp_list)
+		c_comp = [ typ / div, rmin / div, rmax / div ] 
+		for n in c_comp_list:
+			range_param(n, c_comp, True)
 	else:
-		param('C_comp', '0')
+		for n in c_comp_list:
+			if n in model.param_row:
+				range_param(n, model.param_row[n], True)
+				typ, rmin, rmax = range_list(model.param_row[n], True)
+				c_comp_total[0] += typ
+				c_comp_total[1] += rmin
+				c_comp_total[2] += rmax
+			else:
+				# Give it *something*, we get a better chance
+				# of convergence
+				param(n, '10f')
 
 	refs = dict()
 	refs['c_comp'] = c_comp_total
