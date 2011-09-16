@@ -2,6 +2,8 @@ IBIS_COMPONENTS=\
 	ibis_pkg.inc \
 	ibis_input.inc \
 	ibis_output.inc \
+	ibis_output_pulldown.inc \
+	ibis_output_pullup.inc \
 	ibis_buffer.inc \
 	ibis_terminator.inc \
 	ibis_dynamic_clamp.inc

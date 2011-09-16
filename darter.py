@@ -655,27 +655,17 @@ for model in main.sections['model'] if 'model' in main.sections else []:
 	if type == 'Input': # 4
 		pins = 'in'
 		en = 'pulldown'
-		libs.append('ibis_input')
 		Vinl, Vinh = 0.8, 2.0
 	elif type == 'I/O': # 8
 		pins = 'vdd vss en out in'
-		libs.append('ibis_input')
-		libs.append('ibis_output')
-		nfixtures = 2
 		Vinl, Vinh = 0.8, 2.0
-	elif type == 'I/O_open_drain' or type == 'I/O_open_sink': # 7
-		pins = 'vdd vss en in'
+	elif type == 'I/O_open_drain' or type == 'I/O_open_sink': # 6
+		pins = 'vss en in'
 		out = 'pulldown'
-		libs.append('ibis_input')
-		libs.append('ibis_output')
-		nfixtures = 1
 		Vinl, Vinh = 0.8, 2.0
-	elif type == 'I/O_open_source': # 7
-		pins = 'vdd vss en in'
+	elif type == 'I/O_open_source': # 6
+		pins = 'vdd en in'
 		out = 'pullup'
-		libs.append('ibis_input')
-		libs.append('ibis_output')
-		nfixtures = 1
 		Vinl, Vinh = 0.8, 2.0
 #	elif type == 'Input_ECL':
 #	elif type == 'I/O_ECL':
@@ -685,22 +675,14 @@ for model in main.sections['model'] if 'model' in main.sections else []:
 	elif type == 'Output': # 6
 		pins = 'vdd vss out'
 		en = 'pullup'
-		libs.append('ibis_output')
-		nfixtures = 2
 	elif type == '3-state': # 7
 		pins = 'vdd vss en out'
-		libs.append('ibis_output')
-		nfixtures = 2
-	elif type == 'Open_sink' or type == 'Open_drain': # 6
-		pins = 'vdd vss en'
+	elif type == 'Open_sink' or type == 'Open_drain': # 5
+		pins = 'vss en'
 		out = 'pulldown'
-		libs.append('ibis_output')
-		nfixtures = 1
-	elif type == 'Open_source': # 6
-		pins = 'vdd vss en'
+	elif type == 'Open_source': # 5
+		pins = 'vdd en'
 		out = 'pullup'
-		libs.append('ibis_output')
-		nfixtures = 1
 #	elif type == 'Input_ECL':
 #	elif type == 'Output_ECL':
 #	elif type == 'I/O_ECL':
@@ -714,6 +696,17 @@ for model in main.sections['model'] if 'model' in main.sections else []:
 	else:
 		print '* Unhandled model type: {}'.format(type)
 		continue
+
+	if 'in' in pins:
+		libs.append('ibis_input')
+	if 'vdd' in pins:
+		libs.append('ibis_output_pullup')
+		nfixtures += 1
+	if 'vss' in pins:
+		libs.append('ibis_output_pulldown')
+		nfixtures += 1
+	if 'vdd' in pins or 'vss' in pins:
+		libs.append('ibis_output')
 
 	defaults = dict()
 	if Vinl != None:
