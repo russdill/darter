@@ -245,12 +245,15 @@ def range_list(row, invert):
 		rmin, rmax = rmax, rmin
 	return typ, rmin, rmax
 
+def range_param_raw(n, row):
+	typ, min, max = row
+	print '.param {}={{modv({}, {}, {})}}'.format(n, typ, min, max)
+
 # Print out a SPICE param that can vary between typ, min, and max based on spec
 # The function ensures that min is less then max if invert is false,
 # and max is less then min otherwise.
 def range_param(n, row, invert):
-	typ, min, max = range_list(row, invert)
-	print '.param {}={{modv({}, {}, {})}}'.format(n, typ, min, max)
+	range_param_raw(n, range_list(row, invert))
 
 def parse_tbl_model(name, sections):
 	ret = []
