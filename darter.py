@@ -129,6 +129,14 @@ ignored_sections = set([
 
 unsupported_sections = set([
 	'.model.driver_schedule',
+	'.model.r_series',
+	'.model.l_series',
+	'.model.rl_series',
+	'.model.c_series',
+	'.model.lc_series',
+	'.model.rc_series',
+	'.model.series_current',
+	'.model.series_mosfet',
 	'.model.on',
 	'.model.on.r_series',
 	'.model.on.l_series',
