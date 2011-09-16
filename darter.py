@@ -295,7 +295,6 @@ def parse_tbl_model(name, sections):
 		ret.append([ [0, 1], [0, 0], [0, 0], [0, 0] ])
 	return ret
 
-# Print out a series of max x .params for tabular data
 # Return a set of strings that can be used to emit
 # a pwl B-source based on the table of data.
 def dump_tbl_models(name, table):
