@@ -84,7 +84,7 @@ args = parser.parse_args()
 vectors = spice_read.spice_read(args.input).get_plots()[0]
 vector = get_vector(vectors, args.vector)
 time = vectors.get_scalevector().get_data()
-timestep = time[1]
+timestep = time[1] - time[0]
 end_time = time[-1] + timestep
 
 width = parse_num(args.width)
