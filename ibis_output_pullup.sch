@@ -75,19 +75,103 @@ N 54100 42800 54000 42800 4
 T 54000 42800 5 10 1 1 0 0 1
 netname=0
 }
-T 49900 45000 8 10 1 0 0 0 1
+T 49900 46600 8 10 1 0 0 0 1
 use-license=GPL2+
-T 49906 45200 8 10 1 0 0 0 1
+T 49906 46800 8 10 1 0 0 0 1
 dist-license=GPL2+
-T 49906 45400 8 10 1 0 0 0 1
+T 49906 47000 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
-C 49900 44300 1 0 0 spice-directive-1.sym
+C 49900 45900 1 0 0 spice-directive-1.sym
 {
-T 50000 44600 5 10 0 1 0 0 1
+T 50000 46200 5 10 0 1 0 0 1
 device=directive
-T 49900 44600 5 10 1 1 180 6 2
+T 49900 46200 5 10 1 1 180 6 10
 value=.model kpu_slew slew(rise_slope={kpu_da_max}
 +	fall_slope={kpu_da_min})
-T 50000 44700 5 10 1 1 0 0 1
+
+.param rising_kpu_max10={rising_kpu_max / 10}
+.model rutime dac_bridge(out_low=0 out_high={rising_kpu_max}
++	t_rise={rising_kpu_max} t_fall={rising_kpu_max10})
+
+.param falling_kpu_max10={falling_kpu_max / 10}
+.model futime dac_bridge(out_low=0 out_high={falling_kpu_max}
++	t_rise={falling_kpu_max} t_fall={falling_kpu_max10})
+T 50000 46300 5 10 1 1 0 0 1
 refdes=kpu
+}
+C 58500 46400 1 180 1 current-1.sym
+{
+T 59100 45400 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 58300 46400 5 10 1 1 0 0 1
+refdes=A_ru_on
+T 58300 45900 5 10 1 1 0 0 1
+value=and
+}
+N 58500 46200 57400 46200 4
+{
+T 57400 46200 5 10 1 1 0 0 1
+netname=[en ddly out]
+}
+N 59400 46200 60600 46200 4
+{
+T 59400 46200 5 10 1 1 0 0 1
+netname=ru_on
+}
+C 58500 45600 1 180 1 current-1.sym
+{
+T 59100 44600 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 58300 45600 5 10 1 1 0 0 1
+refdes=A_rutime
+T 58300 45100 5 10 1 1 0 0 1
+value=rutime
+}
+N 57400 45400 58500 45400 4
+{
+T 57400 45400 5 10 1 1 0 0 1
+netname=[ru_on]
+}
+N 59400 45400 60600 45400 4
+{
+T 59300 45400 5 10 1 1 0 0 1
+netname=[ru_time]
+}
+C 58500 44800 1 180 1 current-1.sym
+{
+T 59100 43800 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 58300 44800 5 10 1 1 0 0 1
+refdes=A_futime
+T 58300 44300 5 10 1 1 0 0 1
+value=futime
+}
+N 57400 44600 58500 44600 4
+{
+T 57400 44600 5 10 1 1 0 0 1
+netname=[~ru_on]
+}
+N 59400 44600 60600 44600 4
+{
+T 59300 44600 5 10 1 1 0 0 1
+netname=[fu_time]
+}
+C 58500 44000 1 180 1 current-1.sym
+{
+T 59100 43000 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 58300 44000 5 10 1 1 0 0 1
+refdes=A_up
+T 58300 43500 5 10 1 1 0 0 1
+value=dac
+}
+N 57400 43800 58500 43800 4
+{
+T 57400 43800 5 10 1 1 0 0 1
+netname=[ru_on]
+}
+N 59400 43800 60600 43800 4
+{
+T 59300 43800 5 10 1 1 0 0 1
+netname=[up]
 }
