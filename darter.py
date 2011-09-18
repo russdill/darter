@@ -749,9 +749,9 @@ for model in main.sections['model'] if 'model' in main.sections else []:
 
 	c_comp_list = [ 'C_comp_power_clamp', 'C_comp_gnd_clamp' ]
 	if 'vdd' in pins:
-		c_comp_list.append('C_comp_pulldown')
-	if 'vss' in pins:
 		c_comp_list.append('C_comp_pullup')
+	if 'vss' in pins:
+		c_comp_list.append('C_comp_pulldown')
 
 	need_c_comp = True
 	c_comp_total = [ 0, 0, 0 ]
