@@ -469,7 +469,10 @@ def ibis_translate(str):
 
 # Convert a SPICE include file, substituting $<var> for vars in 'tables'
 def include(lib, tables):
-	print Template(open(lib, 'rb').read()).substitute(tables)
+	file = lib
+	if sys.path[0]:
+		file = '{}/{}'.format(sys.path[0], lib)
+	print Template(open(file, 'rb').read()).substitute(tables)
 
 # An IBIS section, eg, '[Model]'
 class section:
