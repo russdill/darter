@@ -649,7 +649,7 @@ for model in main.sections['model'] if 'model' in main.sections else []:
 
 	# Select what circuits we need and what pins we need
 	libs = [ 'ibis_buffer' ]
-	pins = None
+	pins = ''
 	en = None
 	out = None
 	nfixtures = 0
@@ -723,10 +723,9 @@ for model in main.sections['model'] if 'model' in main.sections else []:
 		for key, mode in sect.param.iteritems():
 			print '.lib {} {}'.format(outfile, ibis_translate(key))
 
-	if pins == None:
-		pins=''
-	else:
+	if len(pins):
 		pins += ' '
+
 	print '.subckt {} pad vcc vee {}spec=0'.format(ibis_translate(model.header), pins)
 	print '.model pullup d_pullup(load=0)'
 	print '.model pulldown d_pulldown(load=0)'
