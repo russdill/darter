@@ -905,7 +905,7 @@ for comp in main.sections['component'] if 'component' in main.sections else []:
 		else:
 			param(n, '0')
 
-	print '.include ibis_pkg.inc'
+	include('ibis_pkg.inc', None)
 	print '.ends {}'.format(name)
 
 	listed = set()
@@ -946,7 +946,7 @@ for comp in main.sections['component'] if 'component' in main.sections else []:
 #						param(n, '0')
 
 				print modv_func
-				print '.include ibis_pkg.inc'
+				include('ibis_pkg.inc', None)
 				print '.ends {}_{}'.format(name, ibis_translate(sub))
 			listed.add(vals['signal_name'])
 	print '.endl'
