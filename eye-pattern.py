@@ -108,7 +108,11 @@ if args.period:
 
 elif args.trigger:
 	hyst = parse_num(args.hysteresis)
-	vect = get_vector(vectors, args.trigger)
+	try:
+		vect = get_vector(vectors, args.trigger)
+	except:
+		print >> sys.stderr, "For {}".format(args.trigger)
+		raise
 
 	if not args.falling_trigger and not args.rising_trigger:
 		raise Exception('No trigger value given')
