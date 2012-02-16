@@ -40,9 +40,9 @@ T 48700 46800 5 10 1 1 0 0 1
 refdes=B_pc
 T 45100 47000 5 10 1 1 180 6 5
 value=I=modv(
-+	pwl(V(Vcc,pad) $power_clamp0_typ),
-+	pwl(V(Vcc,pad) $power_clamp0_min),
-+	pwl(V(Vcc,pad) $power_clamp0_max))
++	pwl(V(Vcc,pad) $Power_Clamp_typ),
++	pwl(V(Vcc,pad) $Power_Clamp_min),
++	pwl(V(Vcc,pad) $Power_Clamp_max))
 
 }
 C 49000 45700 1 270 0 current-1.sym
@@ -53,9 +53,9 @@ T 48700 45500 5 10 1 1 0 0 1
 refdes=B_gc
 T 45100 45700 5 10 1 1 180 6 4
 value=I=modv(
-+	pwl(V(pad, Vee) $gnd_clamp0_typ),
-+	pwl(V(pad, Vee) $gnd_clamp0_min),
-+	pwl(V(pad, Vee) $gnd_clamp0_max))
++	pwl(V(pad, Vee) $GND_Clamp_typ),
++	pwl(V(pad, Vee) $GND_Clamp_min),
++	pwl(V(pad, Vee) $GND_Clamp_max))
 }
 N 49200 45700 49200 46100 4
 N 49200 47000 49200 47200 4

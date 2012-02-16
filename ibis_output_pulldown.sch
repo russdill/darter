@@ -12,17 +12,17 @@ T 52900 38500 5 10 1 1 0 0 1
 refdes=B_pd
 T 52900 37600 5 10 1 1 0 0 4
 value=I=V(Kpd)*modv(
-+	pwl(V(pad, Vss) $pulldown0_typ),
-+	pwl(V(pad, Vss) $pulldown0_min),
-+	pwl(V(pad, Vss) $pulldown0_max))
++	pwl(V(pad, Vss) $Pulldown_typ),
++	pwl(V(pad, Vss) $Pulldown_min),
++	pwl(V(pad, Vss) $Pulldown_max))
 }
 N 56300 38700 56300 38600 4
 N 56300 37500 56300 37700 4
-T 52900 43300 8 10 1 0 0 0 1
+T 52900 41800 8 10 1 0 0 0 1
 use-license=GPL2+
-T 52906 43500 8 10 1 0 0 0 1
+T 52906 42000 8 10 1 0 0 0 1
 dist-license=GPL2+
-T 52906 43700 8 10 1 0 0 0 1
+T 52906 42200 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
 C 56500 40300 1 270 0 voltage-3.sym
 {
@@ -32,13 +32,13 @@ T 56900 40000 5 10 1 1 0 0 1
 refdes=B_Kpd
 T 52900 39200 5 10 1 1 0 0 8
 value=V=V(down) > 0 ? modv(
-+	pwl(V(rd_time) $rising_kpd0_typ),
-+	pwl(V(rd_time) $rising_kpd0_min),
-+	pwl(V(rd_time) $rising_kpd0_max)) :
++	pwl(V(rd_time) $Rising_kpd_typ),
++	pwl(V(rd_time) $Rising_kpd_min),
++	pwl(V(rd_time) $Rising_kpd_max)) :
 +modv(
-+	pwl(V(fd_time) $falling_kpd0_typ),
-+	pwl(V(fd_time) $falling_kpd0_min),
-+	pwl(V(fd_time) $falling_kpd0_max))
++	pwl(V(fd_time) $Falling_kpd_typ),
++	pwl(V(fd_time) $Falling_kpd_min),
++	pwl(V(fd_time) $Falling_kpd_max))
 }
 C 56600 39100 1 0 0 gnd-1.sym
 N 56700 40300 57800 40300 4
@@ -81,22 +81,14 @@ T 58700 40300 5 10 1 1 0 0 1
 netname=Kpd
 }
 N 56900 37600 56300 37600 4
-C 52900 42600 1 0 0 spice-directive-1.sym
+C 52900 41100 1 0 0 spice-directive-1.sym
 {
-T 53000 42900 5 10 0 1 0 0 1
+T 53000 41400 5 10 0 1 0 0 1
 device=directive
-T 52900 42900 5 10 1 1 180 6 10
+T 52900 41400 5 10 1 1 180 6 2
 value=.model kpd_slew slew(rise_slope={kpd_da_max}
 +	fall_slope={kpd_da_min})
-
-.param rising_kpd_max10={rising_kpd_max / 10}
-.model rdtime dac_bridge(out_low=0 out_high={rising_kpd_max}
-+	t_rise={rising_kpd_max} t_fall={rising_kpd_max10})
-
-.param falling_kpd_max10={falling_kpd_max / 10}
-.model fdtime dac_bridge(out_low=0 out_high={falling_kpd_max}
-+	t_rise={falling_kpd_max} t_fall={falling_kpd_max10})
-T 53000 43000 5 10 1 1 0 0 1
+T 53000 41500 5 10 1 1 0 0 1
 refdes=kpd
 }
 T 57700 38900 9 10 1 0 0 0 4
@@ -130,7 +122,7 @@ device=CURRENT_SOURCE
 T 59400 43300 5 10 1 1 0 0 1
 refdes=A_rdtime
 T 59400 42800 5 10 1 1 0 0 1
-value=rdtime
+value=rtime
 }
 N 58500 43100 59600 43100 4
 {
@@ -149,7 +141,7 @@ device=CURRENT_SOURCE
 T 59400 42500 5 10 1 1 0 0 1
 refdes=A_fdtime
 T 59400 42000 5 10 1 1 0 0 1
-value=fdtime
+value=ftime
 }
 N 58500 42300 59600 42300 4
 {
