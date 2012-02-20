@@ -68,11 +68,6 @@ T 45206 48100 8 10 1 0 0 0 1
 dist-license=GPL2+
 T 45200 48300 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
-N 47400 43800 47600 43800 4
-{
-T 47400 43800 5 10 1 1 0 0 1
-netname=0
-}
 C 52100 44800 1 90 0 resistor-1.sym
 {
 T 51700 45100 5 10 0 0 90 0 1
@@ -80,7 +75,7 @@ device=RESISTOR
 T 52100 45400 5 10 1 1 0 0 1
 refdes=R_pad_gnd_ref
 T 52100 45000 5 10 1 1 0 0 1
-value=1e18
+value=1e12
 }
 N 52000 45700 52000 45900 4
 C 45000 44000 1 270 0 voltage-3.sym
@@ -92,7 +87,6 @@ refdes=B_meas
 T 45300 43200 5 10 1 1 0 0 1
 value=V=V(pad) - V(Vee)
 }
-C 47300 43500 1 0 0 gnd-1.sym
 C 45100 42800 1 0 0 gnd-1.sym
 C 51900 44500 1 0 0 gnd-1.sym
 N 45200 44000 45800 44000 4
