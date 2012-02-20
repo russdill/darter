@@ -454,7 +454,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
     if len(pins):
         pins += ' '
 
-    print '.subckt {} pad vcc vee {}spec=0'.format(ibis_translate(name), pins)
+    print '.subckt {} pad vcc vee {}spec=0 start_on=1'.format(ibis_translate(name), pins)
     print '.model pullup d_pullup(load=0)'
     print '.model pulldown d_pulldown(load=0)'
     print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'

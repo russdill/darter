@@ -51,8 +51,8 @@ T 53800 43300 5 8 0 0 180 0 1
 device=VOLTAGE_SOURCE
 T 53000 44100 5 10 1 1 0 0 1
 refdes=V_delay
-T 52400 43400 5 10 1 1 0 0 1
-value=DC=0V pulse(0 1 1f 0 0 1Meg)
+T 51600 43400 5 10 1 1 0 0 1
+value=DC=0V pulse({start_on} 1 1f 0 0 1Meg)
 }
 T 52800 44400 9 10 1 0 0 0 6
 This is a bit of a hack. ngspice's DC solution
