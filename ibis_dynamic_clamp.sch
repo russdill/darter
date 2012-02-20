@@ -161,8 +161,8 @@ device=VOLTAGE_SOURCE
 T 43400 39600 5 10 1 1 0 0 1
 refdes=B_trigger_r
 T 44700 38900 5 10 1 1 0 0 2
-V=V(pad,Vee) > {V_trigger_r} ?
- {Power_Pulse_Table_time} : 0
+value=V=V(pad,Vee) > {V_trigger_r} ?
++    {Power_Pulse_Table_time} : 0
 }
 C 44200 36500 1 270 0 voltage-3.sym
 {
@@ -171,6 +171,6 @@ device=VOLTAGE_SOURCE
 T 43300 36300 5 10 1 1 0 0 1
 refdes=B_trigger_f
 T 44700 35600 5 10 1 1 0 0 2
-V=V(pad,Vee) < {V_trigger_f} ?
- {GND_Pulse_Table_time} : 0
+value=V=V(pad,Vee) < {V_trigger_f} ?
++    {GND_Pulse_Table_time} : 0
 }

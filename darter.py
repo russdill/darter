@@ -669,13 +669,8 @@ for name, model in main.submodel.iteritems() if 'submodel' in main else []:
         for table in [ 'GND Pulse Table', 'Power Pulse Table' ]:
             try:
                 data[ibis_translate(table)] = model[table]  
-                r = pybis.Range()
-                for i in range(3):
-                    r.append(model[table](i)[0][-1])
-                param(table + '_time', r)
             except:
                 data[ibis_translate(table)] = pybis.Range([ ( [0, 1], [0, 0] ), None, None])
-                param(table + '_time', 0)
 #    elif model.submodel_type == 'Bus_hold':
 #        lib = 'ibis_bus_hold'
 #        table_names.append('pulldown')
@@ -708,6 +703,15 @@ for name, model in main.submodel.iteritems() if 'submodel' in main else []:
             data[ibis_translate(n)] = flatten_extents(model[n])
         except:
             data[ibis_translate(n)] = pybis.Range([ ( [0, 1], [0, 0] ), None, None])
+
+    for table in [ 'GND Pulse Table', 'Power Pulse Table' ]:
+        try:
+            r = pybis.Range()
+            for i in range(3):
+                r.append(model[table](i)[0][-1])
+            param(ibis_translate(table) + '_time', r)
+        except:
+            param(ibis_translate(table) + '_time', 0)
 
     tables = dict()
     for tbl_name, tbl in data.iteritems():
