@@ -482,15 +482,15 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
 
     # FIXME: Rename pin names to IBIS standard. Perhaps make default "External Model"?
     if model.model_type == 'input': # 4
-        pins = 'D_receive'
+        pins = 'D_receive A_extref'
         en = 'pulldown'
     elif model.model_type == 'i/o': # 8
-        pins = 'A_puref A_pdref D_enable D_drive D_receive'
+        pins = 'A_puref A_pdref D_enable D_drive D_receive A_extref'
     elif model.model_type == 'i/o_open_sink': # 6
-        pins = 'A_pdref D_enable D_receive'
+        pins = 'A_pdref D_enable D_receive A_extref'
         out = 'pulldown'
     elif model.model_type == 'i/o_open_source': # 6
-        pins = 'A_puref D_enable D_receive'
+        pins = 'A_puref D_enable D_receive A_extref'
         out = 'pullup'
     elif model.model_type == 'terminator': # 3
         libs.append('ibis_terminator')
@@ -572,7 +572,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
             'gnd_clamp_ref': 'A_gcref',
             'pullup_ref': 'A_puref',
             'pulldown_ref': 'A_pdref',
-            'ext_ref': 'VRef' }
+            'ext_ref': 'A_extref' }
         tables['ref_supply'] = refs[thresholds['Reference_supply']]
     else:
         param('Threshold_sensitivity', 1)
@@ -694,6 +694,11 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         common_pins = 'A_pcref A_gcref'
         pos_pins = pins
         neg_pins = pins
+
+        if 'A_extref' in pins:
+            pins = pins.replace('A_extref', '')
+            pos_pins = pos_pins.replace('A_extref', '0')
+            neg_pins = neg_pins.replace('A_extref', '0')
 
         print '.subckt {}_DIFF A_signal_pos A_signal_neg {} {}spec=0 start_on=1'.format(
             ibis_translate(name), common_pins, pins)
