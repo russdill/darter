@@ -100,10 +100,10 @@ refdes=A_ru_on
 T 58300 45900 5 10 1 1 0 0 1
 value=and
 }
-N 58500 46200 56500 46200 4
+N 58500 46200 56100 46200 4
 {
-T 56500 46200 5 10 1 1 0 0 1
-netname=[D_enable ddly out]
+T 56100 46200 5 10 1 1 0 0 1
+netname=[D_enable ddly D_drive]
 }
 N 59400 46200 60600 46200 4
 {

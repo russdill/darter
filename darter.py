@@ -399,7 +399,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         pins = 'D_receive'
         en = 'pulldown'
     elif model.model_type == 'i/o': # 8
-        pins = 'vdd vss D_enable out D_receive'
+        pins = 'vdd vss D_enable D_drive D_receive'
     elif model.model_type == 'i/o_open_sink': # 6
         pins = 'vss D_enable D_receive'
         out = 'pulldown'
@@ -410,10 +410,10 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         libs.append('ibis_terminator')
         en = 'pulldown'
     elif model.model_type == 'output': # 6
-        pins = 'vdd vss out'
+        pins = 'vdd vss D_drive'
         en = 'pullup'
     elif model.model_type == '3-state': # 7
-        pins = 'vdd vss D_enable out'
+        pins = 'vdd vss D_enable D_drive'
     elif model.model_type == 'open_sink': # 5
         pins = 'vss D_enable'
         out = 'pulldown'
@@ -461,7 +461,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
     if en != None:
         print 'A_en D_enable {}'.format(en)
     if out != None:
-        print 'A_out out {}'.format(out)
+        print 'A_out D_drive {}'.format(out)
     print 'A_not_en D_enable D_not_enable inv'
     print 'A_always_hi always_hi pullup'
     print modv_func
