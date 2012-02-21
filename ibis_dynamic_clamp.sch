@@ -43,12 +43,6 @@ T 47000 36500 5 10 1 1 0 0 1
 netname=gp_time
 }
 C 44300 35300 1 0 0 gnd-1.sym
-C 44300 37200 1 0 0 gnd-1.sym
-N 44200 37500 44400 37500 4
-{
-T 44200 37500 5 10 1 1 0 0 1
-netname=0
-}
 T 44200 41900 8 10 1 0 0 0 1
 use-license=GPL2+
 T 44206 42100 8 10 1 0 0 0 1
@@ -92,8 +86,6 @@ value=I=V(on)*modv(
 N 54900 38100 54900 37700 4
 N 54900 39000 54900 39200 4
 N 54900 36600 54900 36800 4
-C 54700 39200 1 0 0 vcc-1.sym
-C 55100 36600 1 180 0 vee-1.sym
 N 54900 37900 56600 37900 4
 {
 T 56200 37900 5 10 1 1 0 0 1
@@ -108,7 +100,7 @@ C 50100 37700 1 0 1 voltage-3.sym
 {
 T 49900 38400 5 8 0 0 0 6 1
 device=VOLTAGE_SOURCE
-T 49400 38200 5 10 1 1 0 0 1
+T 49600 38200 5 10 1 1 0 0 1
 refdes=B_power_pulse0
 T 49200 38600 5 10 1 1 0 0 4
 value=V=V(pp_on) > 0 ? modv(
@@ -125,7 +117,7 @@ C 49200 37300 1 180 1 voltage-3.sym
 {
 T 49400 36600 5 8 0 0 180 6 1
 device=VOLTAGE_SOURCE
-T 49400 37400 5 10 1 1 0 0 1
+T 49600 37400 5 10 1 1 0 0 1
 refdes=B_gnd_pulse0
 T 49400 35900 5 10 1 1 0 0 4
 value=V=V(gp_on) > 0 ? modv(
@@ -133,8 +125,6 @@ value=V=V(gp_on) > 0 ? modv(
 +	pwl(V(gp_time) $GND_Pulse_Table_min),
 +	pwl(V(gp_time) $GND_Pulse_Table_max)): 0
 }
-C 49000 37900 1 0 0 vcc-1.sym
-C 49400 37100 1 180 0 vee-1.sym
 C 49000 41600 1 180 1 current-1.sym
 {
 T 49600 40600 5 10 0 0 180 6 1
@@ -161,7 +151,7 @@ device=VOLTAGE_SOURCE
 T 43400 39600 5 10 1 1 0 0 1
 refdes=B_trigger_r
 T 44700 38900 5 10 1 1 0 0 2
-value=V=V(A_signal,Vee) > {V_trigger_r} ?
+value=V=V(A_signal, A_gcref) > {V_trigger_r} ?
 +    {Power_Pulse_Table_time} : 0
 }
 C 44200 36500 1 270 0 voltage-3.sym
@@ -171,6 +161,26 @@ device=VOLTAGE_SOURCE
 T 43300 36300 5 10 1 1 0 0 1
 refdes=B_trigger_f
 T 44700 35600 5 10 1 1 0 0 2
-value=V=V(A_signal,Vee) < {V_trigger_f} ?
+value=V=V(A_signal, A_gcref) < {V_trigger_f} ?
 +    {GND_Pulse_Table_time} : 0
+}
+C 54700 39200 1 0 0 generic-power.sym
+{
+T 54900 39450 5 10 1 1 0 3 1
+net=A_pcref:1
+}
+C 54700 36600 1 180 1 generic-power.sym
+{
+T 54900 36350 5 10 1 1 180 3 1
+net=A_gcref:1
+}
+C 49000 37900 1 0 0 generic-power.sym
+{
+T 49200 38150 5 10 1 1 0 3 1
+net=A_pcref:1
+}
+C 49000 37100 1 180 1 generic-power.sym
+{
+T 49200 36850 5 10 1 1 180 3 1
+net=A_gcref:1
 }

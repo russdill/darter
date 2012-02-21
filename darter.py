@@ -454,7 +454,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
     if len(pins):
         pins += ' '
 
-    print '.subckt {} A_signal vcc vee {}spec=0 start_on=1'.format(ibis_translate(name), pins)
+    print '.subckt {} A_signal A_pcref A_gcref {}spec=0 start_on=1'.format(ibis_translate(name), pins)
     print '.model pullup d_pullup(load=0)'
     print '.model pulldown d_pulldown(load=0)'
     print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'
@@ -482,15 +482,15 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
     tables = dict()
     if 'Threshold_sensitivity' in thresholds:
         param('Threshold_sensitivity', thresholds.threshold_sensitivity)
-        refs = { 'power_clamp_ref': 'Vcc',
-            'gnd_clamp_ref': 'Vee',
+        refs = { 'power_clamp_ref': 'A_pcref',
+            'gnd_clamp_ref': 'A_gcref',
             'pullup_ref': 'Vdd',
             'pulldown_ref': 'Vss',
             'ext_ref': 'VRef' }
         tables['ref_supply'] = refs[thresholds['Reference_supply']]
     else:
         param('Threshold_sensitivity', 1)
-        tables['ref_supply'] = 'Vee'
+        tables['ref_supply'] = 'A_gcref'
 
     c_comp_list = [ 'C_comp_power_clamp', 'C_comp_gnd_clamp' ]
     if 'vdd' in pins:
@@ -590,7 +590,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         elif mode == 'all':
             en = 'always_hi'
 
-        print 'x_{} A_signal vcc vee vdd vss {} {} spec={{spec}}'.format(ibis_translate(key), en, ibis_translate(key))
+        print 'x_{} A_signal A_pcref A_gcref vdd vss {} {} spec={{spec}}'.format(ibis_translate(key), en, ibis_translate(key))
 
     print '.ends {}'.format(ibis_translate(name))
     print '.endl'
@@ -688,7 +688,7 @@ for name, model in main.submodel.iteritems() if 'submodel' in main else []:
         print '.endl'
         continue
 
-    print '.subckt {} A_signal vcc vee vdd vss D_enable spec=0'.format(ibis_translate(name))
+    print '.subckt {} A_signal A_pcref A_gcref vdd vss D_enable spec=0'.format(ibis_translate(name))
 
     print modv_func
 

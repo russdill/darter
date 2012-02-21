@@ -38,11 +38,11 @@ T 48400 46700 5 10 0 0 90 0 1
 device=CURRENT_SOURCE
 T 48700 46800 5 10 1 1 0 0 1
 refdes=B_pc
-T 45100 47000 5 10 1 1 180 6 5
+T 44400 47000 5 10 1 1 180 6 5
 value=I=modv(
-+	pwl(V(Vcc,A_signal) $Power_Clamp_typ),
-+	pwl(V(Vcc,A_signal) $Power_Clamp_min),
-+	pwl(V(Vcc,A_signal) $Power_Clamp_max))
++	pwl(V(A_pcref, A_signal) $Power_Clamp_typ),
++	pwl(V(A_pcref, A_signal) $Power_Clamp_min),
++	pwl(V(A_pcref, A_signal) $Power_Clamp_max))
 
 }
 C 49000 45700 1 270 0 current-1.sym
@@ -51,17 +51,15 @@ T 50000 45100 5 10 0 0 270 0 1
 device=CURRENT_SOURCE
 T 48700 45500 5 10 1 1 0 0 1
 refdes=B_gc
-T 45100 45700 5 10 1 1 180 6 4
+T 44400 45700 5 10 1 1 180 6 4
 value=I=modv(
-+	pwl(V(A_signal, Vee) $GND_Clamp_typ),
-+	pwl(V(A_signal, Vee) $GND_Clamp_min),
-+	pwl(V(A_signal, Vee) $GND_Clamp_max))
++	pwl(V(A_signal, A_gcref) $GND_Clamp_typ),
++	pwl(V(A_signal, A_gcref) $GND_Clamp_min),
++	pwl(V(A_signal, A_gcref) $GND_Clamp_max))
 }
 N 49200 45700 49200 46100 4
 N 49200 47000 49200 47200 4
 N 49200 44600 49200 44800 4
-C 49000 47200 1 0 0 vcc-1.sym
-C 49400 44600 1 180 0 vee-1.sym
 T 45200 47900 8 10 1 0 0 0 1
 use-license=GPL2+
 T 45206 48100 8 10 1 0 0 0 1
@@ -85,7 +83,7 @@ device=VOLTAGE_SOURCE
 T 45300 43800 5 10 1 1 0 0 1
 refdes=B_meas
 T 45300 43200 5 10 1 1 0 0 1
-value=V=V(A_signal) - V(Vee)
+value=V=V(A_signal) - V(A_gcref)
 }
 C 45100 42800 1 0 0 gnd-1.sym
 C 51900 44500 1 0 0 gnd-1.sym
@@ -93,4 +91,14 @@ N 45200 44000 45800 44000 4
 {
 T 45300 44000 5 10 1 1 0 0 1
 netname=meas
+}
+C 49000 47200 1 0 0 generic-power.sym
+{
+T 49200 47450 5 10 1 1 0 3 1
+net=A_pcref:1
+}
+C 49000 44600 1 180 1 generic-power.sym
+{
+T 49200 44350 5 10 1 1 180 3 1
+net=A_gcref:1
 }
