@@ -454,7 +454,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
     if len(pins):
         pins += ' '
 
-    print '.subckt {} pad vcc vee {}spec=0 start_on=1'.format(ibis_translate(name), pins)
+    print '.subckt {} A_signal vcc vee {}spec=0 start_on=1'.format(ibis_translate(name), pins)
     print '.model pullup d_pullup(load=0)'
     print '.model pulldown d_pulldown(load=0)'
     print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'
@@ -590,7 +590,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         elif mode == 'all':
             en = 'always_hi'
 
-        print 'x_{} pad vcc vee vdd vss {} {} spec={{spec}}'.format(ibis_translate(key), en, ibis_translate(key))
+        print 'x_{} A_signal vcc vee vdd vss {} {} spec={{spec}}'.format(ibis_translate(key), en, ibis_translate(key))
 
     print '.ends {}'.format(ibis_translate(name))
     print '.endl'
@@ -688,7 +688,7 @@ for name, model in main.submodel.iteritems() if 'submodel' in main else []:
         print '.endl'
         continue
 
-    print '.subckt {} pad vcc vee vdd vss en spec=0'.format(ibis_translate(name))
+    print '.subckt {} A_signal vcc vee vdd vss en spec=0'.format(ibis_translate(name))
 
     print modv_func
 

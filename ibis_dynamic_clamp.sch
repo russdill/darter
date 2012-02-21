@@ -73,9 +73,9 @@ T 55000 38800 5 10 1 1 0 0 1
 refdes=B_pc
 T 55600 38500 5 10 1 1 0 0 4
 value=I=V(on)*modv(
-+	pwl(V(power_pulse,pad) $Power_Clamp_typ),
-+	pwl(V(power_pulse,pad) $Power_Clamp_min),
-+	pwl(V(power_pulse,pad) $Power_Clamp_max))
++	pwl(V(power_pulse,A_signal) $Power_Clamp_typ),
++	pwl(V(power_pulse,A_signal) $Power_Clamp_min),
++	pwl(V(power_pulse,A_signal) $Power_Clamp_max))
 }
 C 54700 37700 1 270 0 current-1.sym
 {
@@ -85,9 +85,9 @@ T 55000 37500 5 10 1 1 0 0 1
 refdes=B_gc
 T 55600 36900 5 10 1 1 0 0 4
 value=I=V(on)*modv(
-+	pwl(V(pad, ground_pulse) $GND_Clamp_typ),
-+	pwl(V(pad, ground_pulse) $GND_Clamp_min),
-+	pwl(V(pad, ground_pulse) $GND_Clamp_max))
++	pwl(V(A_signal, ground_pulse) $GND_Clamp_typ),
++	pwl(V(A_signal, ground_pulse) $GND_Clamp_min),
++	pwl(V(A_signal, ground_pulse) $GND_Clamp_max))
 }
 N 54900 38100 54900 37700 4
 N 54900 39000 54900 39200 4
@@ -97,7 +97,7 @@ C 55100 36600 1 180 0 vee-1.sym
 N 54900 37900 56600 37900 4
 {
 T 56200 37900 5 10 1 1 0 0 1
-netname=pad
+netname=A_signal
 }
 N 50700 37100 50100 37100 4
 {
@@ -161,7 +161,7 @@ device=VOLTAGE_SOURCE
 T 43400 39600 5 10 1 1 0 0 1
 refdes=B_trigger_r
 T 44700 38900 5 10 1 1 0 0 2
-value=V=V(pad,Vee) > {V_trigger_r} ?
+value=V=V(A_signal,Vee) > {V_trigger_r} ?
 +    {Power_Pulse_Table_time} : 0
 }
 C 44200 36500 1 270 0 voltage-3.sym
@@ -171,6 +171,6 @@ device=VOLTAGE_SOURCE
 T 43300 36300 5 10 1 1 0 0 1
 refdes=B_trigger_f
 T 44700 35600 5 10 1 1 0 0 2
-value=V=V(pad,Vee) < {V_trigger_f} ?
+value=V=V(A_signal,Vee) < {V_trigger_f} ?
 +    {GND_Pulse_Table_time} : 0
 }

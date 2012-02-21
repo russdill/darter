@@ -2,7 +2,7 @@ v 20110115 2
 N 53100 40600 53700 40600 4
 {
 T 53300 40600 5 10 1 1 0 0 1
-netname=pad
+netname=A_signal
 }
 C 53300 40800 1 90 0 current-1.sym
 {
@@ -12,9 +12,9 @@ T 49900 41500 5 10 1 1 0 0 1
 refdes=B_pu
 T 49900 40600 5 10 1 1 0 0 4
 value=I=V(Kpu)*modv(
-+	pwl(V(Vdd, pad) $Pullup_typ),
-+	pwl(V(Vdd, pad) $Pullup_min),
-+	pwl(V(Vdd, pad) $Pullup_max))
++	pwl(V(Vdd, A_signal) $Pullup_typ),
++	pwl(V(Vdd, A_signal) $Pullup_min),
++	pwl(V(Vdd, A_signal) $Pullup_max))
 }
 C 52900 41900 1 0 0 vdd-1.sym
 N 53100 40800 53100 40600 4

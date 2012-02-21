@@ -2,7 +2,7 @@ v 20110115 2
 N 49800 45900 52300 45900 4
 {
 T 52000 46000 5 10 1 1 0 0 1
-netname=pad
+netname=A_signal
 }
 C 50000 44800 1 90 0 capacitor-1.sym
 {
@@ -40,9 +40,9 @@ T 48700 46800 5 10 1 1 0 0 1
 refdes=B_pc
 T 45100 47000 5 10 1 1 180 6 5
 value=I=modv(
-+	pwl(V(Vcc,pad) $Power_Clamp_typ),
-+	pwl(V(Vcc,pad) $Power_Clamp_min),
-+	pwl(V(Vcc,pad) $Power_Clamp_max))
++	pwl(V(Vcc,A_signal) $Power_Clamp_typ),
++	pwl(V(Vcc,A_signal) $Power_Clamp_min),
++	pwl(V(Vcc,A_signal) $Power_Clamp_max))
 
 }
 C 49000 45700 1 270 0 current-1.sym
@@ -53,9 +53,9 @@ T 48700 45500 5 10 1 1 0 0 1
 refdes=B_gc
 T 45100 45700 5 10 1 1 180 6 4
 value=I=modv(
-+	pwl(V(pad, Vee) $GND_Clamp_typ),
-+	pwl(V(pad, Vee) $GND_Clamp_min),
-+	pwl(V(pad, Vee) $GND_Clamp_max))
++	pwl(V(A_signal, Vee) $GND_Clamp_typ),
++	pwl(V(A_signal, Vee) $GND_Clamp_min),
++	pwl(V(A_signal, Vee) $GND_Clamp_max))
 }
 N 49200 45700 49200 46100 4
 N 49200 47000 49200 47200 4
@@ -85,7 +85,7 @@ device=VOLTAGE_SOURCE
 T 45300 43800 5 10 1 1 0 0 1
 refdes=B_meas
 T 45300 43200 5 10 1 1 0 0 1
-value=V=V(pad) - V(Vee)
+value=V=V(A_signal) - V(Vee)
 }
 C 45100 42800 1 0 0 gnd-1.sym
 C 51900 44500 1 0 0 gnd-1.sym

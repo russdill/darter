@@ -2,7 +2,7 @@ v 20110115 2
 N 56300 38700 56900 38700 4
 {
 T 56400 38700 5 10 1 1 0 0 1
-netname=pad
+netname=A_signal
 }
 C 56100 38600 1 270 0 current-1.sym
 {
@@ -12,9 +12,9 @@ T 52900 38500 5 10 1 1 0 0 1
 refdes=B_pd
 T 52900 37600 5 10 1 1 0 0 4
 value=I=V(Kpd)*modv(
-+	pwl(V(pad, Vss) $Pulldown_typ),
-+	pwl(V(pad, Vss) $Pulldown_min),
-+	pwl(V(pad, Vss) $Pulldown_max))
++	pwl(V(A_signal, Vss) $Pulldown_typ),
++	pwl(V(A_signal, Vss) $Pulldown_min),
++	pwl(V(A_signal, Vss) $Pulldown_max))
 }
 N 56300 38700 56300 38600 4
 N 56300 37500 56300 37700 4
