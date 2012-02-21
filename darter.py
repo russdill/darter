@@ -396,15 +396,15 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
 
     # FIXME: Rename pin names to IBIS standard. Perhaps make default "External Model"?
     if model.model_type == 'input': # 4
-        pins = 'in'
+        pins = 'D_receive'
         en = 'pulldown'
     elif model.model_type == 'i/o': # 8
-        pins = 'vdd vss en out in'
+        pins = 'vdd vss en out D_receive'
     elif model.model_type == 'i/o_open_sink': # 6
-        pins = 'vss en in'
+        pins = 'vss en D_receive'
         out = 'pulldown'
     elif model.model_type == 'i/o_open_source': # 6
-        pins = 'vdd en in'
+        pins = 'vdd en D_receive'
         out = 'pullup'
     elif model.model_type == 'terminator': # 3
         libs.append('ibis_terminator')
@@ -434,7 +434,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         print '* Unhandled model type: {}'.format(model.model_type)
         continue
 
-    if 'in' in pins:
+    if 'D_receive' in pins:
         libs.append('ibis_input')
     if 'vdd' in pins:
         libs.append('ibis_output_pullup')
