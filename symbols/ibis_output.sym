@@ -42,7 +42,7 @@ pinnumber=6
 T 100 1250 5 8 0 1 0 8 1
 pinseq=6
 T 250 1350 9 8 1 1 0 0 1
-pinlabel=OUT
+pinlabel=DRV
 T 250 1300 5 8 0 1 0 2 1
 pintype=pas
 }
