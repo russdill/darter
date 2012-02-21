@@ -399,12 +399,12 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         pins = 'D_receive'
         en = 'pulldown'
     elif model.model_type == 'i/o': # 8
-        pins = 'vdd vss en out D_receive'
+        pins = 'vdd vss D_enable out D_receive'
     elif model.model_type == 'i/o_open_sink': # 6
-        pins = 'vss en D_receive'
+        pins = 'vss D_enable D_receive'
         out = 'pulldown'
     elif model.model_type == 'i/o_open_source': # 6
-        pins = 'vdd en D_receive'
+        pins = 'vdd D_enable D_receive'
         out = 'pullup'
     elif model.model_type == 'terminator': # 3
         libs.append('ibis_terminator')
@@ -413,12 +413,12 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         pins = 'vdd vss out'
         en = 'pullup'
     elif model.model_type == '3-state': # 7
-        pins = 'vdd vss en out'
+        pins = 'vdd vss D_enable out'
     elif model.model_type == 'open_sink': # 5
-        pins = 'vss en'
+        pins = 'vss D_enable'
         out = 'pulldown'
     elif model.model_type == 'open_source': # 5
-        pins = 'vdd en'
+        pins = 'vdd D_enable'
         out = 'pullup'
 #    elif model.model_type == 'Input_ECL':
 #    elif model.model_type == 'Output_ECL':
@@ -459,10 +459,10 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
     print '.model pulldown d_pulldown(load=0)'
     print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'
     if en != None:
-        print 'A_en en {}'.format(en)
+        print 'A_en D_enable {}'.format(en)
     if out != None:
         print 'A_out out {}'.format(out)
-    print 'A_not_en en not_en inv'
+    print 'A_not_en D_enable D_not_enable inv'
     print 'A_always_hi always_hi pullup'
     print modv_func
 
@@ -584,9 +584,9 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
     # Include necessary submodel circuits
     for key, mode in model.add_submodel.iteritems() if 'Add Submodel' in model else []:
         if mode == 'non-driving':
-            en = 'not_en'
+            en = 'D_not_enable'
         elif mode == 'driving':
-            en = 'en'
+            en = 'D_enable'
         elif mode == 'all':
             en = 'always_hi'
 
@@ -688,7 +688,7 @@ for name, model in main.submodel.iteritems() if 'submodel' in main else []:
         print '.endl'
         continue
 
-    print '.subckt {} A_signal vcc vee vdd vss en spec=0'.format(ibis_translate(name))
+    print '.subckt {} A_signal vcc vee vdd vss D_enable spec=0'.format(ibis_translate(name))
 
     print modv_func
 
