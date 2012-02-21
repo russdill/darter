@@ -28,7 +28,6 @@ import copy
 ignored_sections = set([
     'Component.Package Model.Alternate Package Models',
     'Component.Pin Mapping',
-    'Component.Diff Pin',
     'Component.Series Pin Mapping',
     'Component.Series Switch Groups',
     'Component.Node Declarations',
@@ -87,8 +86,6 @@ ignored_sections = set([
     'Model.Receiver Thresholds.Vth_max',
     'Model.Receiver Thresholds.Vcross_low',
     'Model.Receiver Thresholds.Vcross_high',
-    'Model.Receiver Thresholds.Vdiff_ac',
-    'Model.Receiver Thresholds.Vdiff_dc',
     'Model.Receiver Thresholds.Tslew_ac',
     'Model.Receiver Thresholds.Tdiffslew_ac',
     'Submodel.Ramp',
@@ -384,6 +381,95 @@ for name, model in main.define_package_model.iteritems() if 'Define Package Mode
             pm[pin] = tmp
     package_models[name] = pm
 
+diff_models = dict()
+
+# Generate pin component parasitics
+for name, comp in main.component.iteritems() if 'component' in main else []:
+    name = ibis_translate(name)
+
+    print '.lib {}'.format(name)
+    print '.subckt {} pad gnd die spec=0'.format(name)
+
+    print '* Manufacturer: {}'.format(comp.manufacturer)
+
+    try:
+        pm = package_models[comp.package_model]
+    except:
+        pm = dict()
+
+    print modv_func
+    param('R_pkg', comp.package.r_pkg.norm)
+    param('L_pkg', comp.package.l_pkg.inv)
+    param('C_pkg', comp.package.c_pkg.inv)
+
+    include('ibis_pkg.inc', None)
+    print '.ends {}'.format(name)
+
+    listed = set()
+
+    for pin, vals in comp.pin.iteritems():
+        if vals.signal_name is None or vals.model_name is None:
+            continue
+
+        # Don't print out non-pin specific information
+        if (n not in vals or vals[n] is None) and not pin in pm:
+            continue
+
+        for sub, signal in [ [ pin, False ], [ vals.signal_name, True ] ]:
+            # Ignore duplicated pins (power/ground)
+            # NOTE: This may or may not be throwing away
+            # data depending in the IBIS model
+            if signal and sub in listed:
+                continue
+
+            print '.subckt {}_{} pad gnd die spec=0'.format(name,
+                            ibis_translate(sub))
+            if signal:
+                print '* pin {}'.format(pin)
+            else:
+                print '* {}'.format(vals.signal_name)
+
+            for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
+                n = '{}_pin'.format(prefix)
+                np = '{}_pkg'.format(prefix)
+                if n in vals and vals[n] is not None:
+                    param(np, vals[n], inv)
+                elif pin in pm and prefix in pm[pin]:
+                    param(np, pm[pin][prefix], inv)
+                else:
+                    param(np, comp.package[np], inv)
+
+            print modv_func
+            include('ibis_pkg.inc', None)
+            print '.ends {}_{}'.format(name, ibis_translate(sub))
+        listed.add(vals.signal_name)
+    print '.endl'
+
+    # Track info from diff pin sections
+    if 'Diff Pin' in comp:
+        for pin_name, diff_info in comp.diff_pin.iteritems():
+            pin_info = comp.pin[pin_name]
+            inv_info = comp.pin[diff_info.inv_pin]
+            if pin_info.model_name != inv_info.model_name:
+                # We can't handle that...
+                print >> sys.stderr, 'Warning: Cannot handle [Diff Pin] {} in component {} with mixed models'.format(pin_name, name)
+                continue
+            if pin_info.model_name in main.model:
+                models = [pin_info.model_name]
+            else:
+                models = main.model_selector[pin_info.model_name].keys()
+            for model_name in models:
+                if model_name in diff_models:
+                    if diff_models[model_name] is None:
+                        # already ignored
+                        pass
+                    elif diff_models[model_name] != diff_info.vdiff:
+                        # We don't know what to do with this...
+                        diff_models[model_name] = None
+                        print >> sys.stderr, 'Warning: Cannot handle variable vdiff across different [Diff Pin] sets with same model (component {}, pin {})'.format(name, pin_name)
+                else:
+                    diff_models[model_name] = diff_info.vdiff
+
 # Process each model
 for name, model in main.model.iteritems() if 'Model' in main else []:
 
@@ -593,68 +679,43 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         print 'x_{} A_signal A_pcref A_gcref A_puref A_pdref {} {} spec={{spec}}'.format(ibis_translate(key), en, ibis_translate(key))
 
     print '.ends {}'.format(ibis_translate(name))
-    print '.endl'
-
-# Generate pin component parasitics
-for name, comp in main.component.iteritems() if 'component' in main else []:
-    name = ibis_translate(name)
-
-    print '.lib {}'.format(name)
-    print '.subckt {} pad gnd die spec=0'.format(name)
-
-    print '* Manufacturer: {}'.format(comp.manufacturer)
 
     try:
-        pm = package_models[comp.package_model]
+        vdiff_ac = model.receiver_thresholds.vdiff_ac
+        vdiff_dc = model.receiver_thresholds.vdiff_dc
     except:
-        pm = dict()
+        if name in diff_models:
+            vdiff_ac = diff_models[name]
+            vdiff_dc = vdiff_ac
+        else:
+            vdiff_ac = None
 
-    print modv_func
-    param('R_pkg', comp.package.r_pkg.norm)
-    param('L_pkg', comp.package.l_pkg.inv)
-    param('C_pkg', comp.package.c_pkg.inv)
+    if 'D_receive' not in pins or vdiff_ac is not None:
+        common_pins = 'A_pcref A_gcref'
+        pos_pins = pins
+        neg_pins = pins
 
-    include('ibis_pkg.inc', None)
-    print '.ends {}'.format(name)
+        print '.subckt {}_DIFF A_signal_pos A_signal_neg {} {}spec=0 start_on=1'.format(
+            ibis_translate(name), common_pins, pins)
 
-    listed = set()
+        if 'D_drive' in pins:
+            print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'
+            print 'A_not_drive D_drive D_not_drive inv'
+            neg_pins = neg_pins.replace('D_drive', 'D_not_drive')
 
-    for pin, vals in comp.pin.iteritems():
-        if vals.signal_name is None or vals.model_name is None:
-            continue
+        if 'D_receive' in pins:
+            pos_pins = pos_pins.replace('D_receive', 'D_receive_pos')
+            neg_pins = neg_pins.replace('D_receive', 'D_receive_neg')
+            param('Vdiff_ac', vdiff_ac)
+            param('Vdiff_dc', vdiff_dc)
+            include('ibis_input_diff.inc', dict())
 
-        # Don't print out non-pin specific information
-        if (n not in vals or vals[n] is None) and not pin in pm:
-            continue
+        print 'X_pos A_signal_pos {} {}{} spec={{spec}} start_on={{start_on}}'.format(
+            common_pins, pos_pins, ibis_translate(name))
+        print 'X_neg A_signal_neg {} {}{} spec={{spec}} start_on={{start_on}}'.format(
+            common_pins, neg_pins, ibis_translate(name))
 
-        for sub, signal in [ [ pin, False ], [ vals.signal_name, True ] ]:
-            # Ignore duplicated pins (power/ground)
-            # NOTE: This may or may not be throwing away
-            # data depending in the IBIS model
-            if signal and sub in listed:
-                continue
-
-            print '.subckt {}_{} pad gnd die spec=0'.format(name,
-                            ibis_translate(sub))
-            if signal:
-                print '* pin {}'.format(pin)
-            else:
-                print '* {}'.format(vals.signal_name)
-
-            for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
-                n = '{}_pin'.format(prefix)
-                np = '{}_pkg'.format(prefix)
-                if n in vals and vals[n] is not None:
-                    param(np, vals[n], inv)
-                elif pin in pm and prefix in pm[pin]:
-                    param(np, pm[pin][prefix], inv)
-                else:
-                    param(np, comp.package[np], inv)
-
-            print modv_func
-            include('ibis_pkg.inc', None)
-            print '.ends {}_{}'.format(name, ibis_translate(sub))
-        listed.add(vals.signal_name)
+        print '.ends {}_DIFF'.format(ibis_translate(name))
     print '.endl'
 
 # Create submodel subcircuits
