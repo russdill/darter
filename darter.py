@@ -399,26 +399,26 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         pins = 'D_receive'
         en = 'pulldown'
     elif model.model_type == 'i/o': # 8
-        pins = 'vdd vss D_enable D_drive D_receive'
+        pins = 'A_puref A_pdref D_enable D_drive D_receive'
     elif model.model_type == 'i/o_open_sink': # 6
-        pins = 'vss D_enable D_receive'
+        pins = 'A_pdref D_enable D_receive'
         out = 'pulldown'
     elif model.model_type == 'i/o_open_source': # 6
-        pins = 'vdd D_enable D_receive'
+        pins = 'A_puref D_enable D_receive'
         out = 'pullup'
     elif model.model_type == 'terminator': # 3
         libs.append('ibis_terminator')
         en = 'pulldown'
     elif model.model_type == 'output': # 6
-        pins = 'vdd vss D_drive'
+        pins = 'A_puref A_pdref D_drive'
         en = 'pullup'
     elif model.model_type == '3-state': # 7
-        pins = 'vdd vss D_enable D_drive'
+        pins = 'A_puref A_pdref D_enable D_drive'
     elif model.model_type == 'open_sink': # 5
-        pins = 'vss D_enable'
+        pins = 'A_pdref D_enable'
         out = 'pulldown'
     elif model.model_type == 'open_source': # 5
-        pins = 'vdd D_enable'
+        pins = 'A_puref D_enable'
         out = 'pullup'
 #    elif model.model_type == 'Input_ECL':
 #    elif model.model_type == 'Output_ECL':
@@ -436,13 +436,13 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
 
     if 'D_receive' in pins:
         libs.append('ibis_input')
-    if 'vdd' in pins:
+    if 'A_puref' in pins:
         libs.append('ibis_output_pullup')
         nfixtures += 1
-    if 'vss' in pins:
+    if 'A_pdref' in pins:
         libs.append('ibis_output_pulldown')
         nfixtures += 1
-    if 'vdd' in pins or 'vss' in pins:
+    if 'A_puref' in pins or 'A_pdref' in pins:
         libs.append('ibis_output')
 
     print '.lib {}'.format(ibis_translate(name))
@@ -484,8 +484,8 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         param('Threshold_sensitivity', thresholds.threshold_sensitivity)
         refs = { 'power_clamp_ref': 'A_pcref',
             'gnd_clamp_ref': 'A_gcref',
-            'pullup_ref': 'Vdd',
-            'pulldown_ref': 'Vss',
+            'pullup_ref': 'A_puref',
+            'pulldown_ref': 'A_pdref',
             'ext_ref': 'VRef' }
         tables['ref_supply'] = refs[thresholds['Reference_supply']]
     else:
@@ -493,9 +493,9 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         tables['ref_supply'] = 'A_gcref'
 
     c_comp_list = [ 'C_comp_power_clamp', 'C_comp_gnd_clamp' ]
-    if 'vdd' in pins:
+    if 'A_puref' in pins:
         c_comp_list.append('C_comp_pullup')
-    if 'vss' in pins:
+    if 'A_pdref' in pins:
         c_comp_list.append('C_comp_pulldown')
 
     need_c_comp = True
@@ -590,7 +590,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         elif mode == 'all':
             en = 'always_hi'
 
-        print 'x_{} A_signal A_pcref A_gcref vdd vss {} {} spec={{spec}}'.format(ibis_translate(key), en, ibis_translate(key))
+        print 'x_{} A_signal A_pcref A_gcref A_puref A_pdref {} {} spec={{spec}}'.format(ibis_translate(key), en, ibis_translate(key))
 
     print '.ends {}'.format(ibis_translate(name))
     print '.endl'
@@ -688,7 +688,7 @@ for name, model in main.submodel.iteritems() if 'submodel' in main else []:
         print '.endl'
         continue
 
-    print '.subckt {} A_signal A_pcref A_gcref vdd vss D_enable spec=0'.format(ibis_translate(name))
+    print '.subckt {} A_signal A_pcref A_gcref A_puref A_pdref D_enable spec=0'.format(ibis_translate(name))
 
     print modv_func
 
