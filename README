@@ -2,7 +2,7 @@ Darter is very much a work in progress. The basic workflow is:
 
   * Build ibis_*.inc files (make).
   * Obtain a .ibs file from your vendor (eg, u69a.ibs).
-  * Build the associated .lib file (make u69a.lib).
+  * Build the associated .lib file (darter.py u69a.ibs u69a.lib).
   * Create a schematic using the proper IBIS components:
       - Check in your .ibs file to see what [Model]'s are available.
       - Create a 'SPICE directive' with a .lib line for that [Model] (.lib
@@ -10,12 +10,12 @@ Darter is very much a work in progress. The basic workflow is:
       - Select the gEDA IBIS symbol associated with the Model_type.
       - Fill in the in the symbol attribute (DQ_FULL_533).
           + Optionally add spec=-1/0/1 for slow, typ, and fast respectively
-          + Optionally prefix model name with package name and '_' for package
-            modeling.
-          + Optionally Suffix model name with '_' and pin name of signal name
-            for package modelling.
-          + eg: MT47H128M16U69A_DQ_FULL_533_DQ14 spec=1 
-      - Connect up a stimulus to the IN and EN pins if applicable.
+          + Optionally add start_on=1/0 to change the initial state of the
+            buffer. With the default (start_on=1), the buffer starts in whatever
+            state is indicated by its input. With start_on=0, the buffer will
+            start tristated and then immediately transition to the state given
+            by the inputs. The latter can help with convergence is some cases.
+      - Connect up a digital stimulus to the IN and DRV pins if applicable.
       - Connect up the power and ground rails.
       - Connect together various models as in your own design.
       - Create a SPICE netlist from your schematic (gnetlist -g spice-sdb -o
@@ -23,6 +23,27 @@ Darter is very much a work in progress. The basic workflow is:
       - Load the netlist in ngspice (ngspice example.net).
       - Run as appropriate (tran 1p 60n).
       - Plot the output (aka, go nuts).
+
+Darter also supports pseudo-differential models. Add the suffix '_DIFF' for the
+differential model. Threshold information is pulled from the '[Diff Pin]'
+section or the '[Receiver Thresholds]'.
+
+Pin parasitics are supported with additional subckts:
+
+  * Add a .lib line for the component (.lib MT47H512M4EB).
+  * Add the 'ibis_ebd-1.sym' component.
+  * Fill in the symbol attribute with <component>, <component>_<pin> or
+    <component>_<signal>, such as MT47H512M4EB_DQ0 or MT47H512M4EB_C9. As with
+    model, the 'spec' keyword can be used.
+  * Connect 'Pin' to the outside of the component, 'Gnd' to ground, and the
+    third pin to the associated IBIS model.
+
+There is limited support for board description files. If the board description
+file only connects from an external pin to internal nodes, it can be used. This
+is the case for board description files that describe multiple dies in a single
+package. It is done the same way with component pin parasitics except that a
+different symbol must be used depending on the number of die pads the along the
+path.
 
 Currently unsupported:
 
@@ -43,8 +64,7 @@ Current limitations:
     output.
   * Output buffers need two rising and falling waveforms each.
   * Open source/sink buffers need one rising and one falling waveform.
-  * Ramp data is ignored.
-
+  * Ramp data is not used.
 
 PyBIS - Used by darter to parse IBIS files:
 http://github.com/russdill/pybis
