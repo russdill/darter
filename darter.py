@@ -703,6 +703,8 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         print '.subckt {}_DIFF A_signal_pos A_signal_neg {} {}spec=0 start_on=1'.format(
             ibis_translate(name), common_pins, pins)
 
+        include('ibis_buffer_diff.inc', dict())
+
         if 'D_drive' in pins:
             print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'
             print 'A_not_drive D_drive D_not_drive inv'

@@ -6,6 +6,7 @@ IBIS_COMPONENTS=\
 	ibis_output_pulldown.inc \
 	ibis_output_pullup.inc \
 	ibis_buffer.inc \
+	ibis_buffer_diff.inc \
 	ibis_terminator.inc \
 	ibis_dynamic_clamp.inc
 
