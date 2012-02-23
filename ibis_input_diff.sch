@@ -103,3 +103,20 @@ N 46800 40900 47900 40900 4
 T 47900 40900 5 10 1 1 0 6 1
 netname=A_signal_neg
 }
+C 41700 39900 1 270 0 voltage-3.sym
+{
+T 42400 39700 5 8 0 0 270 0 1
+device=VOLTAGE_SOURCE
+T 42000 39700 5 10 1 1 0 0 1
+refdes=B_vcross
+T 42300 39000 5 10 1 1 0 0 3
+value=V=V(state) == 0.5 && 
++    (V(A_signal_pos, A_gcref) < Vcross_low ||
++     V(A_signal_pos, A_gcref) > Vcross_high)
+}
+C 41800 38700 1 0 0 gnd-1.sym
+N 43000 39900 41900 39900 4
+{
+T 41900 39900 5 10 1 1 0 0 1
+netname=vcross_violation
+}

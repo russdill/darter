@@ -713,6 +713,14 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
             neg_pins = neg_pins.replace('D_receive', 'D_receive_neg')
             param('Vdiff_ac', vdiff_ac)
             param('Vdiff_dc', vdiff_dc)
+            try:
+                param('Vcross_low', model.receiver_thresholds.vcross_low)
+            except:
+                param('Vcross_low', '-1MegV')
+            try:
+                param('Vcross_high', model.receiver_thresholds.vcross_high)
+            except:
+                param('Vcross_high', '1MegV')
             include('ibis_input_diff.inc', dict())
 
         print 'X_pos A_signal_pos {} {}{} spec={{spec}} start_on={{start_on}}'.format(
