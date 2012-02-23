@@ -700,13 +700,13 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
             pos_pins = pos_pins.replace('A_extref', '0')
             neg_pins = neg_pins.replace('A_extref', '0')
 
-        print '.subckt {}_DIFF A_signal_pos A_signal_neg {} {}spec=0 start_on=1'.format(
+        print '.subckt {}_DIFF A_signal_pos A_signal_neg {} {}spec=0 start_on=1 tdelay=1f'.format(
             ibis_translate(name), common_pins, pins)
 
         include('ibis_buffer_diff.inc', dict())
 
         if 'D_drive' in pins:
-            print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'
+            print '.model inv d_inverter(rise_delay={{tdelay}} fall_delay={{tdelay}} input_load=0)'
             print 'A_not_drive D_drive D_not_drive inv'
             neg_pins = neg_pins.replace('D_drive', 'D_not_drive')
 
