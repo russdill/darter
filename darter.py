@@ -706,7 +706,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         include('ibis_buffer_diff.inc', dict())
 
         if 'D_drive' in pins:
-            print '.model inv d_inverter(rise_delay={{tdelay}} fall_delay={{tdelay}} input_load=0)'
+            print '.model inv d_inverter(rise_delay={tdelay} fall_delay={tdelay} input_load=0)'
             print 'A_not_drive D_drive D_not_drive inv'
             neg_pins = neg_pins.replace('D_drive', 'D_not_drive')
 
