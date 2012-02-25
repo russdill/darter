@@ -573,7 +573,15 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
             'pullup_ref': 'A_puref',
             'pulldown_ref': 'A_pdref',
             'ext_ref': 'A_extref' }
-        tables['ref_supply'] = refs[thresholds['Reference_supply']]
+        ref = refs[thresholds['Reference_supply']]
+        # Some models specify a puref or pdref but
+        # don't have pullup or pulldown structures
+        if ref not in pins:
+            if ref == 'A_puref':
+                ref = 'A_pcref'
+            elif ref == 'A_pdref':
+                ref = 'A_gcref'
+        tables['ref_supply'] = ref
     else:
         param('Threshold_sensitivity', 1)
         tables['ref_supply'] = 'A_gcref'
