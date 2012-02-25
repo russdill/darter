@@ -251,6 +251,9 @@ def fixture(refs, data, nfixtures):
                         last_dx[n] = next_dx
                         curr_x[n] = next_x[n]
 
+                    dx = min(dx, waveform[n].waveform(i)[0][-1] - t)
+                    dx = min(dx, t - waveform[n].waveform(i)[0][0])
+
                     Icomp = derivative(wfm[n], t, dx=dx) * c_comp[n]
                     Ifx.append(I - (Igc + Ipc + Icomp))
                     Ipu.append(pu[i](refs['Pullup Reference'](i) - y))
