@@ -17,9 +17,10 @@
 import sys
 import argparse
 import spice_read
+import bisect
 from pylab import *
 
-def parse_num(val):
+def parse_si(val):
 	if isinstance(val, float) or isinstance(val, int) or val == "inf":
 		return float(val)
 
@@ -37,21 +38,10 @@ def get_vector(vectors, n):
 	return filter(lambda vect: vect.name == n,
 			vectors.get_datavectors())[0].get_data()
 
-def plot_at(vector, idx, timestep, steps):
-	x_end = int(steps / 2)
-	x_begin = x_end - steps
-
-	begin = idx + x_begin
-	if begin < 0:
-		x_begin -= begin
-		begin = 0
-
-	end = idx + x_end
-	if end > len(vector):
-		x_end -= end - len(vector)
-		end = len(vector)
-
-	x = [ x * timestep for x in range(x_begin, x_end) ]
+def plot_at(vector, at):
+	begin = max(bisect.bisect_right(time, at - width / 2) - 1, 0)
+	end = min(bisect.bisect_left(time, at + width / 2), len(time) - 1)
+	x = [ x - at for x in time[begin:end] ]
 	plot(x, vector[begin:end], color='blue')
 
 parser = argparse.ArgumentParser(conflict_handler='resolve')
@@ -84,30 +74,25 @@ args = parser.parse_args()
 vectors = spice_read.spice_read(args.input).get_plots()[0]
 vector = get_vector(vectors, args.vector)
 time = vectors.get_scalevector().get_data()
-timestep = time[1] - time[0]
-end_time = time[-1] + timestep
-
-width = parse_num(args.width)
-steps = int(width / timestep)
-offset = parse_num(args.offset)
-
-start = parse_num(args.start)
-end = parse_num(args.end)
+offset = parse_si(args.offset)
+width = parse_si(args.width)
+start = parse_si(args.start)
+end = min(parse_si(args.end), time[-1])
 
 xlim(-width / 2, width / 2)
 
 samples = 0
 
 if args.period:
-	period = parse_num(args.period)
+	period = parse_si(args.period)
 	center = offset + start
-	while center < min(end, end_time):
+	while center < end:
 		samples += 1
-		plot_at(vector, int(center / timestep), timestep, steps)
+		plot_at(vector, center)
 		center += period
 
 elif args.trigger:
-	hyst = parse_num(args.hysteresis)
+	hyst = parse_si(args.hysteresis)
 	try:
 		vect = get_vector(vectors, args.trigger)
 	except:
@@ -118,45 +103,37 @@ elif args.trigger:
 		raise Exception('No trigger value given')
 	both = args.falling_trigger and args.rising_trigger
 
-	if start < 0:
-		start_idx = 0
-	else:
-		start_idx = int(start / timestep)
-	if end > end_time:
-		end_idx = len(time)
-	else:
-		end_idx = int(math.ceil(end / timestep))
+	start_idx = max(bisect.bisect_right(time, start) - 1, 0)
+	end_idx = min(bisect.bisect_left(time, end), len(time))
 
 	if args.falling_trigger:
-		fv = parse_num(args.falling_trigger)
+		fv = parse_si(args.falling_trigger)
 		fstate = vect[start_idx] <= fv
 	if args.rising_trigger:
-		rv = parse_num(args.rising_trigger)
+		rv = parse_si(args.rising_trigger)
 		rstate = vect[start_idx] >= rv
 
-	idx = start_idx
-	while idx < end_idx:
- 		curr = int(idx + offset / timestep)
+	for idx in range(start_idx, end_idx):
+		curr = time[idx] + offset
 		if both:
 			if (rstate and vect[idx] <= fv) or (not rstate and vect[idx] >= rv):
 				rstate = not rstate
 				samples += 1
-				plot_at(vector, curr, timestep, steps)
+				plot_at(vector, curr)
 		if args.falling_trigger and not both:
 			if fstate and vect[idx] > fv + hyst:
 				fstate = False
 			elif not fstate and fvect[idx] <= fv:
 				fstate = True
 				samples += 1
-				plot_at(vector, curr, timestep, steps)
+				plot_at(vector, curr)
 		if args.rising_trigger and not both:
 			if rstate and vect[idx] < rv - hyst:
 				rstate = False
 			elif not rstate and vect[idx] >= rv:
 				rstate = True
 				samples += 1
-				plot_at(vector, curr, timestep, steps)
-		idx += 1
+				plot_at(vector, curr)
 else:
 	raise Exception('No stimulus given')
 
