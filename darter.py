@@ -36,14 +36,9 @@ ignored_sections = set([
     'Model Selector',
     'Model.Polarity',
     'Model.Enable'
-    'Model.Vmeas',
-    'Model.Cref',
-    'Model.Rref',
-    'Model.Vref',
     'Model.TTgnd',
     'Model.TTpower',
     'Model.Temperature Range',
-    'Model.External Reference',
     'Model.ISSO PU',
     'Model.ISSO PD',
     'Model.Ramp',
@@ -60,34 +55,11 @@ ignored_sections = set([
     'Model.Series Mosfet',
     'Model.On',
     'Model.Off',
-    'Model.Model Spec.S_overshoot_high',
-    'Model.Model Spec.S_overshoot_low',
-    'Model.Model Spec.D_overshoot_high',
-    'Model.Model Spec.D_overshoot_low',
-    'Model.Model Spec.D_overshoot_time',
     'Model.Model Spec.Pulse_high',
     'Model.Model Spec.Pulse_low',
     'Model.Model Spec.Pulse_time',
-    'Model.Model Spec.Vmeas',
-    'Model.Model Spec.Vref',
-    'Model.Model Spec.Cref',
-    'Model.Model Spec.Rref',
-    'Model.Model Spec.Cref_falling',
-    'Model.Model Spec.Cref_rising',
-    'Model.Model Spec.Rref_rising',
-    'Model.Model Spec.Rref_falling',
-    'Model.Model Spec.Vref_rising',
-    'Model.Model Spec.Vref_falling',
-    'Model.Model Spec.Vmeas_rising',
-    'Model.Model Spec.Vmeas_falling',
-    'Model.Model Spec.Rref_diff',
-    'Model.Model Spec.Cref_diff',
     'Model.Receiver Thresholds.Vth_min',
     'Model.Receiver Thresholds.Vth_max',
-    'Model.Receiver Thresholds.Vcross_low',
-    'Model.Receiver Thresholds.Vcross_high',
-    'Model.Receiver Thresholds.Tslew_ac',
-    'Model.Receiver Thresholds.Tdiffslew_ac',
     'Submodel.Ramp',
     'Begin Board Description.Reference Designator Map',
 ])
@@ -312,7 +284,7 @@ def ibis_translate(str):
     return str.translate(maketrans('<>- #', '____c'))
 
 # Convert a SPICE include file, substituting $<var> for vars in 'tables'
-def include(lib, tables):
+def include(lib, tables=None):
     file = lib
     if sys.path[0]:
         file = '{}/{}'.format(sys.path[0], lib)
@@ -320,7 +292,7 @@ def include(lib, tables):
 
 
 # Pick typ, min, max based on spec -1, 0, 1
-modv_func = '.func modv(typ, minv, maxv) {ternary_fcn(spec > 0, maxv, ternary_fcn(spec < 0, minv, typ))} '
+modv_func = '.func modv(typ, minv, maxv) {ternary_fcn(spec > 0, maxv, ternary_fcn(spec < 0, minv, typ))}'
 
 infile = sys.argv[1]
 outfile = sys.argv[2]
@@ -407,7 +379,7 @@ for name, comp in main.component.iteritems() if 'component' in main else []:
     param('L_pkg', comp.package.l_pkg.inv)
     param('C_pkg', comp.package.c_pkg.inv)
 
-    include('ibis_pkg.inc', None)
+    include('ibis_pkg.inc')
     print '.ends {}'.format(name)
 
     listed = set()
@@ -445,7 +417,7 @@ for name, comp in main.component.iteritems() if 'component' in main else []:
                     param(np, comp.package[np], inv)
 
             print modv_func
-            include('ibis_pkg.inc', None)
+            include('ibis_pkg.inc')
             print '.ends {}_{}'.format(name, ibis_translate(sub))
         listed.add(vals.signal_name)
     print '.endl'
@@ -626,15 +598,28 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         ref = refs[thresholds['Reference_supply']]
         # Some models specify a puref or pdref but
         # don't have pullup or pulldown structures
-        if ref not in pins:
-            if ref == 'A_puref':
-                ref = 'A_pcref'
-            elif ref == 'A_pdref':
-                ref = 'A_gcref'
-        tables['ref_supply'] = ref
+        if ref == 'A_puref' and not has_pullup:
+            ref = 'A_pcref'
+        elif ref == 'A_pdref' and not has_pulldown:
+            ref = 'A_gcref'
     else:
         param('Threshold_sensitivity', 1)
-        tables['ref_supply'] = 'A_gcref'
+        ref = 'A_gcref'
+
+    tables['ref_supply'] = ref
+
+    spec_ref = { 'A_pcref': 'POWER Clamp Reference',
+        'A_gcref': 'GND Clamp Reference',
+        'A_puref': 'Pullup Reference',
+        'A_pdref': 'Pulldown Reference',
+        'A_extref': 'Exterenal Reference' }
+
+    if ref == 'A_pcref' or ref == 'A_puref':
+        param('Vref_supply', model.get(spec_ref[ref], model.voltage_range).typ)
+    elif ref == 'A_extref':
+        param('Vref_supply', model[spec_ref[ref]].typ)
+    else:
+        param('Vref_supply', '0')
 
     c_comp_list = [ 'C_comp_power_clamp', 'C_comp_gnd_clamp' ]
     if has_pullup:
@@ -742,9 +727,49 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
 
     print '.ends {}'.format(ibis_translate(name))
 
+    # Create a model that can calculate launch time
+    if 'Vmeas' in model or 'Vmeas' in model_spec:
+        for edge in [ 'rising', 'falling' ]:
+            if (edge == 'rising' and type_sink) or (edge == 'falling' and type_source):
+                continue
+
+            tables = dict()
+            print '.subckt {}_Vmeas_{} time not_ready spec=0'.format(ibis_translate(name), edge)
+
+            print modv_func
+            param('vmeas', model_spec.get('Vmeas_' + edge, model_spec.get('Vmeas', model.vmeas)))
+            param('pcref', model.get('POWER Clamp Reference', model.voltage_range))
+            param('gcref', model.get('GND Clamp Reference', '0'))
+            param('puref', model.get('Pullup Reference', model.voltage_range))
+            param('pdref', model.get('Pulldown Reference', '0'))
+            param('extref', model.get('External Reference', '0'))
+            for ref in [ 'Vref', 'Rref', 'Cref' ]:
+                param(ref, model_spec.get(ref + '_' + edge,
+                           model_spec.get(ref, model.get(ref, '0'))))
+
+            if edge == 'rising':
+                drv = 'drive'
+                tables['gtlt'] = '<'
+            else:
+                drv = 'not_drive'
+                tables['gtlt'] = '>'
+
+            if type_source or type_sink:
+                    tables['D_drive'] = 'hi'
+                    tables['D_enable'] = drv
+            else:
+                    tables['D_drive'] = drv
+                    tables['D_enable'] = 'hi'
+
+            tables['model'] = ibis_translate(name)
+            include('ibis_vmeas.inc', tables)
+
+            print '.ends {}_Vmeas_{}'.format(ibis_translate(name), edge)
+
+    # Create a differential model
     try:
-        vdiff_ac = model.receiver_thresholds.vdiff_ac
-        vdiff_dc = model.receiver_thresholds.vdiff_dc
+        vdiff_ac = thresholds.vdiff_ac
+        vdiff_dc = thresholds.vdiff_dc
     except:
         if name in diff_models:
             vdiff_ac = diff_models[name]
@@ -767,15 +792,10 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         if type_input:
             param('Vdiff_ac', vdiff_ac)
             param('Vdiff_dc', vdiff_dc)
-            try:
-                param('Vcross_low', model.receiver_thresholds.vcross_low)
-            except:
-                param('Vcross_low', '-1MegV')
-            try:
-                param('Vcross_high', model.receiver_thresholds.vcross_high)
-            except:
-                param('Vcross_high', '1MegV')
-            include('ibis_input_diff.inc', dict())
+            param('Vcross_low', thresholds.get('Vcross_low', '-1MegV'))
+            param('Vcross_high', thresholds.get('Vcross_high', '1MegV'))
+            param('Tdiffslew_ac', thresholds.get('Tdiffslew_ac', '1'))
+            include('ibis_input_diff.inc')
 
         print 'X_pos A_signal_pos 0 A_pcref A_gcref A_puref A_pdref ' \
             'D_enable D_drive D_receive_pos 0 {} spec={{spec}} start_on={{start_on}}' \
@@ -785,6 +805,26 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
             .format(ibis_translate(name))
 
         print '.ends {}_DIFF'.format(ibis_translate(name))
+
+        # Create a model that can calculate launch time
+        if type_output:
+            tables = dict()
+            print '.subckt {}_DIFF_Vmeas time not_ready spec=0'.format(ibis_translate(name))
+
+            print modv_func
+            param('pcref', model.get('POWER Clamp Reference', model.voltage_range))
+            param('gcref', model.get('GND Clamp Reference', '0'))
+            param('puref', model.get('Pullup Reference', model.voltage_range))
+            param('pdref', model.get('Pulldown Reference', '0'))
+            for ref in [ 'Vref', 'Rref', 'Cref', 'Cref_diff' ]:
+                param(ref, model_spec.get(ref, model.get(ref, '0')))
+            param('Rref_diff', model_spec.get('Rref_diff', model.get('Rref_diff', '1e18')))
+
+            tables['model'] = ibis_translate(name) + '_DIFF'
+            include('ibis_diff_vmeas.inc', tables)
+
+            print '.ends {}_DIFF_Vmeas'.format(ibis_translate(name))
+
     print '.endl'
 
 # Create submodel subcircuits

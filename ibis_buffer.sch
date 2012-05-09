@@ -83,7 +83,7 @@ device=VOLTAGE_SOURCE
 T 45300 43800 5 10 1 1 0 0 1
 refdes=B_meas
 T 45300 43200 5 10 1 1 0 0 1
-value=V=V(A_signal) - V(A_gcref)
+value=V=V(A_signal, A_gcref)
 }
 C 45100 42800 1 0 0 gnd-1.sym
 C 51900 44500 1 0 0 gnd-1.sym

@@ -1,19 +1,21 @@
 v 20110115 2
-T 41500 43900 8 10 1 0 0 0 1
+T 41500 44800 8 10 1 0 0 0 1
 use-license=GPL2+
-T 41506 44100 8 10 1 0 0 0 1
+T 41506 45000 8 10 1 0 0 0 1
 dist-license=GPL2+
-T 41500 44300 8 10 1 0 0 0 1
+T 41500 45200 8 10 1 0 0 0 1
 author=Russ Dill <Russ.Dill@asu.edu>
-C 41500 43200 1 0 0 spice-directive-1.sym
+C 41500 44100 1 0 0 spice-directive-1.sym
 {
-T 41600 43500 5 10 0 1 0 0 1
+T 41600 44400 5 10 0 1 0 0 1
 device=directive
-T 41400 43400 5 10 1 1 180 6 3
+T 41400 44300 5 10 1 1 180 6 5
 value=.model adc_in adc_bridge(in_low=0 in_high=1 rise_delay=1f fall_delay=1f)
 .model on sw(vt={(Vinh_ac + Vinh_dc)/2} vh={(Vinh_ac - Vinh_dc)/2} ron=1 roff=9)
 .model off sw(vt={(Vinl_dc + Vinl_ac)/2} vh={(Vinl_dc - Vinl_ac)/2} ron=9 roff=1)
-T 41600 43600 5 10 1 1 0 0 1
+.model simple sw(vt=0 vh=1 ron=1 roff=3
+.model time_ramp slew(rise_slope=1 fall_slope=1e12)
+T 41600 44500 5 10 1 1 0 0 1
 refdes=input
 }
 C 42400 42000 1 0 0 current-1.sym
@@ -92,8 +94,8 @@ T 45600 42700 5 8 0 0 0 6 1
 device=VOLTAGE_SOURCE
 T 44600 42400 5 10 1 1 0 0 1
 refdes=B_Vth
-T 44600 42600 5 10 1 1 0 0 1
-value=V={Vth+threshold_sensitivity*(V($ref_supply)-Vth)}
+T 43800 42600 5 10 1 1 0 0 1
+value=V={Vth+threshold_sensitivity*(V($ref_supply)-Vref_supply)}
 }
 N 41700 40900 42000 40900 4
 N 47100 40900 46800 40900 4
@@ -114,9 +116,90 @@ C 41500 40900 1 0 0 generic-power.sym
 T 41700 41150 5 10 1 1 0 3 1
 net=Vth:1
 }
-T 46100 43600 9 10 1 0 0 0 5
+T 46100 44500 9 10 1 0 0 0 5
 S_off	S_on	state
 off		off		0V
 off		on		0.5V
 on		off		0.5V
 on		on		1V
+T 47600 42100 9 10 1 0 180 6 6
+Include A_gcref offset to Vth?
+Maybe subtract before multiplication, and add back after?
+
+Add state_early/state_late based on vth_min/vth_max
+
+Measure vth crossing for board level timing
+C 42700 39800 1 180 0 voltage-3.sym
+{
+T 42500 39100 5 8 0 0 180 0 1
+device=VOLTAGE_SOURCE
+T 41500 40100 5 10 1 1 0 0 1
+refdes=B_unknown
+T 41500 39900 5 10 1 1 0 0 1
+value=V={V(state) > 0 && V(state) < 1 ? 1 : 0}
+}
+C 44000 39800 1 180 1 current-1.sym
+{
+T 44600 38800 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 44800 40100 5 10 1 1 0 0 1
+refdes=A_unknown
+T 44800 39900 5 10 1 1 0 0 1
+value=time_ramp
+}
+N 42700 39600 44000 39600 4
+{
+T 42800 39600 5 10 1 1 0 0 1
+netname=unknown
+}
+N 44900 39600 46400 39600 4
+{
+T 44900 39600 5 10 1 1 0 0 1
+netname=unknown_time
+}
+C 41500 39700 1 270 0 gnd-1.sym
+C 42700 38900 1 180 0 voltage-3.sym
+{
+T 42500 38200 5 8 0 0 180 0 1
+device=VOLTAGE_SOURCE
+T 41500 39200 5 10 1 1 0 0 1
+refdes=B_slew_violation
+T 41500 39000 5 10 1 1 0 0 1
+value=V={max(V(unknown_time) - Tslew_ac, 0)}
+}
+C 41500 38800 1 270 0 gnd-1.sym
+N 42700 38700 44200 38700 4
+{
+T 42700 38700 5 10 1 1 0 0 1
+netname=slew_violation
+}
+C 42700 37600 1 0 1 voltage-3.sym
+{
+T 42500 38300 5 8 0 0 0 6 1
+device=VOLTAGE_SOURCE
+T 41500 38000 5 10 1 1 0 0 1
+refdes=B_AC_Margin
+T 41500 38200 5 10 1 1 0 0 1
+value=V={max(V(A_signal, Vth) - Vinh_ac, 0) + max(V(Vth, A_signal) + Vinl_ac, 0)}
+}
+C 41500 37900 1 270 0 gnd-1.sym
+N 42700 37800 44200 37800 4
+{
+T 42700 37800 5 10 1 1 0 0 1
+netname=ac_margin
+}
+C 42700 36800 1 0 1 voltage-3.sym
+{
+T 42500 37500 5 8 0 0 0 6 1
+device=VOLTAGE_SOURCE
+T 41500 37200 5 10 1 1 0 0 1
+refdes=B_DC_Margin
+T 41500 37400 5 10 1 1 0 0 1
+value=V={max(V(A_signal, Vth) - Vinh_dc, 0) + max(V(Vth, A_signal) + Vinl_dc, 0)}
+}
+C 41500 37100 1 270 0 gnd-1.sym
+N 42700 37000 44200 37000 4
+{
+T 42700 37000 5 10 1 1 0 0 1
+netname=dc_margin
+}

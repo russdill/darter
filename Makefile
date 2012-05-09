@@ -2,13 +2,20 @@ IBIS_COMPONENTS=\
 	ibis_pkg.inc \
 	ibis_input.inc \
 	ibis_input_diff.inc \
+	ibis_model_spec.inc \
+	ibis_model_spec_s.inc \
+	ibis_model_spec_d.inc \
+	ibis_model_spec_ampl.inc \
+	ibis_model_spec_area.inc \
 	ibis_output.inc \
 	ibis_output_pulldown.inc \
 	ibis_output_pullup.inc \
 	ibis_buffer.inc \
 	ibis_buffer_diff.inc \
 	ibis_terminator.inc \
-	ibis_dynamic_clamp.inc
+	ibis_dynamic_clamp.inc \
+	ibis_vmeas.inc \
+	ibis_diff_vmeas.inc
 
 all: ibis_components
 

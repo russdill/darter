@@ -1,0 +1,236 @@
+v 20110115 2
+T 45500 44300 8 10 1 0 0 0 1
+use-license=GPL2+
+T 45506 44500 8 10 1 0 0 0 1
+dist-license=GPL2+
+T 45500 44700 8 10 1 0 0 0 1
+author=Russ Dill <Russ.Dill@asu.edu>
+C 45500 43600 1 0 0 spice-directive-1.sym
+{
+T 45600 43900 5 10 0 1 0 0 1
+device=directive
+T 45500 43900 5 10 1 1 180 6 4
+value=.model time_ramp slew(rise_slope=1 fall_slope=0)
+.model delay adc_bridge(in_low=0 in_high=1 rise_delay=1f)
+.model pullup d_pullup(load=0)
+A_hi hi pullup
+T 45600 44000 5 10 1 1 0 0 1
+refdes=spec
+}
+C 47900 40600 1 180 0 gnd-1.sym
+C 48000 39400 1 90 0 voltage-3.sym
+{
+T 47300 39600 5 8 0 0 90 0 1
+device=VOLTAGE_SOURCE
+T 48100 40000 5 10 1 1 0 0 1
+refdes=V_pcref
+T 48100 39800 5 10 1 1 0 0 1
+value=DC={pcref}
+}
+C 47500 39400 1 90 0 voltage-3.sym
+{
+T 46800 39600 5 8 0 0 90 0 1
+device=VOLTAGE_SOURCE
+T 46300 40000 5 10 1 1 0 0 1
+refdes=V_puref
+T 46000 39800 5 10 1 1 0 0 1
+value=DC={puref}
+}
+C 47400 40600 1 180 0 gnd-1.sym
+C 47600 37600 1 270 0 voltage-3.sym
+{
+T 48300 37400 5 8 0 0 270 0 1
+device=VOLTAGE_SOURCE
+T 48100 37200 5 10 1 1 0 0 1
+refdes=V_gcref
+T 48100 37000 5 10 1 1 0 0 1
+value=DC={gcref}
+}
+C 47100 37600 1 270 0 voltage-3.sym
+{
+T 47800 37400 5 8 0 0 270 0 1
+device=VOLTAGE_SOURCE
+T 46400 37200 5 10 1 1 0 0 1
+refdes=V_pdref
+T 46100 37000 5 10 1 1 0 0 1
+value=DC={pdref}
+}
+C 47700 36400 1 0 0 gnd-1.sym
+C 47200 36400 1 0 0 gnd-1.sym
+N 48700 39500 51800 39500 4
+{
+T 50900 39550 5 10 1 1 0 0 1
+netname=pos
+}
+C 51800 38400 1 90 0 capacitor-1.sym
+{
+T 51100 38600 5 10 0 0 90 0 1
+device=CAPACITOR
+T 51700 39000 5 10 1 1 0 0 1
+refdes=Cref0
+T 50900 38600 5 10 0 0 90 0 1
+symversion=0.1
+T 51700 38600 5 10 1 1 0 0 1
+value={Cref}
+}
+C 51800 39400 1 0 0 resistor-1.sym
+{
+T 52100 39800 5 10 0 0 0 0 1
+device=RESISTOR
+T 51900 39700 5 10 1 1 0 0 1
+refdes=Rref0
+T 52400 39700 5 10 1 1 0 0 1
+value={Rref}
+}
+N 51600 39300 51600 39500 4
+C 51500 38100 1 0 0 gnd-1.sym
+N 52700 39500 52900 39500 4
+N 45800 38900 45000 38900 4
+{
+T 45100 38950 5 10 1 1 0 0 1
+netname=drive
+}
+C 46700 41600 1 180 0 voltage-3.sym
+{
+T 46500 40900 5 8 0 0 180 0 1
+device=VOLTAGE_SOURCE
+T 45400 41900 5 10 1 1 0 0 1
+refdes=B_meas
+T 45400 41700 5 10 1 1 0 0 1
+value=V=V(pos, neg) < 0 ? V(delay) : 0
+}
+C 45500 41500 1 270 0 gnd-1.sym
+C 47800 41600 1 180 1 current-1.sym
+{
+T 48400 40600 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 48100 41900 5 10 1 1 0 0 1
+refdes=A_time
+T 48100 41700 5 10 1 1 0 0 1
+value=time_ramp
+}
+N 47800 41400 46700 41400 4
+{
+T 46900 41450 5 10 1 1 0 0 1
+netname=not_ready
+}
+N 49300 41400 48700 41400 4
+{
+T 48900 41450 5 10 1 1 0 0 1
+netname=time
+}
+C 48000 42500 1 180 1 current-1.sym
+{
+T 48600 41500 5 10 0 0 180 6 1
+device=CURRENT_SOURCE
+T 48200 42800 5 10 1 1 0 0 1
+refdes=A_delay
+T 48200 42600 5 10 1 1 0 0 1
+value=delay
+}
+N 48900 42300 49300 42300 4
+{
+T 48900 42350 5 10 1 1 0 0 1
+netname=[drive]
+}
+N 46700 42300 47200 42300 4
+{
+T 46700 42350 5 10 1 1 0 0 1
+netname=delay
+}
+C 46700 42500 1 180 0 voltage-3.sym
+{
+T 46500 41800 5 8 0 0 180 0 1
+device=VOLTAGE_SOURCE
+T 45500 42800 5 10 1 1 0 0 1
+refdes=V_delay
+T 45500 42600 5 10 1 1 0 0 1
+value=DC=0V pulse(0 1 1f 0 0 1Meg)
+}
+N 47600 42300 48000 42300 4
+{
+T 47600 42350 5 10 1 1 0 0 1
+netname=[delay]
+}
+C 45500 42400 1 270 0 gnd-1.sym
+C 52700 37300 1 270 0 voltage-3.sym
+{
+T 53400 37100 5 8 0 0 270 0 1
+device=VOLTAGE_SOURCE
+T 53200 36900 5 10 1 1 0 0 1
+refdes=Vref
+T 53200 36700 5 10 1 1 0 0 1
+value=DC={Vref}
+}
+C 52800 36100 1 0 0 gnd-1.sym
+N 48700 37500 51800 37500 4
+{
+T 50900 37550 5 10 1 1 0 0 1
+netname=neg
+}
+C 51800 36400 1 90 0 capacitor-1.sym
+{
+T 51100 36600 5 10 0 0 90 0 1
+device=CAPACITOR
+T 51700 37000 5 10 1 1 0 0 1
+refdes=Cref1
+T 50900 36600 5 10 0 0 90 0 1
+symversion=0.1
+T 51700 36600 5 10 1 1 0 0 1
+value={Cref}
+}
+C 51800 37400 1 0 0 resistor-1.sym
+{
+T 52100 37800 5 10 0 0 0 0 1
+device=RESISTOR
+T 51900 37700 5 10 1 1 0 0 1
+refdes=Rref1
+T 52400 37700 5 10 1 1 0 0 1
+value={Rref}
+}
+N 51600 37300 51600 37500 4
+C 51500 36100 1 0 0 gnd-1.sym
+N 52700 37500 52900 37500 4
+C 49900 38100 1 90 0 resistor-1.sym
+{
+T 49500 38400 5 10 0 0 90 0 1
+device=RESISTOR
+T 48900 38600 5 10 1 1 0 0 1
+refdes=Rref_diff
+T 48900 38400 5 10 1 1 0 0 1
+value={Rref_diff}
+}
+N 48500 38700 48700 38700 4
+N 48700 38700 48700 39500 4
+N 48500 38300 48700 38300 4
+N 48700 38300 48700 37500 4
+C 50500 38100 1 90 0 capacitor-1.sym
+{
+T 49800 38300 5 10 0 0 90 0 1
+device=CAPACITOR
+T 50400 38700 5 10 1 1 0 0 1
+refdes=Cref_diff
+T 49600 38300 5 10 0 0 90 0 1
+symversion=0.1
+T 50400 38300 5 10 1 1 0 0 1
+value={Cref_diff}
+}
+N 49800 39000 49800 39500 4
+N 49800 38100 49800 37500 4
+N 50300 38100 50300 37500 4
+N 50300 39000 50300 39500 4
+N 52900 37300 52900 39500 4
+C 45800 37600 1 0 0 ibis_3-state_diff.sym
+{
+T 45300 37550 5 10 1 1 0 0 1
+value=$model spec={spec}
+T 46000 39600 5 10 0 0 0 0 1
+symversion=1.0
+T 46000 39250 5 10 1 1 0 0 1
+refdes=X0
+}
+N 45800 38100 45000 38100 4
+{
+T 45100 38150 5 10 1 1 0 0 1
+netname=hi
+}
