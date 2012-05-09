@@ -475,101 +475,146 @@ for name, comp in main.component.iteritems() if 'component' in main else []:
                 else:
                     diff_models[model_name] = diff_info.vdiff
 
+# also automatically calculates the time it takes to reach Vmeas under the test
+# load condition, as long as the timing parameters Rref, Cref, Vref, and Vmeas
+# are defined. The simulator then subtracts this test load delay from the system
+# load delay in order to report correct flight time delays.
+
+# Specifies the maximum allowable flight time on signal falling edge. Flight
+# time is the signal delay time introduced by the interconnect structure. It
+# is calculated as the time it takes for the signal on the net to fall to the
+# threshold voltage (marking the transition from signal HIGH to signal LOW),
+# less the time it would take for a reference load (connected directly to the
+# output) to fall to the threshold voltage.
+
+# My first check of an IBIS file is to see if the IBIS author has correctly
+# used the Vmeas, Vref, Rref, and Vref parameters. If not, they probably
+# don't understand IBIS and the whole file is suspect. The timing test load
+# should be defined for every driver including I/O and should not be included
+# for receiver only models. If you create any IBIS files, please take the
+# time to understand the correct usage of Vmeas, Vref, Rref, and Cref. Your
+# customers will love and praise you :-)!
+
+# To summarize, test load and test fixture parameters are not
+# equivalent. When Vmeas, Vref, Rref, and Cref are accurately specified
+# for a driver model, consistent with the datasheet, then they represent
+# valuable information which can facilitate the timing synchronization
+# runs and hence enhance the overall efficiency of a SI simulation. Test
+# load circuits are not needed for receiver models. 
+
 # Process each model
 for name, model in main.model.iteritems() if 'Model' in main else []:
 
-    # Select what circuits we need and what pins we need
-    libs = [ 'ibis_buffer' ]
-    pins = ''
-    en = None
-    out = None
-    nfixtures = 0
+    model_type = model.model_type
 
-    # FIXME: Rename pin names to IBIS standard. Perhaps make default "External Model"?
-    if model.model_type == 'input': # 4
-        pins = 'D_receive A_extref'
-        en = 'pulldown'
-    elif model.model_type == 'i/o': # 8
-        pins = 'A_puref A_pdref D_enable D_drive D_receive A_extref'
-    elif model.model_type == 'i/o_open_sink': # 6
-        pins = 'A_pdref D_enable D_receive A_extref'
-        out = 'pulldown'
-    elif model.model_type == 'i/o_open_source': # 6
-        pins = 'A_puref D_enable D_receive A_extref'
-        out = 'pullup'
-    elif model.model_type == 'terminator': # 3
-        libs.append('ibis_terminator')
-        en = 'pulldown'
-    elif model.model_type == 'output': # 6
-        pins = 'A_puref A_pdref D_drive'
-        en = 'pullup'
-    elif model.model_type == '3-state': # 7
-        pins = 'A_puref A_pdref D_enable D_drive'
-    elif model.model_type == 'open_sink': # 5
-        pins = 'A_pdref D_enable'
-        out = 'pulldown'
-    elif model.model_type == 'open_source': # 5
-        pins = 'A_puref D_enable'
-        out = 'pullup'
-#    elif model.model_type == 'Input_ECL':
-#    elif model.model_type == 'Output_ECL':
-#    elif model.model_type == 'I/O_ECL':
-#    elif model.model_type == '3-state_ECL':
-#    elif model.model_type == 'Series':
-#    elif model.model_type == 'Series_switch':
-#    elif model.model_type == 'Input_diff':
-#    elif model.model_type == 'Output_diff':
-#    elif model.model_type == 'I/O_diff':
-#    elif model.model_type == '3-state_diff':
-    else:
-        print '* Unhandled model type: {}'.format(model.model_type)
+    type_diff = model_type.endswith("diff")
+    type_ecl = model_type.endswith("ecl")
+    type_output = model_type.startswith(("i/o", "output", "3-state", "open"))
+    type_source = model_type.endswith("source")
+    type_sink = model_type.endswith("sink")
+    type_input = model_type.startswith(("i/o", "input"))
+    type_series = model_type.startswith("series")
+    type_enable = model_type.startswith(("i/o", "3-state"))
+    type_switch = model_type == "series_switch"
+    type_terminator = model_type == "terminator"
+
+    if type_diff or type_switch or type_ecl:
+        print '* Unhandled model type: {}'.format(model_type)
         continue
 
-    if 'D_receive' in pins:
+    has_pullup = type_output and not type_sink
+    has_pulldown = type_output and not type_source
+
+    # Select what circuits we need
+    libs = [ 'ibis_buffer' ]
+    nfixtures = 0
+
+    if type_input:
         libs.append('ibis_input')
-    if 'A_puref' in pins:
+    if has_pullup:
         libs.append('ibis_output_pullup')
         nfixtures += 1
-    if 'A_pdref' in pins:
+    if has_pulldown:
         libs.append('ibis_output_pulldown')
         nfixtures += 1
-    if 'A_puref' in pins or 'A_pdref' in pins:
+    if type_output:
         libs.append('ibis_output')
+    if type_terminator:
+        libs.append('ibis_terminator')
 
     print '.lib {}'.format(ibis_translate(name))
-    print '* type - {}'.format(model.model_type)
+    print '* type - {}'.format(model_type)
 
     for key, mode in model.add_submodel.iteritems() if 'Add Submodel' in model else []:
         print '.lib {} {}'.format(outfile, ibis_translate(key))
 
-    if len(pins):
-        pins += ' '
+    print '.subckt {} A_signal A_signal_neg A_pcref A_gcref ' \
+            'A_puref A_pdref D_enable D_drive D_receive A_extref ' \
+            'spec=0 start_on=1'.format(ibis_translate(name))
 
-    print '.subckt {} A_signal A_pcref A_gcref {}spec=0 start_on=1'.format(ibis_translate(name), pins)
     print '.model pullup d_pullup(load=0)'
     print '.model pulldown d_pulldown(load=0)'
-    print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'
-    if en != None:
-        print 'A_en D_enable {}'.format(en)
-    if out != None:
-        print 'A_out D_drive {}'.format(out)
-    print 'A_not_en D_enable D_not_enable inv'
-    print 'A_always_hi always_hi pullup'
+    if model_type == 'output':
+        print 'A_en D_enable pullup'
+    elif not type_output:
+        print 'A_en D_enable pulldown'
+
+    if type_source:
+        print 'A_out D_drive pullup'
+    elif type_sink:
+        print 'A_out D_drive pulldown'
+
     print modv_func
 
     model_spec = model.get("Model Spec", dict())
     thresholds = model.get("Receiver Thresholds", dict())
-    param('vth', thresholds.get('Vth', 0))
 
-    param('Vinh_ac', thresholds.get('Vinh_ac', model_spec.get('Vinh+',
-        model_spec.get('Vinh', model.get('Vinh', 0)))))
-    param('Vinh_dc', thresholds.get('Vinh_dc', model_spec.get('Vinh-',
-        model_spec.get('Vinh', model.get('Vinh', 0)))))
-    param('Vinl_ac', thresholds.get('Vinl_ac', model_spec.get('Vinl-',
-        model_spec.get('Vinl', model.get('Vinl', 0)))))
-    param('Vinl_dc', thresholds.get('Vinl_dc', model_spec.get('Vinl+',
-        model_spec.get('Vinl', model.get('Vinl', 0)))))
+    if type_input:
+        param('vth', thresholds.get('Vth', 0))
 
+        param('Vinh_ac', thresholds.get('Vinh_ac', model_spec.get('Vinh+',
+            model_spec.get('Vinh', model.get('Vinh', 0)))))
+        param('Vinh_dc', thresholds.get('Vinh_dc', model_spec.get('Vinh-',
+            model_spec.get('Vinh', model.get('Vinh', 0)))))
+        param('Vinl_ac', thresholds.get('Vinl_ac', model_spec.get('Vinl-',
+            model_spec.get('Vinl', model.get('Vinl', 0)))))
+        param('Vinl_dc', thresholds.get('Vinl_dc', model_spec.get('Vinl+',
+            model_spec.get('Vinl', model.get('Vinl', 0)))))
+        param('Tslew_ac', thresholds.get('Tslew_ac', '1'))
+
+    include('ibis_model_spec.inc')
+
+    try:
+        param('D_overshoot_high', model_spec.d_overshoot_high)
+        param('D_overshoot_low', model_spec.d_overshoot_low)
+        include('ibis_model_spec_d.inc')
+    except:
+        print 'R_violation_d_overshoot 0 violation_d_overshoot 0'
+
+    try:
+        param('D_overshoot_ampl_h', model_spec.d_overshoot_ampl_h)
+        param('D_overshoot_ampl_l', model_spec.d_overshoot_ampl_l)
+        include('ibis_model_spec_ampl.inc')
+    except:
+        print 'R_violation_d_overshoot_ampl 0 violation_d_overshoot_ampl 0'
+
+    try:
+        param('S_overshoot_high', model_spec.s_overshoot_high)
+        param('S_overshoot_low', model_spec.s_overshoot_low)
+        param('D_overshoot_time', model_spec.get('D_overshoot_time', '0'))
+        include('ibis_model_spec_s.inc')
+    except:
+        print 'R_violation_s_overshoot 0 violation_s_overshoot 0'
+
+    try:
+        param('D_overshoot_area_h', model_spec.d_overshoot_area_h)
+        param('D_overshoot_area_l', model_spec.d_overshoot_area_l)
+        include('ibis_model_spec.inc')
+        include('ibis_model_spec_area.inc')
+    except:
+        print 'R_violation_d_overshoot_area 0 violation_d_overshoot_area 0'
+
+    # FIXME: Default reference supply should probably be A_pcref
     tables = dict()
     if 'Threshold_sensitivity' in thresholds:
         param('Threshold_sensitivity', thresholds.threshold_sensitivity)
@@ -592,9 +637,9 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         tables['ref_supply'] = 'A_gcref'
 
     c_comp_list = [ 'C_comp_power_clamp', 'C_comp_gnd_clamp' ]
-    if 'A_puref' in pins:
+    if has_pullup:
         c_comp_list.append('C_comp_pullup')
-    if 'A_pdref' in pins:
+    if has_pulldown:
         c_comp_list.append('C_comp_pulldown')
 
     need_c_comp = True
@@ -681,6 +726,9 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         include('{}.inc'.format(lib), tables)
 
     # Include necessary submodel circuits
+    print '.model inv d_inverter(rise_delay=1f fall_delay=1f input_load=0)'
+    print 'A_not_en D_enable D_not_enable inv'
+    print 'A_always_hi always_hi pullup'
     for key, mode in model.add_submodel.iteritems() if 'Add Submodel' in model else []:
         if mode == 'non-driving':
             en = 'D_not_enable'
@@ -689,7 +737,8 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         elif mode == 'all':
             en = 'always_hi'
 
-        print 'x_{} A_signal A_pcref A_gcref A_puref A_pdref {} {} spec={{spec}}'.format(ibis_translate(key), en, ibis_translate(key))
+        print 'x_{} A_signal A_pcref A_gcref A_puref A_pdref {} {} spec={{spec}}' \
+            .format(ibis_translate(key), en, ibis_translate(key))
 
     print '.ends {}'.format(ibis_translate(name))
 
@@ -703,29 +752,19 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         else:
             vdiff_ac = None
 
-    if 'D_receive' not in pins or vdiff_ac is not None:
-        common_pins = 'A_pcref A_gcref'
-        pos_pins = pins
-        neg_pins = pins
+    if (not type_input or vdiff_ac is not None) and not type_source and not type_sink:
 
-        if 'A_extref' in pins:
-            pins = pins.replace('A_extref', '')
-            pos_pins = pos_pins.replace('A_extref', '0')
-            neg_pins = neg_pins.replace('A_extref', '0')
+        print '.subckt {}_DIFF A_signal_pos A_signal_neg A_pcref A_gcref ' \
+            'A_puref A_pdref D_enable D_drive D_receive spec=0 start_on=1 tdelay=1f' \
+            .format(ibis_translate(name))
 
-        print '.subckt {}_DIFF A_signal_pos A_signal_neg {} {}spec=0 start_on=1 tdelay=1f'.format(
-            ibis_translate(name), common_pins, pins)
+        include('ibis_buffer_diff.inc')
 
-        include('ibis_buffer_diff.inc', dict())
-
-        if 'D_drive' in pins:
+        if type_output:
             print '.model inv d_inverter(rise_delay={tdelay} fall_delay={tdelay} input_load=0)'
             print 'A_not_drive D_drive D_not_drive inv'
-            neg_pins = neg_pins.replace('D_drive', 'D_not_drive')
 
-        if 'D_receive' in pins:
-            pos_pins = pos_pins.replace('D_receive', 'D_receive_pos')
-            neg_pins = neg_pins.replace('D_receive', 'D_receive_neg')
+        if type_input:
             param('Vdiff_ac', vdiff_ac)
             param('Vdiff_dc', vdiff_dc)
             try:
@@ -738,10 +777,12 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
                 param('Vcross_high', '1MegV')
             include('ibis_input_diff.inc', dict())
 
-        print 'X_pos A_signal_pos {} {}{} spec={{spec}} start_on={{start_on}}'.format(
-            common_pins, pos_pins, ibis_translate(name))
-        print 'X_neg A_signal_neg {} {}{} spec={{spec}} start_on={{start_on}}'.format(
-            common_pins, neg_pins, ibis_translate(name))
+        print 'X_pos A_signal_pos 0 A_pcref A_gcref A_puref A_pdref ' \
+            'D_enable D_drive D_receive_pos 0 {} spec={{spec}} start_on={{start_on}}' \
+            .format(ibis_translate(name))
+        print 'X_neg A_signal_neg 0 A_pcref A_gcref A_puref A_pdref ' \
+            'D_enable D_not_drive D_receive_neg 0 {} spec={{spec}} start_on={{start_on}}' \
+            .format(ibis_translate(name))
 
         print '.ends {}_DIFF'.format(ibis_translate(name))
     print '.endl'
