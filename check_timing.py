@@ -271,11 +271,11 @@ for idx, time in enumerate(time_vector):
             return margin
 
         if args.margin or args.ac_margin:
-            margin = calc_margin(time + delay - setup)
+            margin = calc_margin(time - setup)
             if margin is not None:
                 slacks["Setup margin"] = min(margin, slacks["Setup margin"])
 
-            margin = calc_margin(time + delay + hold)
+            margin = calc_margin(time + hold)
             if margin is not None:
                 slacks["Hold margin"] = min(margin, slacks["Hold margin"])
 
