@@ -95,6 +95,7 @@ parser.add_argument('-n', '--number', default=10, type=int,
 
 violations = dict()
 slacks = dict()
+worst = dict()
 
 args = parser.parse_args()
 vectors = spice_read.spice_read(args.input).get_plots()[0]
@@ -148,11 +149,15 @@ if args.vector:
 
 violations["Setup time"] = []
 slacks["Setup time"] = float("inf")
+worst["Setup time"] = None
 violations["Hold time"] = []
 slacks["Hold time"] = float("inf")
+worst["Hold time"] = None
 if args.margin or args.ac_margin:
     slacks["Setup margin"] = float("inf")
+    worst["Setup margin"] = None
     slacks["Hold margin"] = float("inf")
+    worst["Hold margin"] = None
 
 # Time when data became good
 first_good = None
@@ -211,7 +216,9 @@ for idx, time in enumerate(time_vector):
             if slack < 0:
                 # Hold violation
                 violations["Hold time"].append(time)
-            slacks["Hold time"] = min(slacks["Hold time"], slack)
+            if slacks["Hold time"] > slack:
+                slacks["Hold time"] = slack
+                worst["Hold time"] = time
 
     next_edge_early = None
     next_edge_late = None
@@ -258,7 +265,9 @@ for idx, time in enumerate(time_vector):
             if slack < 0:
                 # Setup time violation
                 violations["Setup time"].append(time)
-            slacks["Setup time"] = min(slacks["Setup time"], slack)
+            if slacks["Setup time"] > slack:
+                slacks["Setup time"] = slack
+                worst["Setup time"] = time
 
     if clock_invalid:
         def calc_margin(at):
@@ -272,12 +281,14 @@ for idx, time in enumerate(time_vector):
 
         if args.margin or args.ac_margin:
             margin = calc_margin(time - setup)
-            if margin is not None:
-                slacks["Setup margin"] = min(margin, slacks["Setup margin"])
+            if margin is not None and slacks["Setup margin"] > margin:
+                slacks["Setup margin"] = margin
+                worst["Setup margin"] = time
 
             margin = calc_margin(time + hold)
-            if margin is not None:
-                slacks["Hold margin"] = min(margin, slacks["Hold margin"])
+            if margin is not None and slacks["Hold margin"] > margin:
+                slacks["Hold margin"] = margin
+                worst["Hold margin"] = time
 
         if args.vector and data[idx] != data[idx - 1]:
             # Data changing during clock change violation
@@ -293,11 +304,13 @@ for idx, time in enumerate(time_vector):
     last_time = time
 
 for name, value in slacks.iteritems():
-    if math.isinf(value):
-        value = 'No data'
-    else:
-        value = print_si(value) + 's'
-    print '{} slack: {}'.format(name, value)
+    if not math.isinf(value):
+        value = print_si(value)
+        if 'time' in name:
+            value += 's'
+        else:
+            value += 'V'
+        print '{} slack: {}@{}s'.format(name, value, print_si(worst[name]))
 
 total = 0
 for name, violation in violations.iteritems():
