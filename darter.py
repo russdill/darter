@@ -490,6 +490,12 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
     type_switch = model_type == "series_switch"
     type_terminator = model_type == "terminator"
 
+    # Voltage range will only not exist if we don't need it.
+    try:
+        voltage_range = model.voltage_range
+    except:
+        voltage_range = None
+
     if type_diff or type_switch or type_ecl:
         print '* Unhandled model type: {}'.format(model_type)
         continue
@@ -615,7 +621,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         'A_extref': 'Exterenal Reference' }
 
     if ref == 'A_pcref' or ref == 'A_puref':
-        param('Vref_supply', model.get(spec_ref[ref], model.voltage_range).typ)
+        param('Vref_supply', model.get(spec_ref[ref], voltage_range).typ)
     elif ref == 'A_extref':
         param('Vref_supply', model[spec_ref[ref]].typ)
     else:
@@ -679,7 +685,7 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
         try:
             refs[full] = model[full].norm
         except:
-            refs[full] = model.voltage_range.norm
+            refs[full] = voltage_range.norm
 
     for n in [ 'Rising Waveform', 'Falling Waveform' ]:
         if n in model:
@@ -738,9 +744,9 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
 
             print modv_func
             param('vmeas', model_spec.get('Vmeas_' + edge, model_spec.get('Vmeas', model.vmeas)))
-            param('pcref', model.get('POWER Clamp Reference', model.voltage_range))
+            param('pcref', model.get('POWER Clamp Reference', voltage_range))
             param('gcref', model.get('GND Clamp Reference', '0'))
-            param('puref', model.get('Pullup Reference', model.voltage_range))
+            param('puref', model.get('Pullup Reference', voltage_range))
             param('pdref', model.get('Pulldown Reference', '0'))
             param('extref', model.get('External Reference', '0'))
             for ref in [ 'Vref', 'Rref', 'Cref' ]:
@@ -812,9 +818,9 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
             print '.subckt {}_DIFF_Vmeas time not_ready spec=0'.format(ibis_translate(name))
 
             print modv_func
-            param('pcref', model.get('POWER Clamp Reference', model.voltage_range))
+            param('pcref', model.get('POWER Clamp Reference', voltage_range))
             param('gcref', model.get('GND Clamp Reference', '0'))
-            param('puref', model.get('Pullup Reference', model.voltage_range))
+            param('puref', model.get('Pullup Reference', voltage_range))
             param('pdref', model.get('Pulldown Reference', '0'))
             for ref in [ 'Vref', 'Rref', 'Cref', 'Cref_diff' ]:
                 param(ref, model_spec.get(ref, model.get(ref, '0')))
