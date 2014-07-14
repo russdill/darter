@@ -757,7 +757,11 @@ for name, model in main.model.iteritems() if 'Model' in main else []:
             print '.subckt {}_Vmeas_{} time not_ready spec=0'.format(ibis_translate(name), edge)
 
             print modv_func
-            param('vmeas', model_spec.get('Vmeas_' + edge, model_spec.get('Vmeas', model.vmeas)))
+            try:
+                vmeas = model.vmeas
+            except:
+                vmeas = None
+            param('vmeas', model_spec.get('Vmeas_' + edge, model_spec.get('Vmeas', vmeas)))
             param('pcref', model.get('POWER Clamp Reference', voltage_range))
             param('gcref', model.get('GND Clamp Reference', '0'))
             param('puref', model.get('Pullup Reference', voltage_range))
