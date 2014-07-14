@@ -172,9 +172,11 @@ def fixture(refs, data, nfixtures):
     for name in [ 'Rising', 'Falling' ]:
         waveform = data[name + ' Waveform']
 
+        fixtures = min(nfixtures, len(waveform))
+
         kpu = None
         kpd = None
-        if nfixtures > 1:
+        if fixtures > 1:
             kpu = pybis.Range([ ( [], [] ), ( [], [] ), ( [], [] ) ])
             kpd = pybis.Range([ ( [], [] ), ( [], [] ), ( [], [] ) ])
 
@@ -183,28 +185,37 @@ def fixture(refs, data, nfixtures):
             c_comp = []
             wfm = []
             curr_x = []
-            last_dx = [float("inf")] * nfixtures
-            dx = [0] * nfixtures
-            next_x = [0] * nfixtures
-            idx = [0] * nfixtures
+            last_dx = [float("inf")] * fixtures
+            dx = [0] * fixtures
+            next_x = [0] * fixtures
+            idx = [0] * fixtures
             time = set()
-            for n in range(nfixtures):
-                # FIXME: [i] can return None
-                c_comp.append(refs['C_comp'](i) + waveform[n].c_fixture)
-                wfm.append(interp_wfm(*waveform[n].waveform(i)))
-                curr_x.append(waveform[n].waveform(i)[0][0])
+
+            # Enumerate all the time steps
+            for n in range(fixtures):
                 time = time | set(waveform[n].waveform(i)[0])
 
             time = list(time)
             time.sort()
             max_time.append(time[-1])
 
+            for n in range(fixtures):
+                # Extend waveforms so that they all cover the same time period
+                if waveform[n].waveform(i)[0][-1] < time[-1]:
+                    waveform[n].waveform(i)[0].append(time[-1])
+                    waveform[n].waveform(i)[1].append(waveform[n].waveform(i)[1][-1])
+
+                # FIXME: [i] can return None
+                c_comp.append(refs['C_comp'](i) + waveform[n].c_fixture)
+                wfm.append(interp_wfm(*waveform[n].waveform(i)))
+                curr_x.append(waveform[n].waveform(i)[0][0])
+
             for timestep, t in enumerate(time):
                 Ifx = []
                 Ipu = []
                 Ipd = []
                 # FIXME: This could be handled with matrix math
-                for n in range(nfixtures):
+                for n in range(fixtures):
                     y = wfm[n](t)
                     I = (waveform[n].v_fixture(i) - y) / waveform[n].r_fixture
                     if math.isnan(I):
@@ -232,40 +243,43 @@ def fixture(refs, data, nfixtures):
                     Ifx.append(I - (Igc + Ipc + Icomp))
                     Ipu.append(pu[i](refs['Pullup Reference'](i) - y))
                     Ipd.append(pd[i](y - refs['Pulldown Reference'](i)))
-                if nfixtures > 1:
+                if fixtures > 1:
                     denom = Ipd[1] * Ipu[0] - Ipd[0] * Ipu[1]
                     kpu[i][1].append((Ifx[0] * Ipd[1] - Ifx[1] * Ipd[0]) / denom)
                     kpd[i][1].append((Ifx[1] * Ipu[0] - Ifx[0] * Ipu[1]) / denom)
                     kpu[i][0].append(t)
                     kpd[i][0].append(t)
+                    isos_kpu = True
+                    isos_kpd = True
                 else:
                     if not kpu and not kpd:
-                        if Ipu[0] != 0 and Ipd[0] != 0:
-                            raise Exception('Insufficient waveforms for fixture')
-                        elif Ipu[0] != 0:
-                            isos = True
+                        isos_kpu = Ipu[0] != 0
+                        isos_kpd = Ipd[0] != 0
+
+                        if isos_kpu:
                             kpu = pybis.Range([ ( [], [] ), ( [], [] ), ( [], [] ) ])
-                            kpd = pybis.Range([ ( [0, 1], [0, 0] ), None, None ])
-                        elif Ipd[0] != 0:
-                            isos = False
+                        else:
                             kpu = pybis.Range([ ( [0, 1], [0, 0] ), None, None ])
+
+                        if isos_kpd:
                             kpd = pybis.Range([ ( [], [] ), ( [], [] ), ( [], [] ) ])
                         else:
-                            raise Exception('Too many waveforms for fixture')
-                    if isos:
+                            kpd = pybis.Range([ ( [0, 1], [0, 0] ), None, None ])
+
+                    if isos_kpu:
                         kpu[i][1].append(Ifx[0] / Ipu[0])
                         kpu[i][0].append(t)
-                    else:
+                    if isos_kpd:
                         kpd[i][1].append(Ifx[0] / Ipd[0])
                         kpd[i][0].append(t)
                 if timestep > 1:
                     # Find the maximum expected slew rate up and down
-                    if nfixtures > 1 or isos:
+                    if isos_kpu:
                         dA = kpu[i][1][-1] - kpu[i][1][-2]
                         dA /= t - prev_t
                         kpu_dA_min[i] = max(kpu_dA_min[i], -dA)
                         kpu_dA_max[i] = max(kpu_dA_max[i], dA)
-                    if nfixtures > 1 or not isos:
+                    if isos_kpd:
                         dA = kpd[i][1][-1] - kpd[i][1][-2]
                         dA /= t - prev_t
                         kpd_dA_min[i] = max(kpd_dA_min[i], -dA)
