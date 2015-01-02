@@ -402,10 +402,6 @@ for name, comp in main.component.iteritems() if 'component' in main else []:
         if vals.signal_name is None or vals.model_name is None:
             continue
 
-        # Don't print out non-pin specific information
-        if (n not in vals or vals[n] is None) and not pin in pm:
-            continue
-
         for sub, signal in [ [ pin, False ], [ vals.signal_name, True ] ]:
             # Ignore duplicated pins (power/ground)
             # NOTE: This may or may not be throwing away
