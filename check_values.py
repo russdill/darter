@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #  check_values.py
 #
@@ -42,11 +42,10 @@ def print_si(val, sig=4):
     return '{:.{}g}{}'.format(val, sig, si)
 
 def get_vector(vectors, n):
-    return filter(lambda vect: vect.name == n,
-            vectors.get_datavectors())[0].get_data()
+    return [vect for vect in vectors.get_datavectors() if vect.name == n][0].get_data()
 
 parser = argparse.ArgumentParser(conflict_handler='resolve')
-parser.add_argument('input', type=argparse.FileType('rb'),
+parser.add_argument('input', type=argparse.FileType('r'),
     help='Spice3f5 input file')
 
 parser.add_argument('-v', '--vector', type=str, required=True,
@@ -106,22 +105,22 @@ for idx, time in enumerate(time):
             high_violation = False
         slack["Maximum voltage"] = min(slack["Maximum voltage"], high - data[idx])
 
-for name, v in slack.iteritems():
-    print '{} slack: {}V'.format(name, print_si(v))
+for name, v in slack.items():
+    print('{} slack: {}V'.format(name, print_si(v)))
 
 total = 0
-for name, violation in violations.iteritems():
+for name, violation in violations.items():
     total += len(violation)
     if len(violation):
-        print '{} violated!'.format(name)
+        print('{} violated!'.format(name))
         if args.number != 0:
-            print 'Violations:'
+            print('Violations:')
     for n, time in enumerate(violation):
         if args.number != -1 and n >= args.number:
-            print ' ...'
+            print(' ...')
             break
-        print ' {}s'.format(print_si(time))
+        print(' {}s'.format(print_si(time)))
 
-print 'Total violations: {}'.format(total)
+print('Total violations: {}'.format(total))
 
 sys.exit(total != 0)

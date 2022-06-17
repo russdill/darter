@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #  check_timing.py
 #
@@ -47,13 +47,12 @@ def print_si(val, sig=4):
 
 def get_vector(vectors, n):
     try:
-        return filter(lambda vect: vect.name == n,
-                vectors.get_datavectors())[0].get_data()
+        return [vect for vect in vectors.get_datavectors() if vect.name in (n, f'v({n})')][0].get_data()
     except:
         raise Exception("Could not find vector {}".format(n))
 
 def valid(data):
-    return data == 0 or data == 1
+    return abs(data) < 1e-6 or abs(data - 1) < 1e-6
 
 parser = argparse.ArgumentParser(conflict_handler='resolve')
 parser.add_argument('input', type=argparse.FileType('rb'),
@@ -303,28 +302,28 @@ for idx, time in enumerate(time_vector):
 
     last_time = time
 
-for name, value in slacks.iteritems():
+for name, value in slacks.items():
     if not math.isinf(value):
         value = print_si(value)
         if 'time' in name:
             value += 's'
         else:
             value += 'V'
-        print '{} slack: {}@{}s'.format(name, value, print_si(worst[name]))
+        print('{} slack: {}@{}s'.format(name, value, print_si(worst[name])))
 
 total = 0
-for name, violation in violations.iteritems():
+for name, violation in violations.items():
     total += len(violation)
     if len(violation):
-        print '{} violated {} time(s)!'.format(name, len(violation))
+        print('{} violated {} time(s)!'.format(name, len(violation)))
         if args.number != 0:
-            print 'Violations:'
+            print('Violations:')
     for n, time in enumerate(violation):
         if args.number != -1 and n >= args.number:
-            print ' ...'
+            print(' ...')
             break
-        print ' {}s'.format(print_si(time))
+        print(' {}s'.format(print_si(time)))
 
-print 'Total violations: {}'.format(total)
+print('Total violations: {}'.format(total))
 
 sys.exit(total != 0)

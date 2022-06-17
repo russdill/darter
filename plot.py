@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #  plot.py
 #
@@ -34,8 +34,7 @@ def parse_num(val):
 	return float(val) * e
 
 def get_vector(vectors, n):
-	return filter(lambda vect: vect.name == n,
-			vectors.get_datavectors())[0].get_data()
+	return [vect for vect in vectors.get_datavectors() if vect.name == n][0].get_data()
 
 parser = argparse.ArgumentParser(conflict_handler='resolve')
 parser.add_argument('-w', '--width', type=float, required=False,
@@ -54,7 +53,7 @@ parser.add_argument('-c', '--color', type=str, required=False,
 	help="Color", default='blue')
 parser.add_argument('-v', '--vector', type=str, required=True,
 	help="Spice vector to plot")
-parser.add_argument('input', type=argparse.FileType('rb'),
+parser.add_argument('input', type=argparse.FileType('r'),
 	help='Spice3f5 input file')
 parser.add_argument('output', type=argparse.FileType('wb'), nargs='?',
 	help='Plot output file')

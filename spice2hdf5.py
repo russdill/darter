@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 #     Copyright (C) 2007-2008 Werner Hoch
 #
@@ -31,7 +31,7 @@ def insert_spiceplot(plot, outfile="out.hdf5", path="/", name="plot",
     ## create the path group
     path_toks = path[1:].split("/")
     last_path = "/"
-    for i in xrange(len(path_toks)):
+    for i in range(len(path_toks)):
         test_path = "/" + "/".join(path_toks[:i+1])
         if test_path not in h5file:
             h5file.createGroup(last_path, path_toks[i])
@@ -43,7 +43,7 @@ def insert_spiceplot(plot, outfile="out.hdf5", path="/", name="plot",
             h5file.removeNode(path, name, recursive=True)
             h5file.flush()
         else:
-            print "Error: path already exists: [%s, %s]" %(path,name)
+            print("Error: path already exists: [%s, %s]" %(path,name))
             return
 
     scale = plot.get_scalevector()
@@ -58,7 +58,7 @@ def insert_spiceplot(plot, outfile="out.hdf5", path="/", name="plot",
             elif v.get_data().dtype == numpy.complex128:
                 d_cols[v.name] = tables.ComplexCol(pos=i+1, itemsize=16)
             else:
-                print "vector type " , v.get_data().dtype , "not supported yet"
+                print("vector type " , v.get_data().dtype , "not supported yet")
                 return
                 
         ## create a table and add all data
@@ -76,7 +76,7 @@ def insert_spiceplot(plot, outfile="out.hdf5", path="/", name="plot",
         h5file.createArray(node, scale.name, scale.get_data())
         for d in data:
             if path + "/" + name + "/" + d.name in h5file:
-                print "Error: data name is not uniq: [%s]" %(d.name)
+                print("Error: data name is not uniq: [%s]" %(d.name))
                 return
             h5file.createArray(node, d.name, d.get_data())
     
@@ -85,14 +85,14 @@ def insert_spiceplot(plot, outfile="out.hdf5", path="/", name="plot",
 
 
 def usage():
-    print "spice2hdf5 version " + VERSION + "   (C) " + AUTHOR
-    print "usage: " +  sys.argv[0] + """ [options], spicefile, [spicefile2, ..]
+    print("spice2hdf5 version " + VERSION + "   (C) " + AUTHOR)
+    print("usage: " +  sys.argv[0] + """ [options], spicefile, [spicefile2, ..]
   -h --help: print help information
   -v --verbose: print debug messages to stdout
   -o --outfile: specify the hdf5 output filename (default: out.hdf5)
   -p --pathprefix: location to store the spice data
   -f --format: whether to store the data as single vectors or table
-               (default: table)"""
+               (default: table)""")
     
 
 
@@ -111,8 +111,8 @@ try:
     opts, args = getopt.getopt(sys.argv[1:], "hvo:p:f:",
                                ["help", "verbose","outfile=", "pathprefix=",
                                 "format="])
-except getopt.GetoptError, err:
-    print str(err)
+except getopt.GetoptError as err:
+    print(str(err))
     usage()
     sys.exit(2)
 

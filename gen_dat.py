@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #  gen_dat.py - Generate d_source tabular data from simplified input
 #
@@ -67,10 +67,10 @@ def parse_dig(val):
 	return val
 
 if len(sys.argv) > 1 and sys.argv[1] != '-':
-	sys.stdin = open(sys.argv[1], 'rb')
+	sys.stdin = open(sys.argv[1], 'r', encoding='utf-8')
 
 if len(sys.argv) > 2 and sys.argv[2] != '-':
-	sys.stdout = open(sys.argv[2], 'wb')
+	sys.stdout = open(sys.argv[2], 'w', encoding='utf-8')
 
 vars = dict()
 order = list()
@@ -104,7 +104,7 @@ for line in sys.stdin:
 		out = '{:12}'.format('* t')
 		for var in order:
 			out += ' {{:{}}}'.format(len(var)).format(var)
-		print out
+		print(out)
 		first = False
 	if time[0] == '+':
 		now += parse_num(time[1:])
@@ -113,5 +113,5 @@ for line in sys.stdin:
 	out = '{:<12}'.format(now)
 	for var in order:
 		out += ' {{:{}}}'.format(len(var)).format(vars[var])
-	print out
+	print(out)
 

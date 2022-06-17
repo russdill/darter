@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 #     Copyright (C) 2007 Werner Hoch
 #
@@ -16,7 +16,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy
-import string
 import sys
 
 class spice_vector():
@@ -43,10 +42,10 @@ class spice_vector():
                 if type(getattr(self,k)) == type(v):
                     setattr(self,k,v)
                 else:
-                    print "Warning: attribute has wrong type: " \
-                          + type(v) + " ignored!"
+                    print("Warning: attribute has wrong type: " \
+                          + type(v) + " ignored!")
             else:
-                print "Warning: unknown attribute" + k + " Ignored!"
+                print("Warning: unknown attribute" + k + " Ignored!")
                     
     def set_data(self, data_array):
         """
@@ -103,10 +102,10 @@ class spice_plot():
                 if type(getattr(self,k)) == type(v):
                     setattr(self,k,v)
                 else:
-                    print "Warning: attribute has wrong type: " \
-                          + type(v) + " ignored!"
+                    print("Warning: attribute has wrong type: " \
+                          + type(v) + " ignored!")
             else:
-                print "Warning: unknown attribute \"" + k + "\". Ignored!"
+                print("Warning: unknown attribute \"" + k + "\". Ignored!")
 
     def set_scalevector(self, spice_vector):
         """
@@ -160,7 +159,7 @@ class spice_read():
         error = self.readfile(file)
         if error:
             ## FIXME create an assertion
-            print "error in reading the file"
+            print("error in reading the file")
 
     def set_default_values(self):
         ## Set the default values for some options
@@ -175,57 +174,57 @@ class spice_read():
     def readfile(self,f):
         while (1):
             line = f.readline()
-            if line == "":   ## EOF
+            if line == b"":   ## EOF
                 return
 
-            tok = [string.strip(t) for t in string.split(line,":",1)]
+            tok = [t.strip() for t in line.split(b":",1)]
             keyword = tok[0].lower()  ## don't care the case of the keyword entry
 
-            if keyword == "title":
-                self.current_plot.set_attributes(title=tok[1])
-            elif keyword == "date":
-                self.current_plot.set_attributes(date=tok[1])
-            elif keyword == "plotname":  ## FIXME: incomplete??
-                self.current_plot.set_attributes(plotname=tok[1])
-            elif keyword == "flags":
-                ftok= [string.lower(string.strip(t)) for t in string.split(tok[1])]
+            if keyword == b"title":
+                self.current_plot.set_attributes(title=tok[1].decode('utf-8'))
+            elif keyword == b"date":
+                self.current_plot.set_attributes(date=tok[1].decode('utf-8'))
+            elif keyword == b"plotname":  ## FIXME: incomplete??
+                self.current_plot.set_attributes(plotname=tok[1].decode('utf-8'))
+            elif keyword == b"flags":
+                ftok= [ t.strip().lower() for t in tok[1].split()]
                 for flag in ftok:
-                    if flag == "real":
+                    if flag == b"real":
                         self.real = True
-                    elif flag == "complex":
+                    elif flag == b"complex":
                         self.real = False
-                    elif flag == "unpadded":
+                    elif flag == b"unpadded":
                         self.padded = False
-                    elif flag == "padded":
+                    elif flag == b"padded":
                         self.padded = True
                     else:
-                        print 'Warning: unknown flag: "' + f + '"'
-            elif keyword == "no. variables":
-                self.nvars = string.atoi(tok[1])
-            elif keyword == "no. points":
-                self.npoints = string.atoi(tok[1])
-            elif keyword == "dimensions":
+                        print(f'Warning: unknown flag: "{flag}"')
+            elif keyword == b"no. variables":
+                self.nvars = int(tok[1])
+            elif keyword == b"no. points":
+                self.npoints = int(tok[1])
+            elif keyword == b"dimensions":
                 if self.npoints == 0:
-                    print 'Error: misplaced "Dimensions:" lineprint'
+                    print('Error: misplaced "Dimensions:" lineprint')
                     continue
-                print 'Warning: "Dimensions" not supported yet'
+                print('Warning: "Dimensions" not supported yet')
                 # FIXME: How can I create such simulation files?
-                # numdims = string.atoi(tok[1])
-            elif keyword == "command":
-                print 'Warning: "command" option not implemented yet'
-                print '\t' + line
+                # numdims = int(tok[1])
+            elif keyword == b"command":
+                print('Warning: "command" option not implemented yet')
+                print(b'\t' + line)
                 # FIXME: what is this command good for
-            elif keyword == "option":
-                print 'Warning: "command" option not implemented yet'
-                print '\t' + line
+            elif keyword == b"option":
+                print('Warning: "command" option not implemented yet')
+                print(b'\t' + line)
                 # FIXME: what is this command good for
-            elif keyword == "variables":
-                for i in xrange(self.nvars):
-                    line = string.split(string.strip(f.readline()))
+            elif keyword == b"variables":
+                for i in range(self.nvars):
+                    line = f.readline().strip().split()
                     if len(line) >= 3:
-                        number = string.atoi(line[0])
-                        curr_vector = spice_vector(name=line[1],
-                                                   type=line[2])
+                        number = int(line[0])
+                        curr_vector = spice_vector(name=line[1].decode('utf-8'),
+                                                   type=line[2].decode('utf-8'))
                         self.vectors.append(curr_vector)
                         if len(line) > 3:
                             # print "Attributes: ", line[3:]
@@ -233,20 +232,20 @@ class spice_read():
                             ## min=, max, color, grid, plot, dim
                             ## I think only dim is useful and neccesary
                     else:
-                        print "list of variables is to short"
+                        print("list of variables is to short")
 
-            elif keyword in ["values","binary"]:
+            elif keyword in [b"values",b"binary"]:
                 # read the data
                 if self.real:
-                    if keyword == "values":
+                    if keyword == b"values":
                         i = 0
                         a = numpy.zeros(self.npoints*self.nvars, dtype="float64")
                         while (i < self.npoints*self.nvars):
-                            t = string.split(f.readline(),"\t")
+                            t = f.readline().split(b"\t")
                             if len(t) < 2:
                                 continue
                             else:
-                                a[i] = string.atof(t[1])
+                                a[i] = float(t[1])
                             i += 1
                     else: ## keyword = "binary"
                         a = numpy.frombuffer(f.read(self.nvars*self.npoints*8),
@@ -254,23 +253,23 @@ class spice_read():
                     aa = a.reshape(self.npoints,self.nvars)
                     self.vectors[0].set_data(aa[:,0])
                     self.current_plot.set_scalevector(self.vectors[0])
-                    for n in xrange(1,self.nvars):
+                    for n in range(1,self.nvars):
                         self.vectors[n].set_data(aa[:,n])
                         self.current_plot.append_datavector(self.vectors[n])
                         
                 else: # complex data
-                    if keyword == "values":
+                    if keyword == b"values":
                         i = 0
                         a = numpy.zeros(self.npoints*self.nvars*2, dtype="float64")
                         while (i < self.npoints*self.nvars*2):
-                            t = string.split(f.readline(),"\t")
+                            t = f.readline().split(b"\t")
                             if len(t) < 2:  ## empty lines
                                 continue
                             else:
-                                t = string.split(t[1],",")
-                                a[i] = string.atof(t[0])
+                                t = t[1].split(b",")
+                                a[i] = float(t[0])
                                 i += 1
-                                a[i] = string.atof(t[1])
+                                a[i] = float(t[1])
                                 i += 1
                     else: ## keyword = "binary"
                         a = numpy.frombuffer(f.read(self.nvars*self.npoints*8*2),
@@ -278,7 +277,7 @@ class spice_read():
                     aa = a.reshape(self.npoints, self.nvars*2)
                     self.vectors[0].set_data(aa[:,0]) ## only the real part!
                     self.current_plot.set_scalevector(self.vectors[0])
-                    for n in xrange(1,self.nvars):
+                    for n in range(1,self.nvars):
                         self.vectors[n].set_data(numpy.array(aa[:,2*n]+
                                                              1j*aa[:,2*n+1]))
                         self.current_plot.append_datavector(self.vectors[n])
@@ -287,12 +286,13 @@ class spice_read():
                 self.plots.append(self.current_plot)
                 self.set_default_values()
 
-            elif string.strip(keyword) == "": ## ignore empty lines
+            elif keyword.strip() == b"": ## ignore empty lines
                 continue
 
             else:
-                print 'Error: strange line in rawfile:\n\t"'  \
-                      +line + '"\n\t load aborted'
+                print('Error: strange line in rawfile:')
+                print('\t"{line}"')
+                print('\tload aborted')
                 return 0
 
     def get_plots(self):
@@ -302,27 +302,27 @@ class spice_read():
 if __name__ == "__main__":
     ## plot out some informations about the spice files given by commandline
     for f in sys.argv[1:]:
-        print 'The file: "' + f + '" contains the following plots:' 
-        for i,p in enumerate(spice_read(open(f, "rb")).get_plots()):
-            print '  Plot', i, 'with the attributes'
-            print '    Title: ' , p.title
-            print '    Date: ', p.date
-            print '    Plotname: ', p.plotname
-            print '    Plottype: ' , p.plottype
+        print('The file: "' + f + '" contains the following plots:') 
+        for i,p in enumerate(spice_read(open(f, "r", encoding='utf-8')).get_plots()):
+            print('  Plot', i, 'with the attributes')
+            print('    Title: ' , p.title)
+            print('    Date: ', p.date)
+            print('    Plotname: ', p.plotname)
+            print('    Plottype: ' , p.plottype)
 
             s = p.get_scalevector()
-            print '    The Scale vector has the following properties:'
-            print '      Name: ', s.name
-            print '      Type: ', s.type
+            print('    The Scale vector has the following properties:')
+            print('      Name: ', s.name)
+            print('      Type: ', s.type)
             v = s.get_data()
-            print '      Vector-Length: ', len(v)
-            print '      Vector-Type: ', v.dtype
+            print('      Vector-Length: ', len(v))
+            print('      Vector-Type: ', v.dtype)
 
             for j,d in enumerate(p.get_datavectors()):
-                print '    Data vector', j, 'has the following properties:'
-                print '      Name: ', d.name
-                print '      Type: ', d.type
+                print('    Data vector', j, 'has the following properties:')
+                print('      Name: ', d.name)
+                print('      Type: ', d.type)
                 v = d.get_data()
-                print '      Vector-Length: ', len(v)
-                print '      Vector-Type: ', v.dtype
+                print('      Vector-Length: ', len(v))
+                print('      Vector-Type: ', v.dtype)
         

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #  gen_stream.py
 #
@@ -25,7 +25,7 @@ def parse(item, state, prev):
 		item = '{{:0{}b}}'.format(bits).format(int(item, 16))
 	for c in item:
 		if prev:
-			print '{} {}s -> {}'.format(state, prev, state + 1)
+			print('{} {}s -> {}'.format(state, prev, state + 1))
 			state += 1
 		prev = c
 	return state, prev
@@ -69,4 +69,4 @@ else:
 	parser.print_help()
 
 if prev:
-	print '{} {}s -> {}'.format(state, prev, 0)
+	print('{} {}s -> {}'.format(state, prev, 0))

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #  eye-pattern.py
 #
@@ -13,6 +13,13 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
+
+# TODO: Version that generates timing information.
+#   latest state to good (x1)
+#   earliest state to unk (x2)
+# - Draw trapazoid on eye diagram
+#   (x1, vinh_ac)         (x2, vinh_dc)
+#   (x1, vinl_ac)         (x2, vinl_dc)
 
 import sys
 import argparse
@@ -35,8 +42,7 @@ def parse_si(val):
 	return float(val) * e
 
 def get_vector(vectors, n):
-	return filter(lambda vect: vect.name == n,
-			vectors.get_datavectors())[0].get_data()
+	return [vect for vect in vectors.get_datavectors() if vect.name == n][0].get_data()
 
 def plot_at(vector, at):
 	begin = max(bisect.bisect_right(time, at - width / 2) - 1, 0)
@@ -49,7 +55,7 @@ parser.add_argument('-w', '--width', type=str, required=True,
 	help="Plot width in seconds")
 parser.add_argument('-v', '--vector', type=str, required=True,
 	help="Spice vector to plot")
-parser.add_argument('input', type=argparse.FileType('rb'),
+parser.add_argument('input', type=argparse.FileType('r'),
 	help='Spice3f5 input file')
 parser.add_argument('output', type=argparse.FileType('wb'), nargs='?',
 	help='Plot output file')
@@ -96,7 +102,7 @@ elif args.trigger:
 	try:
 		vect = get_vector(vectors, args.trigger)
 	except:
-		print >> sys.stderr, "For {}".format(args.trigger)
+		print("For {}".format(args.trigger), file=sys.stderr)
 		raise
 
 	if not args.falling_trigger and not args.rising_trigger:
@@ -142,7 +148,7 @@ ylabel('Volts')
 xlabel('Time (s)')
 grid()
 
-print 'Processed {} samples'.format(samples)
+print('Processed {} samples'.format(samples))
 
 if args.output:
 	savefig(args.output)
