@@ -17,16 +17,18 @@ IBIS_COMPONENTS=\
 	ibis_vmeas.inc \
 	ibis_diff_vmeas.inc
 
+GNETLIST=gnetlist-legacy
+
 all: ibis_components
 
 ibis_components: $(IBIS_COMPONENTS)
 
 # Drop off trailing '.end'
 %.inc: %.sch
-	gnetlist -g spice-sdb -o /dev/stderr $< 2>&1 >/dev/null | grep -v '^.end$$' > $@
+	$(GNETLIST) -g spice-sdb -o /dev/stderr $< 2>&1 >/dev/null | grep -v '^.end$$' > $@
 
 %.net: %.sch
-	gnetlist -g spice-sdb -o $@ $^
+	$(GNETLIST) -g spice-sdb -o $@ $^
 
 %.lib: %.ibs darter.py ibis_components
 	./darter.py $< $@
