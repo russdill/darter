@@ -401,19 +401,19 @@ for name, comp in iter(main.component.items()) if 'component' in main else []:
         if vals.signal_name is None or vals.model_name is None:
             continue
 
-        for sub, signal in [ [ pin, False ], [ vals.signal_name, True ] ]:
+        for sub_type in ('signal', 'pin'):
+            sub = vals.signal_name if sub_type == 'signal' else pin
+            sub_name = 'SIG' if sub_type == 'signal' else 'PIN'
+            sub_other = pin if sub_type == 'signal' else vals.signal_name
             # Ignore duplicated pins (power/ground)
             # NOTE: This may or may not be throwing away
             # data depending in the IBIS model
-            if signal and sub in listed:
+            if sub_type == 'signal' and sub in listed:
                 continue
 
-            print('.subckt {}_{} pad gnd die spec=0'.format(name,
-                            ibis_translate(sub)))
-            if signal:
-                print('* pin {}'.format(pin))
-            else:
-                print('* {}'.format(vals.signal_name))
+            print('.subckt {}_{}_{} pad gnd die spec=0'.format(name,
+                            sub_name, ibis_translate(sub)))
+            print('* {} {}'.format(sub_type, sub_other))
 
             for prefix, inv in [ [ 'R', False ], [ 'C', True ], [ 'L', True ] ]:
                 n = '{}_pin'.format(prefix)
@@ -427,7 +427,7 @@ for name, comp in iter(main.component.items()) if 'component' in main else []:
 
             print(modv_func)
             include('ibis_pkg.inc')
-            print('.ends {}_{}'.format(name, ibis_translate(sub)))
+            print('.ends {}_{}_{}'.format(name, sub_name, ibis_translate(sub)))
         listed.add(vals.signal_name)
     print('.endl')
 
@@ -929,8 +929,8 @@ for name, board in iter(main.begin_board_description.items()) if 'Begin Board De
 
         pin_name = path[0].pin
         nodes = get_nodes(path)
-        print('.subckt {}_{} net_0 gnd{}'.format(ibis_translate(name), ibis_translate(pin_name), nodes))
-        print('* {}'.format(signal_name))
+        print('.subckt {}_PIN_{} net_0 gnd{}'.format(ibis_translate(name), ibis_translate(pin_name), nodes))
+        print('* signal {}'.format(signal_name))
 
         def process_path(path, n=[0], net='net', r=[0]):
             next_n = [0]
@@ -976,10 +976,10 @@ for name, board in iter(main.begin_board_description.items()) if 'Begin Board De
 
         process_path(path[1:])
 
-        print('.ends {}_{}'.format(ibis_translate(name), ibis_translate(pin_name)))
+        print('.ends {}_PIN_{}'.format(ibis_translate(name), ibis_translate(pin_name)))
 
-        print('.subckt {}_{} net_0 gnd{}'.format(ibis_translate(name), ibis_translate(signal_name), nodes))
-        print('x net_0 gnd{} {}_{}'.format(nodes, ibis_translate(name), ibis_translate(pin_name)))
-        print('.ends {}_{}'.format(ibis_translate(name), ibis_translate(pin_name)))
+        print('.subckt {}_SIG_{} net_0 gnd{}'.format(ibis_translate(name), ibis_translate(signal_name), nodes))
+        print('x net_0 gnd{} {}_PIN_{}'.format(nodes, ibis_translate(name), ibis_translate(pin_name)))
+        print('.ends {}_SIG_{}'.format(ibis_translate(name), ibis_translate(pin_name)))
 
     print('.endl')

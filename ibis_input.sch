@@ -1,4 +1,4 @@
-v 20110115 2
+v 20191008 2
 T 41500 44800 8 10 1 0 0 0 1
 use-license=GPL2+
 T 41506 45000 8 10 1 0 0 0 1
@@ -93,7 +93,7 @@ C 45800 42000 1 0 1 voltage-3.sym
 T 45600 42700 5 8 0 0 0 6 1
 device=VOLTAGE_SOURCE
 T 44600 42400 5 10 1 1 0 0 1
-refdes=B_Vth
+refdes=B_Vth_net
 T 43800 42600 5 10 1 1 0 0 1
 value=V={Vth+threshold_sensitivity*(V($ref_supply)-Vref_supply)}
 }
@@ -104,17 +104,17 @@ C 44600 42300 1 270 0 gnd-1.sym
 C 45800 42400 1 270 0 generic-power.sym
 {
 T 46050 42200 5 10 1 1 270 3 1
-net=Vth:1
+net=Vth_net:1
 }
 C 46900 40900 1 0 0 generic-power.sym
 {
 T 47100 41150 5 10 1 1 0 3 1
-net=Vth:1
+net=Vth_net:1
 }
 C 41500 40900 1 0 0 generic-power.sym
 {
 T 41700 41150 5 10 1 1 0 3 1
-net=Vth:1
+net=Vth_net:1
 }
 T 46100 44500 9 10 1 0 0 0 5
 S_off	S_on	state
@@ -123,7 +123,7 @@ off		on		0.5V
 on		off		0.5V
 on		on		1V
 T 47600 42100 9 10 1 0 180 6 6
-Include A_gcref offset to Vth?
+Include A_gcref offset to Vth_net?
 Maybe subtract before multiplication, and add back after?
 
 Add state_early/state_late based on vth_min/vth_max
@@ -180,7 +180,7 @@ device=VOLTAGE_SOURCE
 T 41500 38000 5 10 1 1 0 0 1
 refdes=B_AC_Margin
 T 41500 38200 5 10 1 1 0 0 1
-value=V={max(V(A_signal, Vth) - Vinh_ac, 0) + max(V(Vth, A_signal) + Vinl_ac, 0)}
+value=V={max(V(A_signal, Vth_net) - Vinh_ac, 0) + max(V(Vth_net, A_signal) + Vinl_ac, 0)}
 }
 C 41500 37900 1 270 0 gnd-1.sym
 N 42700 37800 44200 37800 4
@@ -195,7 +195,7 @@ device=VOLTAGE_SOURCE
 T 41500 37200 5 10 1 1 0 0 1
 refdes=B_DC_Margin
 T 41500 37400 5 10 1 1 0 0 1
-value=V={max(V(A_signal, Vth) - Vinh_dc, 0) + max(V(Vth, A_signal) + Vinl_dc, 0)}
+value=V={max(V(A_signal, Vth_net) - Vinh_dc, 0) + max(V(Vth_net, A_signal) + Vinl_dc, 0)}
 }
 C 41500 37100 1 270 0 gnd-1.sym
 N 42700 37000 44200 37000 4
