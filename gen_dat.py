@@ -62,7 +62,7 @@ def parse_dig(val):
 		val += 's'
 
 	if not val[0] in '01U' or not val[1] in 'srzu' or len(val) > 2:
-		raise Exception('{} not valid'.format(val))
+		raise Exception(f'{val} not valid')
 
 	return val
 
@@ -101,17 +101,16 @@ for line in sys.stdin:
 		if first and var not in order:
 			order.append(var)
 	if first:
-		out = '{:12}'.format('* t')
+		out = f"{'* t':12}"
 		for var in order:
-			out += ' {{:{}}}'.format(len(var)).format(var)
+			out += f' {var:{len(var)}}'
 		print(out)
 		first = False
 	if time[0] == '+':
 		now += parse_num(time[1:])
 	else:
 		now = parse_num(time)
-	out = '{:<12}'.format(now)
+	out = f'{now:<12}'
 	for var in order:
-		out += ' {{:{}}}'.format(len(var)).format(vars[var])
+		out += f' {vars[var]:{len(var)}}'
 	print(out)
-

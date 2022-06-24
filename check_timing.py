@@ -43,13 +43,13 @@ def print_si(val, sig=4):
     if exp >= -5 and exp <= 4 and exp:
         si = 'fpnum.kMGT'[exp + 5]
         val /= math.pow(10, exp * 3)
-    return '{:.{}g}{}'.format(val, sig, si)
+    return '{val:.{sig}g}{si}'
 
 def get_vector(vectors, n):
     try:
         return [vect for vect in vectors.get_datavectors() if vect.name in (n, f'v({n})')][0].get_data()
     except:
-        raise Exception("Could not find vector {}".format(n))
+        raise Exception(f"Could not find vector {n}")
 
 def valid(data):
     return abs(data) < 1e-6 or abs(data - 1) < 1e-6
@@ -309,21 +309,21 @@ for name, value in slacks.items():
             value += 's'
         else:
             value += 'V'
-        print('{} slack: {}@{}s'.format(name, value, print_si(worst[name])))
+        print(f'{name} slack: {value}@{print_si(worst[name])}s')
 
 total = 0
 for name, violation in violations.items():
     total += len(violation)
     if len(violation):
-        print('{} violated {} time(s)!'.format(name, len(violation)))
+        print(f'{name} violated {len(violation)} time(s)!')
         if args.number != 0:
             print('Violations:')
     for n, time in enumerate(violation):
         if args.number != -1 and n >= args.number:
             print(' ...')
             break
-        print(' {}s'.format(print_si(time)))
+        print(f' {print_si(time)}s')
 
-print('Total violations: {}'.format(total))
+print(f'Total violations: {total}')
 
 sys.exit(total != 0)

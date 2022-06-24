@@ -22,10 +22,10 @@ from struct import unpack
 def parse(item, state, prev):
 	if 'x' in item:
 		bits = (len(item) - 2) * 4
-		item = '{{:0{}b}}'.format(bits).format(int(item, 16))
+		item = f'{int(item, 16):0{bits}b}'
 	for c in item:
 		if prev:
-			print('{} {}s -> {}'.format(state, prev, state + 1))
+			print(f'{state} {prev}s -> {state + 1}')
 			state += 1
 		prev = c
 	return state, prev
@@ -59,7 +59,7 @@ elif args.binary_input:
 	byte = args.binary_input.read(1)
 	while byte:
 		item = unpack('B', byte)[0]
-		state, prev = parse('{:08b}'.format(item), state, prev)
+		state, prev = parse(f'{item:08b}', state, prev)
 		byte = args.binary_input.read(1)
 elif args.data:
 	for item in args.data:
@@ -69,4 +69,4 @@ else:
 	parser.print_help()
 
 if prev:
-	print('{} {}s -> {}'.format(state, prev, 0))
+	print(f'{state} {prev}s -> {0}')

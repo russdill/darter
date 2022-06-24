@@ -102,7 +102,7 @@ elif args.trigger:
 	try:
 		vect = get_vector(vectors, args.trigger)
 	except:
-		print("For {}".format(args.trigger), file=sys.stderr)
+		print(f"For {args.trigger}", file=sys.stderr)
 		raise
 
 	if not args.falling_trigger and not args.rising_trigger:
@@ -148,7 +148,7 @@ ylabel('Volts')
 xlabel('Time (s)')
 grid()
 
-print('Processed {} samples'.format(samples))
+print(f'Processed {samples} samples')
 
 if args.output:
 	savefig(args.output)

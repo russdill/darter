@@ -39,7 +39,7 @@ def print_si(val, sig=4):
     if exp >= -5 and exp <= 4 and exp:
         si = 'fpnum.kMGT'[exp + 5]
         val /= math.pow(10, exp * 3)
-    return '{:.{}g}{}'.format(val, sig, si)
+    return '{val:.{sig}g}{si}'
 
 def get_vector(vectors, n):
     return [vect for vect in vectors.get_datavectors() if vect.name == n][0].get_data()
@@ -106,21 +106,21 @@ for idx, time in enumerate(time):
         slack["Maximum voltage"] = min(slack["Maximum voltage"], high - data[idx])
 
 for name, v in slack.items():
-    print('{} slack: {}V'.format(name, print_si(v)))
+    print(f'{name} slack: {print_si(v)}V')
 
 total = 0
 for name, violation in violations.items():
     total += len(violation)
     if len(violation):
-        print('{} violated!'.format(name))
+        print(f'{name} violated!')
         if args.number != 0:
             print('Violations:')
     for n, time in enumerate(violation):
         if args.number != -1 and n >= args.number:
             print(' ...')
             break
-        print(' {}s'.format(print_si(time)))
+        print(f' {print_si(time)}s')
 
-print('Total violations: {}'.format(total))
+print(f'Total violations: {total}')
 
 sys.exit(total != 0)

@@ -43,7 +43,7 @@ def insert_spiceplot(plot, outfile="out.hdf5", path="/", name="plot",
             h5file.removeNode(path, name, recursive=True)
             h5file.flush()
         else:
-            print("Error: path already exists: [%s, %s]" %(path,name))
+            print(f"Error: path already exists: [{path}, {name}]")
             return
 
     scale = plot.get_scalevector()
@@ -76,7 +76,7 @@ def insert_spiceplot(plot, outfile="out.hdf5", path="/", name="plot",
         h5file.createArray(node, scale.name, scale.get_data())
         for d in data:
             if path + "/" + name + "/" + d.name in h5file:
-                print("Error: data name is not uniq: [%s]" %(d.name))
+                print(f"Error: data name is not uniq: [{d.name}]")
                 return
             h5file.createArray(node, d.name, d.get_data())
     
