@@ -54,6 +54,7 @@ ignored_sections = set([
     'Model.Series Mosfet',
     'Model.On',
     'Model.Off',
+    'Model.C Comp Corner',
     'Model.Model Spec.Pulse_high',
     'Model.Model Spec.Pulse_low',
     'Model.Model Spec.Pulse_time',
