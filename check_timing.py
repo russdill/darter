@@ -43,7 +43,7 @@ def print_si(val, sig=4):
     if exp >= -5 and exp <= 4 and exp:
         si = 'fpnum.kMGT'[exp + 5]
         val /= math.pow(10, exp * 3)
-    return '{val:.{sig}g}{si}'
+    return f'{val:.{sig}g}{si}'
 
 def get_vector(vectors, n):
     try:

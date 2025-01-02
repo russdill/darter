@@ -303,7 +303,7 @@ if __name__ == "__main__":
     ## plot out some informations about the spice files given by commandline
     for f in sys.argv[1:]:
         print('The file: "' + f + '" contains the following plots:') 
-        for i,p in enumerate(spice_read(open(f, "r", encoding='utf-8')).get_plots()):
+        for i,p in enumerate(spice_read(open(f, "rb")).get_plots()):
             print('  Plot', i, 'with the attributes')
             print('    Title: ' , p.title)
             print('    Date: ', p.date)
